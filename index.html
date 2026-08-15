@@ -8,6 +8,12 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
 
+        /* ПЛАВНЫЕ АНИМАЦИИ (ПОЯВЛЕНИЕ) */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         body { 
             background-color: #0b0b0e; color: #e0e0e0; 
             font-family: 'Inter', sans-serif; margin: 0; padding: 20px; 
@@ -24,7 +30,9 @@
         .logo { 
             font-family: 'Orbitron', sans-serif; color: #ffffff; margin: 0; font-size: 28px; 
             text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(166, 124, 255, 0.5);
+            transition: 0.3s;
         }
+        .logo:hover { text-shadow: 0 0 25px rgba(166, 124, 255, 0.9); }
 
         .user-btn { 
             background: #141419; color: #8c8c9b; border: 1px solid #2a2a35; 
@@ -32,67 +40,75 @@
             font-weight: bold; text-decoration: none; transition: 0.3s;
         }
         .user-btn.logged-in { background: rgba(166, 124, 255, 0.1); color: #a67cff; border-color: #a67cff; }
-        .user-btn:hover { background: #a67cff; color: white; }
+        .user-btn:hover { background: #a67cff; color: white; transform: translateY(-2px); }
 
         .section-title { font-size: 22px; color: #ffffff; margin-bottom: 20px; font-weight: 900;}
         #tournament-list { display: flex; flex-direction: column; gap: 15px; }
         
+        /* КАРТОЧКА ТУРНИРА С ПЛАВНЫМ ПОЯВЛЕНИЕМ */
         .tourney-card { 
             background: #141419; padding: 20px; border-radius: 12px; 
             border: 1px solid #1f1f26; border-left: 5px solid #a67cff;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 15px;
+            animation: fadeIn 0.4s ease-out; /* Анимация при загрузке */
+            position: relative; /* Для позиционирования крестика */
+            transition: 0.3s;
         }
+        .tourney-card:hover { transform: translateX(5px); border-left-color: #00ffcc; }
+        
         .tourney-info h2 { margin: 0 0 5px 0; font-size: 18px; color: white; }
         .tourney-info p { margin: 0; color: #8c8c9b; font-size: 14px; }
-        
+        .author-tag { display: inline-block; background: #1e1e26; padding: 3px 8px; border-radius: 5px; font-size: 11px; margin-top: 8px; color: #aaa;}
+        .author-tag.admin { color: #ffcc00; font-weight: bold; background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; }
+
         .enter-btn { 
             background: #23232b; color: white; border: 1px solid #33333d; 
             padding: 10px 20px; cursor: pointer; border-radius: 8px; font-weight: bold; text-decoration: none; transition: 0.3s;
         }
-        .enter-btn:hover { background: #a67cff; border-color: #a67cff; }
+        .enter-btn:hover { background: #a67cff; border-color: #a67cff; box-shadow: 0 0 15px rgba(166,124,255,0.4); }
 
-        /* ПЛАВАЮЩИЕ КНОПКИ (Снизу экрана) */
-        .fab {
-            position: fixed; bottom: 20px; padding: 10px 20px; border-radius: 50px; 
-            display: flex; align-items: center; gap: 10px; cursor: pointer; z-index: 100; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); transition: 0.3s; font-weight: bold;
+        /* КРЕСТИК УДАЛЕНИЯ (Только для Админа) */
+        .del-tourney-btn {
+            position: absolute; top: 15px; right: 15px;
+            background: transparent; color: #ff3c64; border: none;
+            font-size: 18px; cursor: pointer; font-weight: bold;
+            opacity: 0; transition: 0.3s; /* Скрыт по умолчанию */
         }
-        
-        /* Кнопка "Создать турнир" (Справа) */
+        .tourney-card:hover .del-tourney-btn { opacity: 1; } /* Появляется при наведении */
+        .del-tourney-btn:hover { transform: scale(1.3); }
+
+        /* КНОПКА "ПУСТОГО СОСТОЯНИЯ" (Когда нет турниров) */
+        .empty-state-btn {
+            background: transparent; border: 2px dashed #33333d; border-radius: 12px;
+            padding: 40px; text-align: center; color: #8c8c9b; cursor: pointer;
+            transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .empty-state-btn:hover { border-color: white; color: white; background: rgba(255,255,255,0.02); transform: translateY(-3px); }
+        .empty-state-btn .big-plus { font-size: 32px; width: 50px; height: 50px; border: 2px solid; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+
+        /* ПЛАВАЮЩИЕ КНОПКИ */
+        .fab { position: fixed; bottom: 20px; padding: 10px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transition: 0.3s; font-weight: bold; }
         .fab-user { right: 20px; background: #141419; border: 2px solid #33333d; color: #8c8c9b; }
-        .fab-user:hover { border-color: white; color: white; }
-        .fab-user .plus { display: inline-flex; justify-content: center; align-items: center; width: 24px; height: 24px; border: 2px solid white; border-radius: 50%; color: white; font-size: 16px; }
-
-        /* Кнопка Админа (Слева) */
+        .fab-user:hover { border-color: white; color: white; transform: translateY(-3px); }
         .fab-admin { left: 20px; background: rgba(255, 60, 100, 0.1); border: 2px solid #ff3c64; color: #ff3c64; display: none;}
-        .fab-admin:hover { background: #ff3c64; color: white; }
+        .fab-admin:hover { background: #ff3c64; color: white; transform: translateY(-3px);}
 
-        /* --- НОВОЕ: ЧАТ-ТЕРМИНАЛ АДМИНА --- */
-        .admin-chat-window {
-            display: none; position: fixed; bottom: 80px; left: 20px;
-            width: calc(100vw - 40px); max-width: 380px; height: 500px; max-height: 70vh;
-            background: #141419; border: 1px solid #ff3c64; border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(255, 60, 100, 0.3); z-index: 1000;
-            flex-direction: column; overflow: hidden;
-        }
+        /* ЧАТ АДМИНА И МОДАЛКИ (Без изменений) */
+        .admin-chat-window { display: none; position: fixed; bottom: 80px; left: 20px; width: calc(100vw - 40px); max-width: 380px; height: 500px; max-height: 70vh; background: #141419; border: 1px solid #ff3c64; border-radius: 12px; box-shadow: 0 10px 40px rgba(255, 60, 100, 0.3); z-index: 1000; flex-direction: column; overflow: hidden; }
         .chat-header { background: #ff3c64; color: white; padding: 15px; font-weight: 900; display: flex; justify-content: space-between; align-items: center; }
         .close-chat { cursor: pointer; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; font-size: 12px;}
         .chat-body { padding: 15px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 15px;}
-        
         .chat-title { font-size: 12px; color: #8c8c9b; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #2a2a35; padding-bottom: 5px;}
-        
-        /* Сообщения в чате */
         .chat-msg { background: #1e1e26; padding: 12px; border-radius: 8px; border-left: 3px solid #00ffcc; font-size: 13px;}
         .chat-msg.user-msg { border-left-color: #a67cff; }
-        
         .chat-btns { display: flex; gap: 5px; margin-top: 10px; }
         .btn-ok { background: #00ffcc; color: black; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; flex: 1;}
         .btn-no { background: transparent; color: #ff3c64; border: 1px solid #ff3c64; padding: 6px; border-radius: 4px; cursor: pointer; flex: 1;}
 
-        /* Модалка для обычных юзеров */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-box { background: #141419; padding: 25px; border-radius: 12px; border: 1px solid #2a2a35; width: 90%; max-width: 400px; }
+        .modal-box { background: #141419; padding: 25px; border-radius: 12px; border: 1px solid #2a2a35; width: 90%; max-width: 400px; animation: fadeIn 0.3s ease-out; }
         .modal-input { width: 100%; padding: 12px; margin-bottom: 12px; background: #0b0b0e; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; font-size: 14px;}
         .modal-buttons { display: flex; gap: 10px; margin-top: 10px;}
         .btn-save { flex: 1; background: white; color: black; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;}
@@ -109,39 +125,29 @@
 
     <div class="section-title">Ближайшие турниры</div>
     <div id="tournament-list">
-        <p style="color: #8c8c9b;">⏳ Загрузка...</p>
+        <p style="color: #8c8c9b;">⏳ Синхронизация с сервером...</p>
     </div>
 </div>
 
-<!-- КНОПКА ЮЗЕРА (Справа) -->
 <div class="fab fab-user" onclick="openProposeModal()" id="fab-user-btn" style="display: none;">
-    <span class="plus">+</span>
+    <span style="font-size: 20px;">+</span>
     <span>Создать турнир</span>
 </div>
 
-<!-- КНОПКА АДМИНА (Слева) -->
 <div class="fab fab-admin" onclick="toggleAdminChat()" id="fab-admin-btn">
     👑 Терминал
 </div>
 
-<!-- ЧАТ АДМИНА (Скрытый по умолчанию) -->
 <div id="admin-chat" class="admin-chat-window">
-    <div class="chat-header">
-        СИСТЕМА (0m3gas)
-        <span class="close-chat" onclick="toggleAdminChat()">ЗАКРЫТЬ ✖</span>
-    </div>
+    <div class="chat-header">СИСТЕМА (0m3gas) <span class="close-chat" onclick="toggleAdminChat()">ЗАКРЫТЬ ✖</span></div>
     <div class="chat-body">
-        
         <div class="chat-title">Входящие заявки</div>
         <div id="chat-proposals"><span style="color:#8c8c9b; font-size: 12px;">Пусто</span></div>
-
         <div class="chat-title" style="margin-top: 10px;">Лог регистраций</div>
         <div id="chat-users"><span style="color:#8c8c9b; font-size: 12px;">Пусто</span></div>
-
     </div>
 </div>
 
-<!-- МОДАЛКА ЮЗЕРА (Создание турнира) -->
 <div class="modal-overlay" id="proposeModal">
     <div class="modal-box">
         <h3 style="margin-top:0; color:white;">Предложить турнир</h3>
@@ -158,6 +164,7 @@
 <script>
     const dbBase = "https://retro-cup-51db5-default-rtdb.firebaseio.com/";
     let currentUser = localStorage.getItem("currentUser");
+    let lastTournamentsData = ""; // Хранит последнюю скачанную инфу для мгновенного обновления
 
     function checkUserSession() {
         let userBtn = document.getElementById("header-user-btn");
@@ -167,44 +174,67 @@
             userBtn.classList.add("logged-in");
             document.getElementById("fab-user-btn").style.display = "flex";
         }
-        
-        // ЕСЛИ ЭТО АДМИН - показываем левую кнопку
         if (currentUser === "0m3gas") {
             document.getElementById("fab-admin-btn").style.display = "flex";
-            loadAdminData(); // Загружаем данные в чат
         }
     }
     checkUserSession();
 
-    // Открыть/Закрыть чат админа
     function toggleAdminChat() {
         let chat = document.getElementById("admin-chat");
         chat.style.display = chat.style.display === "flex" ? "none" : "flex";
     }
 
+    // --- УМНАЯ ЗАГРУЗКА ТУРНИРОВ (Real-time имитация) ---
     async function loadTournaments() {
         try {
             let response = await fetch(dbBase + "tournaments.json");
             let data = await response.json();
+            
+            // Если данные не изменились с прошлой проверки - ничего не перерисовываем! (чтобы не моргало)
+            let currentDataString = JSON.stringify(data);
+            if (currentDataString === lastTournamentsData) return;
+            lastTournamentsData = currentDataString;
+
             let list = document.getElementById("tournament-list");
             list.innerHTML = ""; 
             
-            let targetLink = currentUser ? "profile.html" : "auth.html";
-
+            // ЕСЛИ ТУРНИРОВ НЕТ - КРАСИВАЯ КНОПКА ПУСТОТЫ
             if (!data) {
-                list.innerHTML = "<p style='color: #8c8c9b;'>Пока нет запланированных турниров. Предложи свой!</p>";
+                list.innerHTML = `
+                    <div class="empty-state-btn" onclick="${currentUser ? 'openProposeModal()' : 'window.location.href=\'auth.html\''}">
+                        <div class="big-plus">+</div>
+                        <div style="font-size: 18px; font-weight: bold; color: white;">Турниров пока нет</div>
+                        <div style="font-size: 14px;">Стань первым, предложи свой турнир!</div>
+                    </div>
+                `;
                 return;
             }
 
+            let targetLink = currentUser ? "profile.html" : "auth.html";
             let keys = Object.keys(data).reverse(); 
+
             keys.forEach(key => {
                 let t = data[key];
+                
+                // ЛОГИКА АВТОРА
+                let authorDisplay = (t.author === "0m3gas") 
+                    ? `<span class="author-tag admin">👑 Турнир от: Retro Cup</span>` 
+                    : `<span class="author-tag">Организатор: ${t.author || "Аноним"}</span>`;
+
+                // КРЕСТИК УДАЛЕНИЯ ТОЛЬКО ДЛЯ АДМИНА
+                let deleteBtnHTML = (currentUser === "0m3gas") 
+                    ? `<button class="del-tourney-btn" onclick="deleteTourney('${key}')" title="Удалить турнир">✖</button>` 
+                    : "";
+
                 list.innerHTML += `
                     <div class="tourney-card">
+                        ${deleteBtnHTML}
                         <div class="tourney-info">
                             <h2>${t.name}</h2>
                             <p style="color: #a67cff; font-weight: bold;">${t.game}</p>
                             <p>Призовые: ${t.prize ? t.prize : 'Нет'}</p>
+                            ${authorDisplay}
                         </div>
                         <a href="${targetLink}" class="enter-btn">Участвовать</a>
                     </div>
@@ -213,7 +243,16 @@
         } catch(e) { console.log(e); }
     }
 
-    // --- МОДАЛКА ЮЗЕРА ---
+    // Удаление турнира (Для админа)
+    async function deleteTourney(key) {
+        if(confirm("Точно удалить этот турнир навсегда?")) {
+            await fetch(dbBase + "tournaments/" + key + ".json", { method: "DELETE" });
+            lastTournamentsData = ""; // Сбрасываем кэш, чтобы мгновенно обновилось
+            loadTournaments();
+        }
+    }
+
+    // --- МОДАЛКА ---
     function openProposeModal() { document.getElementById("proposeModal").style.display = "flex"; }
     function closeProposeModal() { document.getElementById("proposeModal").style.display = "none"; }
 
@@ -228,12 +267,24 @@
         let proposal = { author: currentUser, name: name, game: game, prize: prize, date: new Date().toLocaleString() };
         await fetch(dbBase + "proposals.json", { method: "POST", body: JSON.stringify(proposal) });
         
-        alert("Заявка улетела админу в чат!");
+        // Если создал админ - автоматически одобряем, не засоряем чат!
+        if (currentUser === "0m3gas") {
+            await fetch(dbBase + "tournaments.json", { method: "POST", body: JSON.stringify(proposal) });
+            alert("Турнир мгновенно опубликован (Права Админа)!");
+        } else {
+            alert("Заявка улетела админу в чат!");
+        }
+
+        document.getElementById("prop-name").value = "";
+        document.getElementById("prop-game").value = "";
+        document.getElementById("prop-prize").value = "";
+        
         closeProposeModal();
         document.getElementById("sendBtn").innerText = "Отправить";
+        lastTournamentsData = ""; loadTournaments(); // Обновляем мгновенно
     }
 
-    // --- ЛОГИКА АДМИН-ЧАТА ---
+    // --- АДМИНКА ---
     async function loadAdminData() {
         let uRes = await fetch(dbBase + "users.json");
         let uData = await uRes.json();
@@ -241,10 +292,7 @@
         uList.innerHTML = "";
         if (uData) {
             Object.keys(uData).reverse().forEach(nick => {
-                uList.innerHTML += `<div class="chat-msg user-msg">
-                    <strong>${nick}</strong> присоединился!<br>
-                    <span style="color:#8c8c9b;">Steam: ${uData[nick].steamCode}</span>
-                </div>`;
+                uList.innerHTML += `<div class="chat-msg user-msg"><strong>${nick}</strong> (Steam: ${uData[nick].steamCode})</div>`;
             });
         }
 
@@ -255,15 +303,10 @@
         if (pData) {
             Object.keys(pData).forEach(key => {
                 let p = pData[key];
-                pList.innerHTML += `<div class="chat-msg">
-                    <span style="color:#00ffcc;">📩 Заявка от: ${p.author}</span><br>
-                    <strong>${p.name}</strong> (${p.game})<br>
-                    Призовые: ${p.prize ? p.prize : 'Нет'}<br>
-                    <div class="chat-btns">
-                        <button class="btn-ok" onclick="approveTourney('${key}')">ОДОБРИТЬ</button>
-                        <button class="btn-no" onclick="rejectTourney('${key}')">ОТКЛОНИТЬ</button>
-                    </div>
-                </div>`;
+                // Защита от дубляжей (если админ случайно сам себе отправил)
+                if (p.author === "0m3gas") { fetch(dbBase + "proposals/" + key + ".json", { method: "DELETE" }); return; }
+                
+                pList.innerHTML += `<div class="chat-msg"><span style="color:#00ffcc;">📩 От: ${p.author}</span><br><strong>${p.name}</strong> (${p.game})<br><div class="chat-btns"><button class="btn-ok" onclick="approveTourney('${key}')">ОДОБРИТЬ</button><button class="btn-no" onclick="rejectTourney('${key}')">ОТКЛОНИТЬ</button></div></div>`;
             });
         } else { pList.innerHTML = "<span style='color:#8c8c9b; font-size: 12px;'>Нет новых сообщений.</span>"; }
     }
@@ -273,17 +316,26 @@
         let prop = await pRes.json();
         await fetch(dbBase + "tournaments.json", { method: "POST", body: JSON.stringify(prop) });
         await fetch(dbBase + "proposals/" + key + ".json", { method: "DELETE" });
+        lastTournamentsData = ""; // Мгновенный сброс кэша
         loadAdminData(); loadTournaments();
     }
 
     async function rejectTourney(key) {
-        if(confirm("Удалить заявку?")) {
-            await fetch(dbBase + "proposals/" + key + ".json", { method: "DELETE" });
-            loadAdminData();
-        }
+        await fetch(dbBase + "proposals/" + key + ".json", { method: "DELETE" });
+        loadAdminData();
     }
 
+    // ==========================================
+    // МАГИЯ РЕАЛЬНОГО ВРЕМЕНИ (Обновляем каждые 3 секунды)
+    // ==========================================
     loadTournaments();
+    if (currentUser === "0m3gas") loadAdminData();
+
+    setInterval(() => {
+        loadTournaments();
+        if (currentUser === "0m3gas") loadAdminData();
+    }, 3000);
+
 </script>
 
 </body>
