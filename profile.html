@@ -25,35 +25,80 @@
     <a href="index.html" style="color: #aaa; text-decoration: none;">⬅ На главную</a>
     <h1>ТВОЙ ПРОФИЛЬ</h1>
 
+    <!-- БЛОК РЕГИСТРАЦИИ -->
     <div class="profile-box">
         <h2>Привязка аккаунта</h2>
         <div class="input-group">
             <label>Твой никнейм в Steam:</label>
-            <input type="text" placeholder="Например: S1mple">
+            <input type="text" id="player-nick" placeholder="Например: S1mple">
         </div>
         <div class="input-group">
             <label>Твой код дружбы Steam:</label>
-            <input type="text" placeholder="Например: 123456789">
+            <input type="text" id="player-code" placeholder="Например: 123456789">
         </div>
-        <button class="btn btn-success" onclick="alert('Данные сохранены!')">СОХРАНИТЬ ДАННЫЕ</button>
+        <button class="btn btn-success" onclick="saveProfile()">СОХРАНИТЬ ДАННЫЕ В БАЗУ</button>
     </div>
 
+    <!-- ТЕКУЩИЙ МАТЧ -->
     <div class="match-zone">
         <h3>⚡ ТЕКУЩИЙ МАТЧ ⚡</h3>
         <p><strong>Dota 2 | 1v1 Mid</strong></p>
         <p>Твой соперник: <span style="color:#00ffcc;">Dendi_Fan_99</span></p>
         
-        <!-- ВОТ ОНА, НОВАЯ КНОПКА СЕТКИ -->
         <a href="bracket.html" class="btn" style="background: #333; margin-bottom: 15px; border: 1px solid #555;">👀 ПОСМОТРЕТЬ СЕТКУ ТУРНИРА</a>
 
         <div class="input-group" style="text-align: left;">
             <label>Загрузить скриншот победы:</label>
             <input type="file" accept="image/png, image/jpeg">
         </div>
-        
-        <button class="btn" onclick="alert('Скриншот отправлен модератору!')">ОТПРАВИТЬ РЕЗУЛЬТАТ</button>
+        <button class="btn" onclick="alert('Функция отправки фото будет добавлена позже!')">ОТПРАВИТЬ РЕЗУЛЬТАТ</button>
     </div>
 </div>
+
+<script>
+    // Обрати внимание! Тут в конце написано players.json (новая папка в базе)
+    const dbUrl = "https://retro-cup-51db5-default-rtdb.firebaseio.com/players.json";
+
+    async function saveProfile() {
+        let nick = document.getElementById("player-nick").value;
+        let code = document.getElementById("player-code").value;
+
+        if (nick === "" || code === "") {
+            alert("Братан, заполни оба поля!");
+            return;
+        }
+
+        // Меняем кнопку пока идет сохранение
+        let btn = document.querySelector(".btn-success");
+        btn.innerText = "СОХРАНЕНИЕ...";
+        btn.style.background = "#555";
+        btn.style.color = "white";
+
+        let newPlayer = {
+            nickname: nick,
+            steamCode: code,
+            dateReg: new Date().toLocaleString() // Записываем точное время регистрации
+        };
+
+        // Отправляем игрока в базу Гугла
+        try {
+            await fetch(dbUrl, {
+                method: "POST",
+                body: JSON.stringify(newPlayer)
+            });
+
+            // Успех!
+            alert("Твой профиль успешно сохранен в Базе Данных!");
+            btn.innerText = "ДАННЫЕ УСПЕШНО СОХРАНЕНЫ ✔️";
+            btn.style.background = "#00ffcc";
+            btn.style.color = "black";
+            btn.disabled = true; // Выключаем кнопку, чтобы не нажал дважды
+
+        } catch(error) {
+            alert("Ошибка сохранения: " + error);
+        }
+    }
+</script>
 
 </body>
 </html>
