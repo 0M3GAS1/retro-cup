@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ТУРИКИ | Вход в систему</title>
+    <style>
+        body { background-color: #121212; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh;}
+        .auth-container { width: 100%; max-width: 400px; background: #1e1e1e; border: 2px solid #9d00ff; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px #9d00ff; }
+        h2 { color: #00ffcc; text-align: center; margin-top: 0; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; color: #aaa; margin-bottom: 5px; font-size: 14px; }
+        input { width: 100%; padding: 10px; background: #121212; color: white; border: 1px solid #555; box-sizing: border-box; font-family: monospace; }
+        .btn { background: #9d00ff; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn:hover { background: #b84dff; }
+        
+        .switch-text { text-align: center; margin-top: 20px; font-size: 14px; color: #aaa; }
+        .switch-text span { color: #00ffcc; cursor: pointer; text-decoration: underline; }
+        
+        /* Скрываем регистрацию по умолчанию */
+        #register-form { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    
+    <!-- ФОРМА ВХОДА -->
+    <div id="login-form">
+        <h2>АВТОРИЗАЦИЯ</h2>
+        <div class="input-group">
+            <label>Никнейм:</label>
+            <input type="text" id="log-nick" placeholder="Введи свой ник">
+        </div>
+        <div class="input-group">
+            <label>Пароль:</label>
+            <input type="password" id="log-pass" placeholder="Введи пароль">
+        </div>
+        <button class="btn" onclick="login()">ВОЙТИ</button>
+        <div class="switch-text">Нет аккаунта? <span onclick="toggleForms()">Создать!</span></div>
+    </div>
+
+    <!-- ФОРМА РЕГИСТРАЦИИ -->
+    <div id="register-form">
+        <h2 style="color: #ff0055;">РЕГИСТРАЦИЯ</h2>
+        <div class="input-group">
+            <label>Придумай Никнейм:</label>
+            <input type="text" id="reg-nick" placeholder="Он будет виден всем">
+        </div>
+        <div class="input-group">
+            <label>Код дружбы Steam (нужен для турниров):</label>
+            <input type="text" id="reg-steam" placeholder="Например: 123456789">
+        </div>
+        <div class="input-group">
+            <label>Придумай Пароль:</label>
+            <input type="password" id="reg-pass" placeholder="Секретный пароль">
+        </div>
+        <button class="btn" style="background: #ff0055;" onclick="register()">СДЕЛАТЬ АККАУНТ</button>
+        <div class="switch-text">Уже есть аккаунт? <span onclick="toggleForms()">Войти</span></div>
+    </div>
+
+</div>
+
+<script>
+    // Твоя база данных (создаем папку users)
+    const dbBaseUrl = "https://retro-cup-51db5-default-rtdb.firebaseio.com/users/";
+
+    // Функция переключения между Входом и Регой
+    function toggleForms() {
+        let loginF = document.getElementById("login-form");
+        let regF = document.getElementById("register-form");
+        if (loginF.style.display === "none") {
+            loginF.style.display = "block";
+            regF.style.display = "none";
+        } else {
+            loginF.style.display = "none";
+            regF.style.display = "block";
+        }
+    }
+
+    // --- ЛОГИКА РЕГИСТРАЦИИ ---
+    async function register() {
+        let nick = document.getElementById("reg-nick").value;
+        let steam = document.getElementById("reg-steam").value;
+        let pass = document.getElementById("reg-pass").value;
+
+        if (nick === "" || pass === "" || steam === "") return alert("Заполни все поля!");
+
+        // 1. Проверяем, занят ли ник
+        let checkUrl = dbBaseUrl + nick + ".json";
+        let response = await fetch(checkUrl);
+        let data = await response.json();
+
+        if (data !== null) {
+            alert("❌ Братан, этот ник уже занят! Придумай другой.");
+            return;
+        }
+
+        // 2. Если ник свободен, сохраняем его в базу
+        let newUser = {
+            password: pass, // В реальных проектах пароли шифруют, но для старта это топ!
+            steamCode: steam,
+            regDate: new Date().toLocaleString()
+        };
+
+        // Метод PUT создает папку с именем ника
+        await fetch(checkUrl, {
+            method: "PUT",
+            body: JSON.stringify(newUser)
+        });
+
+        alert("✅ Аккаунт успешно создан! Теперь ты можешь войти.");
+        toggleForms(); // Перекидываем на логин
+    }
+
+    // --- ЛОГИКА ВХОДА ---
+    async function login() {
+        let nick = document.getElementById("log-nick").value;
+        let pass = document.getElementById("log-pass").value;
+
+        if (nick === "" || pass === "") return alert("Введи ник и пароль!");
+
+        // Ищем юзера в базе
+        let checkUrl = dbBaseUrl + nick + ".json";
+        let response = await fetch(checkUrl);
+        let data = await response.json();
+
+        if (data === null) {
+            alert("❌ Такого пользователя не существует!");
+            return;
+        }
+
+        // Сверяем пароль
+        if (data.password === pass) {
+            alert("✅ Успешный вход! Добро пожаловать, " + nick);
+            
+            // МАГИЯ! Запоминаем в браузере, что этот игрок авторизован
+            localStorage.setItem("currentUser", nick);
+            
+            // Перекидываем его в профиль
+            window.location.href = "profile.html";
+        } else {
+            alert("❌ Неверный пароль!");
+        }
+    }
+</script>
+
+</body>
+</html>
