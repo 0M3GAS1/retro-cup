@@ -7,32 +7,24 @@
         body { background-color: #121212; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; border: 2px solid #00ffcc; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px #00ffcc; }
         h1, h2 { color: #00ffcc; text-align: center; }
-        
-        /* Карточка профиля */
         .profile-box { background: #1e1e1e; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
         .input-group { margin-bottom: 15px; }
         label { display: block; color: #aaa; margin-bottom: 5px; font-size: 14px; }
         input { width: 100%; padding: 10px; background: #121212; color: white; border: 1px solid #555; box-sizing: border-box; font-family: monospace; }
-        
-        /* Кнопки */
-        .btn { background: #9d00ff; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn { background: #9d00ff; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; text-decoration: none; display: block; text-align: center; box-sizing: border-box;}
         .btn:hover { background: #b84dff; }
         .btn-success { background: #00ffcc; color: black; }
-        
-        /* Зона активного матча */
         .match-zone { border: 2px dashed #ff0055; padding: 20px; text-align: center; background: #2a0011; border-radius: 5px;}
         .match-zone h3 { color: #ff0055; margin-top: 0; }
-        
-        /* Загрузка файла */
         input[type="file"] { border: none; padding: 0; background: transparent; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <a href="index.html" style="color: #aaa; text-decoration: none;">⬅ На главную</a>
     <h1>ТВОЙ ПРОФИЛЬ</h1>
 
-    <!-- РЕГИСТРАЦИЯ ДАННЫХ STEAM -->
     <div class="profile-box">
         <h2>Привязка аккаунта</h2>
         <div class="input-group">
@@ -40,28 +32,27 @@
             <input type="text" placeholder="Например: S1mple">
         </div>
         <div class="input-group">
-            <label>Твой код дружбы Steam (для инвайта):</label>
+            <label>Твой код дружбы Steam:</label>
             <input type="text" placeholder="Например: 123456789">
         </div>
-        <button class="btn btn-success" onclick="alert('Данные сохранены! Ожидай инвайт в друзья от Админа.')">СОХРАНИТЬ ДАННЫЕ</button>
+        <button class="btn btn-success" onclick="alert('Данные сохранены!')">СОХРАНИТЬ ДАННЫЕ</button>
     </div>
 
-    <!-- ЗОНА ТЕКУЩЕГО МАТЧА И ЗАГРУЗКИ СКРИНА -->
     <div class="match-zone">
         <h3>⚡ ТЕКУЩИЙ МАТЧ ⚡</h3>
         <p><strong>Dota 2 | 1v1 Mid</strong></p>
         <p>Твой соперник: <span style="color:#00ffcc;">Dendi_Fan_99</span></p>
-        <a href="bracket.html" class="btn" style="background: #333; display: block; text-align: center; text-decoration: none; margin-bottom: 15px;">👀 ПОСМОТРЕТЬ СЕТКУ ТУРНИРА</a>
-        <p style="font-size: 12px; color: #aaa;">Сыграйте матч. Победитель должен загрузить скриншот с экраном победы. Модератор проверит его.</p>
         
-        <div class="input-group" style="margin-top: 20px; text-align: left;">
+        <!-- ВОТ ОНА, НОВАЯ КНОПКА СЕТКИ -->
+        <a href="bracket.html" class="btn" style="background: #333; margin-bottom: 15px; border: 1px solid #555;">👀 ПОСМОТРЕТЬ СЕТКУ ТУРНИРА</a>
+
+        <div class="input-group" style="text-align: left;">
             <label>Загрузить скриншот победы:</label>
             <input type="file" accept="image/png, image/jpeg">
         </div>
         
-        <button class="btn" onclick="alert('Скриншот отправлен модератору! Ждем подтверждения. Очки будут начислены после проверки.')">ОТПРАВИТЬ РЕЗУЛЬТАТ</button>
+        <button class="btn" onclick="alert('Скриншот отправлен модератору!')">ОТПРАВИТЬ РЕЗУЛЬТАТ</button>
     </div>
-
 </div>
 
 </body>
