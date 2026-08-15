@@ -6,97 +6,56 @@
     <style>
         body { background-color: #121212; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; border: 2px solid #00ffcc; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px #00ffcc; }
-        h1, h2 { color: #00ffcc; text-align: center; }
-        .profile-box { background: #1e1e1e; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; color: #aaa; margin-bottom: 5px; font-size: 14px; }
-        input { width: 100%; padding: 10px; background: #121212; color: white; border: 1px solid #555; box-sizing: border-box; font-family: monospace; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        h1, h2 { color: #00ffcc; margin: 0;}
+        .logout-btn { background: #ff0055; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold;}
+        
         .btn { background: #9d00ff; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; text-decoration: none; display: block; text-align: center; box-sizing: border-box;}
-        .btn:hover { background: #b84dff; }
-        .btn-success { background: #00ffcc; color: black; }
-        .match-zone { border: 2px dashed #ff0055; padding: 20px; text-align: center; background: #2a0011; border-radius: 5px;}
-        .match-zone h3 { color: #ff0055; margin-top: 0; }
-        input[type="file"] { border: none; padding: 0; background: transparent; }
+        .match-zone { border: 2px dashed #ff0055; padding: 20px; text-align: center; background: #2a0011; border-radius: 5px; margin-top: 20px;}
     </style>
 </head>
 <body>
 
 <div class="container">
     <a href="index.html" style="color: #aaa; text-decoration: none;">⬅ На главную</a>
-    <h1>ТВОЙ ПРОФИЛЬ</h1>
+    
+    <header style="margin-top: 15px;">
+        <!-- Сюда подставится ник игрока -->
+        <h1 id="welcome-text">ТВОЙ ПРОФИЛЬ</h1>
+        <button class="logout-btn" onclick="logout()">ВЫЙТИ 🚪</button>
+    </header>
 
-    <!-- БЛОК РЕГИСТРАЦИИ -->
-    <div class="profile-box">
-        <h2>Привязка аккаунта</h2>
-        <div class="input-group">
-            <label>Твой никнейм в Steam:</label>
-            <input type="text" id="player-nick" placeholder="Например: S1mple">
-        </div>
-        <div class="input-group">
-            <label>Твой код дружбы Steam:</label>
-            <input type="text" id="player-code" placeholder="Например: 123456789">
-        </div>
-        <button class="btn btn-success" onclick="saveProfile()">СОХРАНИТЬ ДАННЫЕ В БАЗУ</button>
-    </div>
-
-    <!-- ТЕКУЩИЙ МАТЧ -->
     <div class="match-zone">
-        <h3>⚡ ТЕКУЩИЙ МАТЧ ⚡</h3>
+        <h3 style="color: #ff0055; margin-top: 0;">⚡ ТЕКУЩИЙ МАТЧ ⚡</h3>
         <p><strong>Dota 2 | 1v1 Mid</strong></p>
         <p>Твой соперник: <span style="color:#00ffcc;">Dendi_Fan_99</span></p>
         
         <a href="bracket.html" class="btn" style="background: #333; margin-bottom: 15px; border: 1px solid #555;">👀 ПОСМОТРЕТЬ СЕТКУ ТУРНИРА</a>
-
-        <div class="input-group" style="text-align: left;">
-            <label>Загрузить скриншот победы:</label>
-            <input type="file" accept="image/png, image/jpeg">
+        
+        <div style="text-align: left; margin-top: 15px;">
+            <label style="color: #aaa; font-size: 14px;">Загрузить скриншот победы:</label><br>
+            <input type="file" accept="image/png, image/jpeg" style="margin-top: 5px;">
         </div>
         <button class="btn" onclick="alert('Функция отправки фото будет добавлена позже!')">ОТПРАВИТЬ РЕЗУЛЬТАТ</button>
     </div>
 </div>
 
 <script>
-    // Обрати внимание! Тут в конце написано players.json (новая папка в базе)
-    const dbUrl = "https://retro-cup-51db5-default-rtdb.firebaseio.com/players.json";
+    // 1. ПРОВЕРЯЕМ, КТО ВОШЕЛ
+    let currentUser = localStorage.getItem("currentUser");
 
-    async function saveProfile() {
-        let nick = document.getElementById("player-nick").value;
-        let code = document.getElementById("player-code").value;
+    // Если чувак не вошел в аккаунт, но как-то попал на эту страницу по ссылке - выгоняем его!
+    if (!currentUser) {
+        window.location.href = "auth.html";
+    } else {
+        // Если вошел - пишем его ник
+        document.getElementById("welcome-text").innerText = "ПРОФИЛЬ: " + currentUser;
+    }
 
-        if (nick === "" || code === "") {
-            alert("Братан, заполни оба поля!");
-            return;
-        }
-
-        // Меняем кнопку пока идет сохранение
-        let btn = document.querySelector(".btn-success");
-        btn.innerText = "СОХРАНЕНИЕ...";
-        btn.style.background = "#555";
-        btn.style.color = "white";
-
-        let newPlayer = {
-            nickname: nick,
-            steamCode: code,
-            dateReg: new Date().toLocaleString() // Записываем точное время регистрации
-        };
-
-        // Отправляем игрока в базу Гугла
-        try {
-            await fetch(dbUrl, {
-                method: "POST",
-                body: JSON.stringify(newPlayer)
-            });
-
-            // Успех!
-            alert("Твой профиль успешно сохранен в Базе Данных!");
-            btn.innerText = "ДАННЫЕ УСПЕШНО СОХРАНЕНЫ ✔️";
-            btn.style.background = "#00ffcc";
-            btn.style.color = "black";
-            btn.disabled = true; // Выключаем кнопку, чтобы не нажал дважды
-
-        } catch(error) {
-            alert("Ошибка сохранения: " + error);
-        }
+    // 2. ФУНКЦИЯ ВЫХОДА
+    function logout() {
+        localStorage.removeItem("currentUser"); // Удаляем память
+        window.location.href = "index.html"; // Выкидываем на главную
     }
 </script>
 
