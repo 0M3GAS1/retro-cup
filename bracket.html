@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ТУРИКИ | Сетка Турнира</title>
+    <style>
+        body { background-color: #121212; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #ff0055; text-align: center; text-transform: uppercase; text-shadow: 0 0 10px #ff0055; }
+        .back-btn { background: #333; color: white; padding: 5px 15px; text-decoration: none; border: 1px solid #555; }
+        .back-btn:hover { background: #555; }
+        
+        /* Сетка турнира */
+        .bracket { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; overflow-x: auto; padding-bottom: 20px;}
+        .round { display: flex; flex-direction: column; justify-content: center; gap: 30px; width: 250px; }
+        
+        /* Карточка матча */
+        .match { background: #1e1e1e; border: 2px solid #555; border-radius: 5px; padding: 10px; position: relative; }
+        .match.active { border-color: #00ffcc; box-shadow: 0 0 10px #00ffcc; } /* Текущий матч светится */
+        
+        .player { padding: 5px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
+        .player:last-child { border-bottom: none; }
+        .winner { color: #00ffcc; font-weight: bold; }
+        .loser { color: #666; text-decoration: line-through; }
+        .score { background: #333; padding: 2px 6px; border-radius: 3px; }
+        
+        .round-title { text-align: center; color: #aaa; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="profile.html" class="back-btn">⬅ Назад в профиль</a>
+    <h1>DOTA 2 | 1V1 MID - ПЛЕЙ-ОФФ</h1>
+    <p style="text-align: center; color: #aaa;">Система посева: Топ-1 группы играет против Топ-8</p>
+
+    <div class="bracket">
+        
+        <!-- ЧЕТВЕРТЬФИНАЛЫ -->
+        <div class="round">
+            <div class="round-title">Четвертьфинал</div>
+            
+            <div class="match">
+                <div class="player winner"><span>1. S1mple</span> <span class="score">1</span></div>
+                <div class="player loser"><span>8. NoobMaster</span> <span class="score">0</span></div>
+            </div>
+            
+            <div class="match">
+                <div class="player winner"><span>4. Dendi</span> <span class="score">1</span></div>
+                <div class="player loser"><span>5. Miracle</span> <span class="score">0</span></div>
+            </div>
+
+            <div class="match active">
+                <div class="player"><span>2. ТВОЙ НИК</span> <span class="score">-</span></div>
+                <div class="player"><span>7. ToxicPlayer</span> <span class="score">-</span></div>
+            </div>
+
+            <div class="match">
+                <div class="player"><span>3. Yatoro</span> <span class="score">-</span></div>
+                <div class="player"><span>6. Ramzes</span> <span class="score">-</span></div>
+            </div>
+        </div>
+
+        <!-- ПОЛУФИНАЛЫ -->
+        <div class="round">
+            <div class="round-title">Полуфинал</div>
+            
+            <div class="match">
+                <div class="player"><span>1. S1mple</span> <span class="score">?</span></div>
+                <div class="player"><span>4. Dendi</span> <span class="score">?</span></div>
+            </div>
+
+            <div class="match">
+                <div class="player" style="color: #666;"><span>Ожидание...</span></div>
+                <div class="player" style="color: #666;"><span>Ожидание...</span></div>
+            </div>
+        </div>
+
+        <!-- ФИНАЛ -->
+        <div class="round">
+            <div class="round-title">ФИНАЛ</div>
+            
+            <div class="match" style="border-color: #ffcc00; box-shadow: 0 0 15px #ffcc00;">
+                <div style="text-align: center; padding: 10px; color: #ffcc00; font-weight: bold;">
+                    👑 ГРАНД ФИНАЛ 👑<br>
+                    <span style="font-size: 12px; color:#aaa; font-weight: normal;">Призовой фонд: 5000 руб</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
