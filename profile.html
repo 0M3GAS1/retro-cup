@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>ТУРИКИ | Профиль Игрока</title>
+    <title>ТУРИКИ | Мой Профиль</title>
     <style>
         body { background-color: #121212; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; border: 2px solid #00ffcc; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px #00ffcc; }
@@ -10,8 +10,17 @@
         h1, h2 { color: #00ffcc; margin: 0;}
         .logout-btn { background: #ff0055; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold;}
         
+        /* Карточки внутри профиля */
+        .profile-card { background: #1e1e1e; padding: 20px; border-radius: 5px; margin-bottom: 20px; border-left: 5px solid #9d00ff; }
+        .info-row { margin-bottom: 10px; font-size: 16px; }
+        
+        .edit-btn { background: #333; color: #00ffcc; border: 1px solid #00ffcc; padding: 3px 8px; cursor: pointer; font-size: 12px; border-radius: 3px; margin-left: 10px;}
+        .edit-btn:hover { background: #00ffcc; color: black; }
+        
         .btn { background: #9d00ff; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; text-decoration: none; display: block; text-align: center; box-sizing: border-box;}
-        .match-zone { border: 2px dashed #ff0055; padding: 20px; text-align: center; background: #2a0011; border-radius: 5px; margin-top: 20px;}
+        .btn:hover { background: #b84dff; }
+        
+        .match-zone { border: 2px dashed #ff0055; padding: 20px; text-align: center; background: #2a0011; border-radius: 5px;}
     </style>
 </head>
 <body>
@@ -20,42 +29,97 @@
     <a href="index.html" style="color: #aaa; text-decoration: none;">⬅ На главную</a>
     
     <header style="margin-top: 15px;">
-        <!-- Сюда подставится ник игрока -->
-        <h1 id="welcome-text">ТВОЙ ПРОФИЛЬ</h1>
+        <h1 id="welcome-text">ПРОФИЛЬ</h1>
         <button class="logout-btn" onclick="logout()">ВЫЙТИ 🚪</button>
     </header>
 
-    <div class="match-zone">
-        <h3 style="color: #ff0055; margin-top: 0;">⚡ ТЕКУЩИЙ МАТЧ ⚡</h3>
-        <p><strong>Dota 2 | 1v1 Mid</strong></p>
-        <p>Твой соперник: <span style="color:#00ffcc;">Dendi_Fan_99</span></p>
-        
-        <a href="bracket.html" class="btn" style="background: #333; margin-bottom: 15px; border: 1px solid #555;">👀 ПОСМОТРЕТЬ СЕТКУ ТУРНИРА</a>
-        
-        <div style="text-align: left; margin-top: 15px;">
-            <label style="color: #aaa; font-size: 14px;">Загрузить скриншот победы:</label><br>
-            <input type="file" accept="image/png, image/jpeg" style="margin-top: 5px;">
+    <!-- ИНФОРМАЦИЯ ОБ АККАУНТЕ -->
+    <div class="profile-card">
+        <h2 style="margin-bottom: 15px;">Мои данные</h2>
+        <div class="info-row">
+            <span style="color: #aaa;">Steam ID (Код дружбы):</span><br>
+            <strong id="display-steam" style="font-size: 20px;">⏳ Загрузка...</strong> 
+            <button class="edit-btn" onclick="changeSteam()">✏️ Изменить</button>
         </div>
-        <button class="btn" onclick="alert('Функция отправки фото будет добавлена позже!')">ОТПРАВИТЬ РЕЗУЛЬТАТ</button>
+    </div>
+
+    <!-- ИСТОРИЯ ТУРНИРОВ -->
+    <div class="profile-card" style="border-left-color: #00ffcc;">
+        <h2 style="margin-bottom: 15px;">Мои турниры</h2>
+        <div id="tournaments-history">
+            <p style="color: #aaa; font-style: italic;">Ты пока не участвовал ни в одном турнире. Время это исправить, бро!</p>
+        </div>
+    </div>
+
+    <!-- ЗОНА АКТИВНОГО МАТЧА (Пока оставляем для будущих каток) -->
+    <div class="match-zone">
+        <h3 style="color: #ff0055; margin-top: 0;">⚡ АКТИВНЫЙ МАТЧ ⚡</h3>
+        <p style="color: #aaa;">Сейчас у тебя нет активных игр.</p>
+        <a href="bracket.html" class="btn" style="background: #333; margin-bottom: 0; border: 1px solid #555;">👀 ПОСМОТРЕТЬ СЕТКУ ПОСЛЕДНЕГО ТУРНИРА</a>
     </div>
 </div>
 
 <script>
-    // 1. ПРОВЕРЯЕМ, КТО ВОШЕЛ
+    // База данных юзеров
+    const dbUsersUrl = "https://retro-cup-51db5-default-rtdb.firebaseio.com/users/";
+    
+    // Кто сейчас сидит?
     let currentUser = localStorage.getItem("currentUser");
 
-    // Если чувак не вошел в аккаунт, но как-то попал на эту страницу по ссылке - выгоняем его!
     if (!currentUser) {
         window.location.href = "auth.html";
     } else {
-        // Если вошел - пишем его ник
-        document.getElementById("welcome-text").innerText = "ПРОФИЛЬ: " + currentUser;
+        document.getElementById("welcome-text").innerText = currentUser;
+        loadUserData(); // Запускаем загрузку данных СТИМА
     }
 
-    // 2. ФУНКЦИЯ ВЫХОДА
+    // ФУНКЦИЯ ЗАГРУЗКИ ДАННЫХ ИЗ ГУГЛА
+    async function loadUserData() {
+        try {
+            let response = await fetch(dbUsersUrl + currentUser + ".json");
+            let data = await response.json();
+            
+            if (data && data.steamCode) {
+                document.getElementById("display-steam").innerText = data.steamCode;
+            } else {
+                document.getElementById("display-steam").innerText = "Не указан";
+            }
+        } catch(e) {
+            document.getElementById("display-steam").innerText = "Ошибка загрузки";
+        }
+    }
+
+    // ФУНКЦИЯ ИЗМЕНЕНИЯ СТИМ-КОДА
+    async function changeSteam() {
+        // Спрашиваем новый код
+        let newSteam = prompt("Введи свой правильный код дружбы Steam:");
+        
+        // Если игрок нажал "Отмена" или ничего не ввел - ничего не делаем
+        if (!newSteam || newSteam.trim() === "") return;
+
+        // Показываем, что идет загрузка
+        document.getElementById("display-steam").innerText = "Обновление...";
+
+        try {
+            // Метод PATCH обновляет ТОЛЬКО стим-код, не стирая пароль!
+            await fetch(dbUsersUrl + currentUser + ".json", {
+                method: "PATCH",
+                body: JSON.stringify({ steamCode: newSteam })
+            });
+
+            // Обновляем на экране
+            document.getElementById("display-steam").innerText = newSteam;
+            alert("✅ Твой Steam ID успешно изменен!");
+        } catch (e) {
+            alert("❌ Ошибка соединения с базой!");
+            loadUserData(); // Возвращаем как было
+        }
+    }
+
+    // ФУНКЦИЯ ВЫХОДА
     function logout() {
-        localStorage.removeItem("currentUser"); // Удаляем память
-        window.location.href = "index.html"; // Выкидываем на главную
+        localStorage.removeItem("currentUser");
+        window.location.href = "index.html";
     }
 </script>
 
