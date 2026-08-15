@@ -2,13 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>ТУРИКИ | Админ Панель</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ТУРИКИ | Главная</title>
     <style>
         body { background-color: #121212; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
         .container { max-width: 800px; margin: 0 auto; border: 2px solid #9d00ff; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px #9d00ff; }
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        h1 { color: #00ffcc; margin: 0; }
-        .login-btn { background: transparent; color: #00ffcc; border: 1px solid #00ffcc; padding: 8px 15px; cursor: pointer; }
+        h1 { color: #00ffcc; margin: 0; text-shadow: 0 0 5px #00ffcc;}
+        .login-btn { background: transparent; color: #00ffcc; border: 1px solid #00ffcc; padding: 8px 15px; cursor: pointer; font-weight: bold;}
         .login-btn:hover { background: #00ffcc; color: #000; }
         
         /* Стили для админа */
@@ -16,29 +17,26 @@
         .add-btn { background: #ff0055; color: white; border: none; padding: 10px 20px; font-size: 18px; cursor: pointer; font-weight: bold; width: 100%;}
         .add-btn:hover { background: #ff3377; }
         
-        /* Форма создания */
         #create-form { display: none; margin-top: 15px; }
         #create-form input { width: 100%; padding: 10px; margin-bottom: 10px; background: #121212; color: white; border: 1px solid #555; box-sizing: border-box; }
         .save-btn { background: #00ffcc; color: black; border: none; padding: 10px; width: 100%; cursor: pointer; font-weight: bold;}
         
-        /* Список турниров */
-        #empty-message { text-align: center; color: #666; font-size: 18px; margin-top: 50px; }
-        .tourney-card { background: #1e1e1e; border-left: 5px solid #00ffcc; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        /* Карточки турниров */
+        .tourney-card { background: #1e1e1e; border-left: 5px solid #00ffcc; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .enter-btn { background: #9d00ff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 3px; font-weight: bold; text-decoration: none;}
+        .enter-btn:hover { background: #b84dff; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1 id="site-title">ТУРИКИ</h1>
-        <button class="login-btn" onclick="checkLogin()">ЛОГИН</button>
+        <h1>ТУРИКИ</h1>
+        <button class="login-btn" onclick="checkLogin()">ЛОГИН (АДМИН)</button>
     </header>
 
-    <!-- ПАНЕЛЬ АДМИНА (Скрыта по умолчанию) -->
     <div id="admin-panel">
         <button class="add-btn" onclick="toggleForm()">+ СОЗДАТЬ ТУРНИР</button>
-        
-        <!-- Форма создания турнира -->
         <div id="create-form">
             <input type="text" id="game-name" placeholder="Название игры (напр. CS2)">
             <input type="text" id="game-format" placeholder="Формат (напр. 1v1 или Спидран)">
@@ -47,68 +45,59 @@
         </div>
     </div>
 
-    <!-- МЕСТО, ГДЕ БУДУТ ТУРНИРЫ -->
+    <h2 style="color: #ffcc00;">Открытые турниры:</h2>
     <div id="tournament-list">
-        <div id="empty-message">Пока нет доступных турниров. Ждем анонса!</div>
+        <!-- ТУРНИР ПО УМОЛЧАНИЮ -->
+        <div class="tourney-card" style="border-left-color: #ff0055;">
+            <div>
+                <h2 style="margin: 0 0 5px 0; font-size: 20px;">СПИДРАН: Misery</h2>
+                <p style="margin: 0; color: #aaa; font-size: 14px;">Приручить домового | Призовые: Уважение</p>
+            </div>
+            <!-- ССЫЛКА НА ПРОФИЛЬ -->
+            <a href="profile.html" class="enter-btn" style="background: #ff0055;">Участвовать</a>
+        </div>
     </div>
 </div>
 
-<!-- А ВОТ И МОЗГИ (JavaScript) -->
 <script>
-    // Функция логина (Секретный пароль - boss)
     function checkLogin() {
-        let password = prompt("Введите пароль администратора:");
+        let password = prompt("Введите пароль (boss):");
         if (password === "boss") {
-            alert("Доступ разрешен! Привет, Босс.");
-            document.getElementById("admin-panel").style.display = "block"; // Показываем кнопку +
-            document.querySelector(".login-btn").innerText = "АДМИН"; // Меняем текст кнопки
+            document.getElementById("admin-panel").style.display = "block"; 
+            document.querySelector(".login-btn").innerText = "👑 БОСС"; 
             document.querySelector(".login-btn").style.background = "#ff0055";
             document.querySelector(".login-btn").style.color = "white";
         } else {
-            alert("Неверный пароль. Вы обычный пользователь.");
+            alert("Неверный пароль.");
         }
     }
 
-    // Функция показать/скрыть форму создания
     function toggleForm() {
         let form = document.getElementById("create-form");
-        if (form.style.display === "block") {
-            form.style.display = "none";
-        } else {
-            form.style.display = "block";
-        }
+        form.style.display = form.style.display === "block" ? "none" : "block";
     }
 
-    // Функция создания самого турнира
     function createTournament() {
-        // Забираем то, что ты написал в форму
         let game = document.getElementById("game-name").value;
         let format = document.getElementById("game-format").value;
         let prize = document.getElementById("prize").value;
 
-        if (game === "" || format === "") {
-            alert("Заполни хотя бы название и формат!");
-            return; // Останавливаем работу, если пусто
-        }
+        if (game === "" || format === "") return alert("Заполни данные!");
 
-        // Убираем надпись "Пока нет турниров"
-        document.getElementById("empty-message").style.display = "none";
-
-        // Создаем новую карточку турнира
         let newCard = document.createElement("div");
         newCard.className = "tourney-card";
         newCard.innerHTML = `
             <div>
                 <h2 style="margin: 0 0 5px 0; font-size: 20px;">${game} | ${format}</h2>
-                <p style="margin: 0; color: #aaa; font-size: 14px;">Призовые: ${prize} | Места есть!</p>
+                <p style="margin: 0; color: #aaa; font-size: 14px;">Призовые: ${prize}</p>
             </div>
-            <button style="background: #9d00ff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 3px;">Зайти</button>
+            <!-- НОВЫЙ ТУРНИР ТОЖЕ ВЕДЕТ В ПРОФИЛЬ -->
+            <a href="profile.html" class="enter-btn">Зайти</a>
         `;
 
-        // Добавляем карточку на сайт
-        document.getElementById("tournament-list").appendChild(newCard);
+        // Добавляем новый турнир в НАЧАЛО списка
+        document.getElementById("tournament-list").prepend(newCard);
 
-        // Очищаем и прячем форму
         document.getElementById("game-name").value = "";
         document.getElementById("game-format").value = "";
         document.getElementById("prize").value = "";
