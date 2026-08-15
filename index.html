@@ -12,7 +12,6 @@
         .login-btn { background: transparent; color: #00ffcc; border: 1px solid #00ffcc; padding: 8px 15px; cursor: pointer; font-weight: bold;}
         .login-btn:hover { background: #00ffcc; color: #000; }
         
-        /* Стили для админа */
         #admin-panel { display: none; margin-bottom: 20px; background: #2a2a2a; padding: 15px; border-radius: 5px; border-left: 5px solid #ff0055; }
         .add-btn { background: #ff0055; color: white; border: none; padding: 10px 20px; font-size: 18px; cursor: pointer; font-weight: bold; width: 100%;}
         .add-btn:hover { background: #ff3377; }
@@ -21,7 +20,6 @@
         #create-form input { width: 100%; padding: 10px; margin-bottom: 10px; background: #121212; color: white; border: 1px solid #555; box-sizing: border-box; }
         .save-btn { background: #00ffcc; color: black; border: none; padding: 10px; width: 100%; cursor: pointer; font-weight: bold;}
         
-        /* Карточки турниров */
         .tourney-card { background: #1e1e1e; border-left: 5px solid #00ffcc; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .enter-btn { background: #9d00ff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 3px; font-weight: bold; text-decoration: none;}
         .enter-btn:hover { background: #b84dff; }
@@ -41,25 +39,21 @@
             <input type="text" id="game-name" placeholder="Название игры (напр. CS2)">
             <input type="text" id="game-format" placeholder="Формат (напр. 1v1 или Спидран)">
             <input type="text" id="prize" placeholder="Призовые (напр. 5000 руб)">
-            <button class="save-btn" onclick="createTournament()">ОПУБЛИКОВАТЬ ТУРНИР</button>
+            <button class="save-btn" onclick="createTournament()">ОПУБЛИКОВАТЬ В БАЗУ</button>
         </div>
     </div>
 
     <h2 style="color: #ffcc00;">Открытые турниры:</h2>
+    <!-- Сюда будут загружаться турниры из базы -->
     <div id="tournament-list">
-        <!-- ТУРНИР ПО УМОЛЧАНИЮ -->
-        <div class="tourney-card" style="border-left-color: #ff0055;">
-            <div>
-                <h2 style="margin: 0 0 5px 0; font-size: 20px;">СПИДРАН: Misery</h2>
-                <p style="margin: 0; color: #aaa; font-size: 14px;">Приручить домового | Призовые: Уважение</p>
-            </div>
-            <!-- ССЫЛКА НА ПРОФИЛЬ -->
-            <a href="profile.html" class="enter-btn" style="background: #ff0055;">Участвовать</a>
-        </div>
+        <p style="color: #aaa;">⏳ Загрузка турниров с сервера...</p>
     </div>
 </div>
 
 <script>
+    // ТВОЯ БАЗА ДАННЫХ
+    const dbUrl = "https://retro-cup-51db5-default-rtdb.firebaseio.com/tournaments.json";
+
     function checkLogin() {
         let password = prompt("Введите пароль (boss):");
         if (password === "boss") {
@@ -77,32 +71,82 @@
         form.style.display = form.style.display === "block" ? "none" : "block";
     }
 
-    function createTournament() {
+    // ФУНКЦИЯ ЗАГРУЗКИ ТУРНИРОВ ИЗ БАЗЫ
+    async function loadTournaments() {
+        try {
+            let response = await fetch(dbUrl);
+            let data = await response.json();
+            let list = document.getElementById("tournament-list");
+            
+            // Очищаем список перед загрузкой
+            list.innerHTML = ""; 
+
+            // Добавляем наш дефолтный турнир по Спидрану всегда
+            list.innerHTML += `
+                <div class="tourney-card" style="border-left-color: #ff0055;">
+                    <div>
+                        <h2 style="margin: 0 0 5px 0; font-size: 20px;">СПИДРАН: Misery</h2>
+                        <p style="margin: 0; color: #aaa; font-size: 14px;">Приручить домового | Призовые: Уважение</p>
+                    </div>
+                    <a href="profile.html" class="enter-btn" style="background: #ff0055;">Участвовать</a>
+                </div>
+            `;
+
+            if (data) {
+                // Переворачиваем список, чтобы новые были сверху
+                let keys = Object.keys(data).reverse(); 
+                
+                keys.forEach(key => {
+                    let t = data[key];
+                    list.innerHTML += `
+                        <div class="tourney-card">
+                            <div>
+                                <h2 style="margin: 0 0 5px 0; font-size: 20px;">${t.game} | ${t.format}</h2>
+                                <p style="margin: 0; color: #aaa; font-size: 14px;">Призовые: ${t.prize}</p>
+                            </div>
+                            <a href="profile.html" class="enter-btn">Зайти</a>
+                        </div>
+                    `;
+                });
+            }
+        } catch(error) {
+            console.log("Ошибка сервера:", error);
+        }
+    }
+
+    // ФУНКЦИЯ СОХРАНЕНИЯ НОВОГО ТУРНИРА В БАЗУ
+    async function createTournament() {
         let game = document.getElementById("game-name").value;
         let format = document.getElementById("game-format").value;
         let prize = document.getElementById("prize").value;
 
         if (game === "" || format === "") return alert("Заполни данные!");
 
-        let newCard = document.createElement("div");
-        newCard.className = "tourney-card";
-        newCard.innerHTML = `
-            <div>
-                <h2 style="margin: 0 0 5px 0; font-size: 20px;">${game} | ${format}</h2>
-                <p style="margin: 0; color: #aaa; font-size: 14px;">Призовые: ${prize}</p>
-            </div>
-            <!-- НОВЫЙ ТУРНИР ТОЖЕ ВЕДЕТ В ПРОФИЛЬ -->
-            <a href="profile.html" class="enter-btn">Зайти</a>
-        `;
+        let newTourney = { game: game, format: format, prize: prize };
 
-        // Добавляем новый турнир в НАЧАЛО списка
-        document.getElementById("tournament-list").prepend(newCard);
+        // Меняем текст кнопки, чтобы было понятно, что идет отправка
+        let btn = document.querySelector(".save-btn");
+        btn.innerText = "ОТПРАВКА...";
 
+        // Отправляем данные в Гугл
+        await fetch(dbUrl, {
+            method: "POST",
+            body: JSON.stringify(newTourney)
+        });
+
+        // Очищаем форму и обновляем список
         document.getElementById("game-name").value = "";
         document.getElementById("game-format").value = "";
         document.getElementById("prize").value = "";
+        btn.innerText = "ОПУБЛИКОВАТЬ В БАЗУ";
         toggleForm();
+        
+        // Снова скачиваем турниры (уже с новым)
+        loadTournaments();
     }
+
+    // Запускаем загрузку турниров сразу при открытии сайта
+    loadTournaments();
 </script>
 
 </body>
