@@ -2,52 +2,189 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ТУРИКИ | Мой Профиль</title>
     <style>
-        body { background-color: #121212; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; border: 2px solid #00ffcc; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px #00ffcc; }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        h1, h2 { color: #00ffcc; margin: 0;}
-        .logout-btn { background: #ff0055; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold;}
-        .profile-card { background: #1e1e1e; padding: 20px; border-radius: 5px; margin-bottom: 20px; border-left: 5px solid #9d00ff; }
-        .info-row { margin-bottom: 10px; font-size: 16px; }
-        .edit-btn { background: #333; color: #00ffcc; border: 1px solid #00ffcc; padding: 3px 8px; cursor: pointer; font-size: 12px; border-radius: 3px; margin-left: 10px;}
-        .edit-btn:hover { background: #00ffcc; color: black; }
-        .btn { background: #9d00ff; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; text-decoration: none; display: block; text-align: center; box-sizing: border-box;}
-        .btn:hover { background: #b84dff; }
-        .match-zone { border: 2px dashed #ff0055; padding: 20px; text-align: center; background: #2a0011; border-radius: 5px;}
+        /* НОВЫЙ СТИЛЬ SENKU.ONE */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        body { 
+            background-color: #0b0b0e; /* Глубокий темный цвет фона */
+            color: #e0e0e0; 
+            font-family: 'Inter', sans-serif; /* Современный гладкий шрифт */
+            margin: 0; 
+            padding: 20px; 
+        }
+        
+        .container { 
+            max-width: 700px; 
+            margin: 0 auto; 
+        }
+
+        /* Навигация */
+        .nav-link {
+            color: #8c8c9b;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .nav-link:hover { color: #a67cff; }
+
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+        }
+        
+        h1 { 
+            color: #ffffff; 
+            margin: 0; 
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .logout-btn { 
+            background: rgba(255, 60, 100, 0.1); 
+            color: #ff3c64; 
+            border: 1px solid rgba(255, 60, 100, 0.3); 
+            padding: 8px 16px; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .logout-btn:hover { background: #ff3c64; color: white; }
+        
+        /* Карточки профиля (Стиль аниме-сайтов) */
+        .profile-card { 
+            background: #141419; 
+            padding: 25px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            border: 1px solid #1f1f26;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        h2 { margin-top: 0; font-size: 18px; color: #a67cff; }
+        .info-row { font-size: 16px; display: flex; flex-direction: column; gap: 8px;}
+        .steam-value { font-size: 24px; font-weight: bold; color: white;}
+        
+        .edit-btn { 
+            background: #a67cff; 
+            color: white; 
+            border: none; 
+            padding: 6px 12px; 
+            cursor: pointer; 
+            font-size: 13px; 
+            border-radius: 6px; 
+            width: max-content;
+            transition: 0.2s;
+        }
+        .edit-btn:hover { background: #915eff; transform: translateY(-2px);}
+        
+        .btn { 
+            background: #23232b; 
+            color: white; 
+            border: 1px solid #33333d; 
+            padding: 15px; 
+            width: 100%; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border-radius: 8px;
+            text-decoration: none; 
+            display: block; 
+            text-align: center; 
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+        .btn:hover { background: #a67cff; border-color: #a67cff; color: white; }
+        
+        /* --- НОВОЕ: ВСПЛЫВАЮЩЕЕ ОКНО (МОДАЛКА) --- */
+        .modal-overlay {
+            display: none; /* Скрыто по умолчанию */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); /* Темный полупрозрачный фон */
+            backdrop-filter: blur(5px); /* Размытие заднего фона */
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-box {
+            background: #141419;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #2a2a35;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(166, 124, 255, 0.2);
+        }
+        .modal-box h3 { margin-top: 0; color: white; }
+        .modal-input {
+            width: 100%; padding: 12px; margin: 15px 0;
+            background: #0b0b0e; color: white; border: 1px solid #333;
+            border-radius: 8px; box-sizing: border-box; font-size: 16px;
+            text-align: center;
+        }
+        .modal-input:focus { outline: none; border-color: #a67cff; }
+        
+        .modal-buttons { display: flex; gap: 10px; }
+        .btn-save { flex: 1; background: #a67cff; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;}
+        .btn-cancel { flex: 1; background: transparent; color: #8c8c9b; border: 1px solid #333; padding: 10px; border-radius: 6px; cursor: pointer;}
+        .btn-save:hover { background: #915eff; }
+        .btn-cancel:hover { background: #23232b; color: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <a href="index.html" style="color: #aaa; text-decoration: none;">⬅ На главную</a>
+    <a href="index.html" class="nav-link">← Вернуться на главную</a>
     
-    <header style="margin-top: 15px;">
-        <h1 id="welcome-text">ПРОФИЛЬ</h1>
-        <button class="logout-btn" onclick="logout()">ВЫЙТИ 🚪</button>
+    <header>
+        <h1 id="welcome-text">Профиль</h1>
+        <button class="logout-btn" onclick="logout()">Выйти</button>
     </header>
 
     <div class="profile-card">
-        <h2 style="margin-bottom: 15px;">Мои данные</h2>
+        <h2>Мой Аккаунт</h2>
         <div class="info-row">
-            <span style="color: #aaa;">Steam ID (Код дружбы):</span><br>
-            <strong id="display-steam" style="font-size: 20px;">⏳ Загрузка...</strong> 
-            <button class="edit-btn" onclick="changeSteam()">✏️ Изменить</button>
+            <span style="color: #8c8c9b; font-size: 14px;">Steam ID (Код дружбы):</span>
+            <span id="display-steam" class="steam-value">⏳ Загрузка...</span> 
+            <button class="edit-btn" onclick="openModal()">Изменить код</button>
         </div>
     </div>
 
-    <div class="profile-card" style="border-left-color: #00ffcc;">
-        <h2 style="margin-bottom: 15px;">Мои турниры</h2>
+    <div class="profile-card">
+        <h2>История турниров</h2>
         <div id="tournaments-history">
-            <p style="color: #aaa; font-style: italic;">Ты пока не участвовал ни в одном турнире. Время это исправить, бро!</p>
+            <p style="color: #8c8c9b; font-size: 14px;">Ты пока не участвовал ни в одном турнире. Время это исправить!</p>
         </div>
     </div>
 
-    <div class="match-zone">
-        <h3 style="color: #ff0055; margin-top: 0;">⚡ АКТИВНЫЙ МАТЧ ⚡</h3>
-        <p style="color: #aaa;">Сейчас у тебя нет активных игр.</p>
-        <a href="bracket.html" class="btn" style="background: #333; margin-bottom: 0; border: 1px solid #555;">👀 ПОСМОТРЕТЬ СЕТКУ ПОСЛЕДНЕГО ТУРНИРА</a>
+    <div class="profile-card" style="border: 1px solid rgba(255, 60, 100, 0.3);">
+        <h2 style="color: #ff3c64;">Активный матч</h2>
+        <p style="color: #8c8c9b; font-size: 14px;">Сейчас у тебя нет активных игр.</p>
+        <a href="bracket.html" class="btn">Сетка последнего турнира</a>
+    </div>
+</div>
+
+<!-- НОВОЕ: СКРЫТОЕ ВСПЛЫВАЮЩЕЕ ОКНО -->
+<div class="modal-overlay" id="steamModal">
+    <div class="modal-box">
+        <h3>Изменить Steam ID</h3>
+        <p style="color: #8c8c9b; font-size: 13px; margin-bottom: 5px;">Вводи только цифры</p>
+        
+        <!-- Защита от букв прямо тут -->
+        <input type="text" id="newSteamInput" class="modal-input" placeholder="Например: 12345678" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal()">Отмена</button>
+            <button class="btn-save" onclick="confirmSteamChange()" id="saveBtn">Сохранить</button>
+        </div>
     </div>
 </div>
 
@@ -77,32 +214,46 @@
         }
     }
 
-    async function changeSteam() {
-        let newSteam = prompt("Введи свой правильный код дружбы Steam (ТОЛЬКО ЦИФРЫ):");
-        
-        if (!newSteam || newSteam.trim() === "") return;
-
-        // --- НОВАЯ ЗАЩИТА ОТ ДУРАКА ---
-        // Проверяем, состоит ли строка ТОЛЬКО из цифр
-        if (!/^\d+$/.test(newSteam.trim())) {
-            alert("❌ Ошибка! Код дружбы может состоять ТОЛЬКО ИЗ ЦИФР. Никаких букв или пробелов!");
-            return; // Прерываем работу, код не сохранится
+    // --- ЛОГИКА ВСПЛЫВАЮЩЕГО ОКНА ---
+    function openModal() {
+        document.getElementById("steamModal").style.display = "flex";
+        // Подставляем текущий код в поле ввода
+        let currentCode = document.getElementById("display-steam").innerText;
+        if(currentCode !== "⏳ Загрузка..." && currentCode !== "Не указан") {
+            document.getElementById("newSteamInput").value = currentCode;
         }
-        // ------------------------------
+    }
 
-        document.getElementById("display-steam").innerText = "Обновление...";
+    function closeModal() {
+        document.getElementById("steamModal").style.display = "none";
+    }
+
+    async function confirmSteamChange() {
+        let newSteam = document.getElementById("newSteamInput").value;
+        
+        if (newSteam.trim() === "") {
+            alert("Поле не может быть пустым!");
+            return;
+        }
+
+        let btn = document.getElementById("saveBtn");
+        btn.innerText = "Загрузка...";
+        btn.disabled = true;
 
         try {
             await fetch(dbUsersUrl + currentUser + ".json", {
                 method: "PATCH",
                 body: JSON.stringify({ steamCode: newSteam.trim() })
             });
+            
             document.getElementById("display-steam").innerText = newSteam.trim();
-            alert("✅ Твой Steam ID успешно изменен!");
+            closeModal(); // Закрываем красивое окошко
         } catch (e) {
             alert("❌ Ошибка соединения с базой!");
-            loadUserData(); 
         }
+        
+        btn.innerText = "Сохранить";
+        btn.disabled = false;
     }
 
     function logout() {
@@ -113,6 +264,3 @@
 
 </body>
 </html>
-
-
-
