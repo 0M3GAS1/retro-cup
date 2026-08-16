@@ -299,68 +299,61 @@
     }
 
     // --- ЗАГРУЗКА И ОТРИСОВКА ТУРНИРОВ ---
-    async function loadTournaments() {
-        try {
-            let response = await fetch(dbBase + "tournaments.json");
-            let data = await response.json();
-            
-            let currentDataString = JSON.stringify(data);
-            if (currentDataString === lastTournamentsData) return;
-            lastTournamentsData = currentDataString;
+async function loadTournaments() {
+    try {
+        let response = await fetch(dbBase + "tournaments.json");
+        let data = await response.json();
+        
+        let currentDataString = JSON.stringify(data);
+        if (currentDataString === lastTournamentsData) return;
+        lastTournamentsData = currentDataString;
 
-            let list = document.getElementById("tournament-list");
-           // Вот так карточка станет кликабельной!
-list.innerHTML += `<div class="tourney-card" style="cursor: pointer; transition: 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#00ffcc';" onmouseout="this.style.transform='none'; this.style.borderColor='#1f1f26'; this.style.borderLeftColor='#a67cff';" onclick="window.location.href='tournament.html?id=${key}'">
-    <div class="tourney-info">
-        <h2>${t.name} ${adminTag}</h2>
-        <p>🎮 ${t.game} | 🏆 ${t.format} | 💰 ${t.prize ? t.prize : 'Без призовых'}</p>
-    </div>
-    <div class="action-area">
-        ${delBtn}
-        <!-- Кнопку делаем просто для красоты (pointer-events: none), клик работает по самой карточке -->
-        <span class="enter-btn" style="pointer-events: none;">Смотреть</span>
-    </div>
-</div>`;
+        let list = document.getElementById("tournament-list");
+        list.innerHTML = ""; // Очищаем список перед загрузкой, чтобы не было дублей
+        
+        if (!data) {
+            list.innerHTML = `<div class="empty-state-btn" onclick="${currentUser ? 'openProposeModal()' : 'window.location.href=\'auth.html\''}"><div class="big-plus">+</div><div style="font-size: 18px; font-weight: bold; color: white;">${dictionary[currentLang].empty}</div></div>`;
+            return;
+        }
+
+        let d = dictionary[currentLang];
+        let keys = Object.keys(data).reverse(); 
+
+        keys.forEach(key => {
+            let t = data[key];
+            // Ссылка: если юзер вошел, кидаем в турнир. Если нет - кидаем на авторизацию.
+            let targetLink = currentUser ? "tournament.html?id=" + key : "auth.html";
             
-            if (!data) {
-                list.innerHTML = `<div class="empty-state-btn" onclick="${currentUser ? 'openProposeModal()' : 'window.location.href=\'auth.html\''}"><div class="big-plus">+</div><div style="font-size: 18px; font-weight: bold; color: white;">${dictionary[currentLang].empty}</div></div>`;
-                return;
+            let authorDisplay = (t.author === "0m3gas") 
+                ? `<span class="author-tag admin">👑 Retro Cup</span>` 
+                : `<span class="author-tag">${d.org}${t.author || "..."}</span>`;
+            
+            // Кнопку просмотра оставляем чисто для визуала, клик пойдет по самой карточке
+            let actionButtons = `<span class="enter-btn" style="pointer-events: none;">${d.join}</span>`;
+            
+            if (currentUser === "0m3gas") {
+                // Добавили event.stopPropagation(), чтобы при удалении нас не перекидывало внутрь турнира
+                actionButtons += `<button class="del-tourney-btn" onclick="event.stopPropagation(); deleteTourney('${key}')" title="Удалить">✖</button>`;
             }
 
-            let d = dictionary[currentLang];
-            let keys = Object.keys(data).reverse(); 
-
-            keys.forEach(key => {
-                let t = data[key];
-                let targetLink = currentUser ? "tournament.html?id=" + key : "auth.html";
-                
-                let authorDisplay = (t.author === "0m3gas") 
-                    ? `<span class="author-tag admin">👑 Retro Cup</span>` 
-                    : `<span class="author-tag">${d.org}${t.author || "..."}</span>`;
-                
-                let actionButtons = `<a href="${targetLink}" class="enter-btn">${d.join}</a>`;
-                
-                if (currentUser === "0m3gas") {
-                    actionButtons += `<button class="del-tourney-btn" onclick="deleteTourney('${key}')" title="Удалить">✖</button>`;
-                }
-
-                list.innerHTML += `
-                    <div class="tourney-card">
-                        <div class="tourney-info">
-                            <h2>${t.name}</h2>
-                            <p style="color: #a67cff; font-weight: bold;">${t.game} | ${t.format}${d.max}${t.maxPlayers || 8}</p>
-                            <p style="font-size: 12px; color: #8c8c9b;">${d.sys}${t.system}</p>
-                            <p style="font-size: 12px;">${d.prize}${t.prize ? t.prize : d.no}</p>
-                            ${authorDisplay}
-                        </div>
-                        <div class="action-area">
-                            ${actionButtons}
-                        </div>
+            // Вставляем полностью кликабельную карточку турнира
+            list.innerHTML += `
+                <div class="tourney-card" style="cursor: pointer; transition: 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#00ffcc';" onmouseout="this.style.transform='none'; this.style.borderColor='#1f1f26'; this.style.borderLeftColor='#a67cff';" onclick="window.location.href='${targetLink}'">
+                    <div class="tourney-info">
+                        <h2>${t.name}</h2>
+                        <p style="color: #a67cff; font-weight: bold;">${t.game} | ${t.format}${d.max}${t.maxPlayers || 8}</p>
+                        <p style="font-size: 12px; color: #8c8c9b;">${d.sys}${t.system}</p>
+                        <p style="font-size: 12px;">${d.prize}${t.prize ? t.prize : d.no}</p>
+                        ${authorDisplay}
                     </div>
-                `;
-            });
-        } catch(e) {}
-    }
+                    <div class="action-area">
+                        ${actionButtons}
+                    </div>
+                </div>
+            `;
+        });
+    } catch(e) {}
+}
 
     async function deleteTourney(key) { 
         if(confirm("Отменить этот турнир?")) { 
