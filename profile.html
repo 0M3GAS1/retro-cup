@@ -38,6 +38,28 @@
             align-items: center; 
             margin-bottom: 30px; 
         }
+
+<!-- Блок профиля: Аватарка + Ник в одну линию -->
+<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+    
+    <!-- Аватарка (сделал чуть поменьше, 70px, чтобы красиво влезала рядом с ником) -->
+    <img id="profile-avatar" src="https://i.imgur.com/XqT2J2K.png" 
+        style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #a67cff; cursor: pointer; transition: 0.3s; flex-shrink: 0;" 
+        onclick="document.getElementById('avatar-input').click()" 
+        onmouseover="this.style.borderColor='#00ffcc';" 
+        onmouseout="this.style.borderColor='#a67cff';" 
+        title="Нажми, чтобы изменить аватарку">
+    
+    <!-- Скрытый инпут для выбора файла -->
+    <input type="file" id="avatar-input" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
+    
+    <!-- Ник и подпись -->
+    <div>
+        <div style="color: #8c8c9b; font-size: 12px; text-transform: uppercase;">Профиль игрока</div>
+        <h1 id="welcome-text" style="margin: 0; color: white; font-size: 24px;">...</h1>
+    </div>
+
+</div>
         
         h1 { 
             color: #ffffff; 
@@ -179,14 +201,6 @@
             <button class="btn-save" onclick="confirmSteamChange()" id="saveBtn">Сохранить</button>
         </div>
     </div>
-</div>
-
-    <!-- Блок аватарки -->
-<div style="text-align: center; margin-bottom: 15px;">
-    <img id="profile-avatar" src="https://i.imgur.com/XqT2J2K.png" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #a67cff; cursor: pointer; transition: 0.3s;" onclick="document.getElementById('avatar-input').click()" onmouseover="this.style.borderColor='#00ffcc'; this.style.transform='scale(1.05)';" onmouseout="this.style.borderColor='#a67cff'; this.style.transform='none';" title="Нажми, чтобы изменить аватарку">
-    
-    <!-- Скрытый инпут для выбора файла -->
-    <input type="file" id="avatar-input" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
 </div>
 
 <script>
