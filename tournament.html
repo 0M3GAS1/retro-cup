@@ -353,132 +353,130 @@
     }
 
     // --- УМНАЯ СЕТКА ---
-    function buildAndDrawBracket(participants, max, resultsDB) {
-        let bContainer = document.getElementById("bracket-container"); bContainer.innerHTML = "";
-        const seeds4 = [1, 4, 2, 3]; const seeds8 = [1, 8, 4, 5, 2, 7, 3, 6]; const seeds16 = [1, 16, 8, 9, 4, 13, 5, 12, 2, 15, 7, 10, 3, 14, 6, 11];
-        let seeds = max == 4 ? seeds4 : (max == 16 ? seeds16 : seeds8);
-        
-        let dynamicBracket = []; let numRounds = Math.log2(max);
-        let round0 = [];
-        for (let i = 0; i < seeds.length; i += 2) {
-            let p1 = participants[seeds[i] - 1] || "TBD";
-            let p2 = participants[seeds[i+1] - 1] || "TBD";
-            round0.push({ p1: p1, p2: p2 });
-        }
-        dynamicBracket.push(round0);
-
-        let playerFarthestRound = {};
-        participants.forEach(p => playerFarthestRound[p] = 0);
-
-        for(let r = 0; r < numRounds; r++) {
-            let roundHTML = `<div class="round">`;
-            let nextRoundMatches = []; 
-
-            for(let m = 0; m < dynamicBracket[r].length; m++) {
-                let match = dynamicBracket[r][m];
-                let matchId = `r${r}_m${m}`; 
-                let result = resultsDB[matchId]; 
-
-                if (match.p1 !== "TBD") playerFarthestRound[match.p1] = r;
-                if (match.p2 !== "TBD") playerFarthestRound[match.p2] = r;
-
-                let p1Display = match.p1; let p2Display = match.p2;
-                let s1HTML = ""; let s2HTML = "";
-                let p1Class = ""; let p2Class = "";
-                let winner = "TBD";
-
-                if (result) {
-                    s1HTML = `<span class="match-score">${result.s1}</span>`;
-                    s2HTML = `<span class="match-score">${result.s2}</span>`;
-                    winner = result.winner;
-                    if (winner === match.p1) { p1Class = "winner"; p2Class = "loser"; }
-                    if (winner === match.p2) { p2Class = "winner"; p1Class = "loser"; }
-                } else {
-                    // АВТО-ПРОХОД: ТОЛЬКО ЕСЛИ ТУРНИР УЖЕ НАЧАЛСЯ
-                    if (tStatus !== "waiting") {
-                        if (match.p1 !== "TBD" && match.p2 === "TBD") {
-                            winner = match.p1; p1Class = "winner"; s1HTML = `<span class="score-auto">AUTO</span>`;
-                        } else if (match.p2 !== "TBD" && match.p1 === "TBD") {
-                            winner = match.p2; p2Class = "winner"; s2HTML = `<span class="score-auto">AUTO</span>`;
-                        }
-                    }
-                }
-
-                // ЛОГИКА КЛИКА ПО МАТЧУ
-                let clickAction = ""; let interClass = "";
-                
-                // Кликабельно, если турнир ИДЕТ, и в матче есть хотя бы один живой игрок
-                if (tStatus === "active" && (match.p1 !== "TBD" || match.p2 !== "TBD")) {
-                    // Админ может кликать всегда
-                    if (currentUser === "0m3gas") {
-                        interClass = "interactive admin-mode";
-                        clickAction = `onclick="openMatchModal('${r}', '${m}', '${match.p1}', '${match.p2}')"`;
-                    } 
-                    // Игрок может кликать, только если он участвует в ЭТОМ матче
-                    else if (match.p1 === myTeamName || match.p2 === myTeamName) {
-                        interClass = "interactive";
-                        clickAction = `onclick="openMatchModal('${r}', '${m}', '${match.p1}', '${match.p2}')"`;
-                    }
-                }
-
-                roundHTML += `<div class="match ${interClass}" ${clickAction}>
-                        <div class="match-team ${p1Class}"><span style="overflow:hidden; text-overflow:ellipsis;">${p1Display}</span> ${s1HTML}</div>
-                        <div class="match-team ${p2Class}"><span style="overflow:hidden; text-overflow:ellipsis;">${p2Display}</span> ${s2HTML}</div>
-                    </div>`;
-
-                if (m % 2 !== 0) { 
-                    let prevMatch = dynamicBracket[r][m-1];
-                    let prevWinner = "TBD";
-                    if (resultsDB[`r${r}_m${m-1}`]) prevWinner = resultsDB[`r${r}_m${m-1}`].winner;
-                    else if (tStatus !== "waiting") { // Проверка авто-прохода
-                        if (prevMatch.p1 !== "TBD" && prevMatch.p2 === "TBD") prevWinner = prevMatch.p1;
-                        else if (prevMatch.p2 !== "TBD" && prevMatch.p1 === "TBD") prevWinner = prevMatch.p2;
-                    }
-                    nextRoundMatches.push({ p1: prevWinner, p2: winner });
-                }
-            }
-            roundHTML += `</div>`;
-            bContainer.innerHTML += roundHTML;
-            if (nextRoundMatches.length > 0) dynamicBracket.push(nextRoundMatches); 
-        }
-
-        // --- ГЕНЕРАЦИЯ ТОПА (ФИКС ДВОЙНОГО ПОБЕДИТЕЛЯ) ---
-        if (tStatus === "finished") {
-            let finalMatch = dynamicBracket[numRounds-1][0];
-            let ultimateWinner = "TBD";
-            
-            // Жестко берем победителя из результата финального матча
-            if (resultsDB[`r${numRounds-1}_m0`]) {
-                ultimateWinner = resultsDB[`r${numRounds-1}_m0`].winner;
-            } else if (finalMatch.p1 !== "TBD" && finalMatch.p2 === "TBD") {
-                ultimateWinner = finalMatch.p1;
-            } else if (finalMatch.p2 !== "TBD" && finalMatch.p1 === "TBD") {
-                ultimateWinner = finalMatch.p2;
-            }
-            
-            if (ultimateWinner !== "TBD") playerFarthestRound[ultimateWinner] = numRounds;
-
-            // Сортировка
-            let sortedPlayers = participants.sort((a,b) => playerFarthestRound[b] - playerFarthestRound[a]);
-            let lbContainer = document.getElementById("final-leaderboard-container"); lbContainer.innerHTML = "";
-            let displayRank = 1; let lastScore = -1;
-            
-            sortedPlayers.forEach((p, index) => {
-                let score = playerFarthestRound[p];
-                if (score !== lastScore) { displayRank = index + 1; lastScore = score; }
-                
-                let rankClass = displayRank == 1 ? "top1" : (displayRank == 2 ? "top2" : (displayRank == 3 ? "top3" : ""));
-                
-                let phaseName = "";
-                if (displayRank === 1) phaseName = "🏆 Победитель (Топ-1)";
-                else if (displayRank === 2) phaseName = "🥈 Финалист (Топ-2)";
-                else if (score === numRounds - 2) phaseName = "🥉 Полуфинал (Топ-4)";
-                else phaseName = `Раунд ${score + 1}`;
-
-                lbContainer.innerHTML += `<div class="speedrun-item"><div style="display:flex; align-items:center; gap:10px;"><div class="speedrun-rank ${rankClass}">#${displayRank}</div><div style="font-size: 14px; font-weight: bold;">${p}</div></div><div style="color: #8c8c9b; font-size: 12px; font-weight:bold;">${phaseName}</div></div>`;
-            });
-        }
+   // --- УМНАЯ СЕТКА (С АВТО-ПРОХОДОМ И ГЕНЕРАЦИЕЙ ИТОГОВ) ---
+function buildAndDrawBracket(participants, max, resultsDB) {
+    let bContainer = document.getElementById("bracket-container"); bContainer.innerHTML = "";
+    
+    const seeds4 = [1, 4, 2, 3]; const seeds8 = [1, 8, 4, 5, 2, 7, 3, 6]; const seeds16 = [1, 16, 8, 9, 4, 13, 5, 12, 2, 15, 7, 10, 3, 14, 6, 11];
+    let seeds = max == 4 ? seeds4 : (max == 16 ? seeds16 : seeds8);
+    
+    let dynamicBracket = [];
+    let numRounds = Math.log2(max);
+    
+    // ИСПОЛЬЗУЕМ null вместо "TBD" для изначально пустых слотов
+    let round0 = [];
+    for (let i = 0; i < seeds.length; i += 2) {
+        let p1 = participants[seeds[i] - 1] || null;
+        let p2 = participants[seeds[i+1] - 1] || null;
+        round0.push({ p1: p1, p2: p2 });
     }
+    dynamicBracket.push(round0);
+
+    let playerFarthestRound = {};
+    participants.forEach(p => playerFarthestRound[p] = 0);
+
+    for(let r = 0; r < numRounds; r++) {
+        let roundHTML = `<div class="round">`;
+        let nextRoundMatches = []; 
+
+        for(let m = 0; m < dynamicBracket[r].length; m++) {
+            let match = dynamicBracket[r][m];
+            let matchId = `r${r}_m${m}`; 
+            let result = resultsDB[matchId]; 
+
+            if (match.p1 && match.p1 !== "TBD") playerFarthestRound[match.p1] = r;
+            if (match.p2 && match.p2 !== "TBD") playerFarthestRound[match.p2] = r;
+
+            let p1Display = match.p1 === null ? "---" : match.p1; 
+            let p2Display = match.p2 === null ? "---" : match.p2;
+            let s1HTML = ""; let s2HTML = "";
+            let p1Class = ""; let p2Class = "";
+            let winner = "TBD";
+
+            if (result) {
+                s1HTML = `<span class="match-score">${result.s1}</span>`;
+                s2HTML = `<span class="match-score">${result.s2}</span>`;
+                winner = result.winner;
+                if (winner === match.p1) { p1Class = "winner"; p2Class = "loser"; }
+                if (winner === match.p2) { p2Class = "winner"; p1Class = "loser"; }
+            } else {
+                // АВТО-ПРОХОД только если второго игрока физически нет (null)
+                if (match.p1 && match.p1 !== "TBD" && match.p2 === null) {
+                    winner = match.p1; p1Class = "winner";
+                    s1HTML = `<span class="score-auto">AUTO</span>`;
+                } else if (match.p2 && match.p2 !== "TBD" && match.p1 === null) {
+                    winner = match.p2; p2Class = "winner";
+                    s2HTML = `<span class="score-auto">AUTO</span>`;
+                }
+            }
+
+            // Клик админа (с защитой от кавычек в никах)
+            let clickAction = ""; let adminClass = "";
+            if (currentUser === "0m3gas" && tStatus === "active" && match.p1 && match.p1 !== "TBD" && match.p2 && match.p2 !== "TBD") {
+                adminClass = "admin-clickable";
+                let safeP1 = match.p1.replace(/'/g, "\\'");
+                let safeP2 = match.p2.replace(/'/g, "\\'");
+                clickAction = `onclick="openScoreModal('${r}', '${m}', '${safeP1}', '${safeP2}')"`;
+            }
+
+            roundHTML += `<div class="match ${adminClass}" ${clickAction}>
+                    <div class="match-team ${p1Class}"><span style="overflow:hidden; text-overflow:ellipsis;">${p1Display}</span> ${s1HTML}</div>
+                    <div class="match-team ${p2Class}"><span style="overflow:hidden; text-overflow:ellipsis;">${p2Display}</span> ${s2HTML}</div>
+                </div>`;
+
+            if (m % 2 !== 0) { 
+                let prevMatch = dynamicBracket[r][m-1];
+                let prevWinner = "TBD";
+                
+                if (resultsDB[`r${r}_m${m-1}`]) {
+                    prevWinner = resultsDB[`r${r}_m${m-1}`].winner;
+                } else if (prevMatch.p1 && prevMatch.p2 === null) {
+                    prevWinner = prevMatch.p1; // Авто-проход
+                } else if (prevMatch.p2 && prevMatch.p1 === null) {
+                    prevWinner = prevMatch.p2; // Авто-проход
+                }
+                
+                nextRoundMatches.push({ p1: prevWinner, p2: winner });
+            }
+        }
+        roundHTML += `</div>`;
+        bContainer.innerHTML += roundHTML;
+        if (nextRoundMatches.length > 0) dynamicBracket.push(nextRoundMatches); 
+    }
+
+    // ГЕНЕРАЦИЯ ИТОГОВОГО ТОПА
+    if (tStatus === "finished") {
+        let finalMatch = dynamicBracket[numRounds-1][0];
+        let ultimateWinner = "TBD";
+        if (resultsDB[`r${numRounds-1}_m0`]) ultimateWinner = resultsDB[`r${numRounds-1}_m0`].winner;
+        else if (finalMatch.p1 && finalMatch.p2 === null) ultimateWinner = finalMatch.p1;
+        else if (finalMatch.p2 && finalMatch.p1 === null) ultimateWinner = finalMatch.p2;
+        
+        if (ultimateWinner !== "TBD") playerFarthestRound[ultimateWinner] = numRounds;
+
+        let sortedPlayers = participants.sort((a,b) => playerFarthestRound[b] - playerFarthestRound[a]);
+        
+        let lbContainer = document.getElementById("final-leaderboard-container");
+        lbContainer.innerHTML = "";
+        
+        let displayRank = 1; let lastScore = -1;
+        
+        sortedPlayers.forEach((p, index) => {
+            let score = playerFarthestRound[p];
+            if (score !== lastScore) { displayRank = index + 1; lastScore = score; }
+            
+            let rankClass = displayRank == 1 ? "top1" : (displayRank == 2 ? "top2" : (displayRank == 3 ? "top3" : ""));
+            
+            let phaseName = "";
+            if (score === numRounds) phaseName = "🏆 Победитель (Топ-1)";
+            else if (score === numRounds - 1) phaseName = "🥈 Финалист (Топ-2)";
+            else if (score === numRounds - 2) phaseName = "🥉 Полуфинал (Топ-4)";
+            else phaseName = `Раунд ${score + 1}`;
+
+            lbContainer.innerHTML += `<div class="speedrun-item"><div style="display:flex; align-items:center; gap:10px;"><div class="speedrun-rank ${rankClass}">#${displayRank}</div><div style="font-size: 14px; font-weight: bold;">${p}</div></div><div style="color: #8c8c9b; font-size: 12px; font-weight:bold;">${phaseName}</div></div>`;
+        });
+    }
+}
 
     // --- МОДАЛКА МАТЧА (СЧЕТ И ЧАТ) ---
     function openMatchModal(r, m, p1, p2) {
