@@ -1754,7 +1754,35 @@ async function loadTournamentData(force = false) {
 
         /* ADMIN */
 
-        updateAdminControls();
+        /* ADMIN */
+
+let adminBox =
+    document.getElementById(
+        "admin-controls"
+    );
+
+if (!adminBox) {
+
+    adminBox =
+        document.createElement("div");
+
+    adminBox.id =
+        "admin-controls";
+
+    const participantsBox =
+        document.querySelector(
+            ".participants-card"
+        );
+
+    if (participantsBox) {
+
+        participantsBox.prepend(
+            adminBox
+        );
+    }
+}
+
+updateAdminControls();
 
 
         /* PLAYERS */
