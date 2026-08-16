@@ -1196,9 +1196,15 @@
 
 <script>
 
-    /* ==========================================
+    /* =========================================================
+       RETRO CUP — MAIN SCRIPT v2
+       Firebase Realtime Database
+    ========================================================= */
+
+
+    /* =========================================================
        FIREBASE
-    ========================================== */
+    ========================================================= */
 
     const dbBase =
         "https://retro-cup-51db5-default-rtdb.firebaseio.com/";
@@ -1206,27 +1212,50 @@
     const dbUsers =
         dbBase + "users/";
 
+    const dbTournaments =
+        dbBase + "tournaments/";
+
+    const dbProposals =
+        dbBase + "proposals/";
+
+    const dbSupport =
+        dbBase + "support/";
+
+
+    /* =========================================================
+       СОСТОЯНИЕ
+    ========================================================= */
+
     let currentUser =
         localStorage.getItem("currentUser");
 
+    let currentLang =
+        localStorage.getItem("siteLang") || "RU";
+
     let lastTournamentsData = "";
+
+    let lastRenderSignature = "";
 
     let activeChatUser = "";
 
     let currentProposalsDict = {};
 
+    let tournamentCache = null;
 
-    /* ==========================================
+    let currentTournamentFilter = "all";
+
+    let searchQuery = "";
+
+    let refreshInProgress = false;
+
+
+    /* =========================================================
        ПЕРЕВОД
-    ========================================== */
-
-    let currentLang =
-        localStorage.getItem("siteLang") || "RU";
-
+    ========================================================= */
 
     const dictionary = {
 
-        "RU": {
+        RU: {
 
             login: "Войти в профиль",
 
@@ -1237,7 +1266,7 @@
             empty: "Турниров пока нет",
 
             disc:
-                "Сайт Retro Cup является платформой для публикации информации и не несёт ответственности за турниры, созданные пользователями.",
+                "Сайт Retro Cup является платформой для публикации информации и не несёт ответственности за турниры, созданные пользователями. Организация, правила и любые финансовые операции осуществляются создателем турнира.",
 
             supp: "💬 Поддержка",
 
@@ -1257,11 +1286,113 @@
 
             prize: "Приз: ",
 
-            no: "Нет"
+            no: "Нет",
+
+            all: "Все",
+
+            active: "Активные",
+
+            finished: "Завершённые",
+
+            registration: "Идёт набор",
+
+            running: "Турнир идёт",
+
+            ended: "Турнир окончен",
+
+            finishedShort: "Завершён",
+
+            total: "Всего",
+
+            activeCount: "Активных",
+
+            finishedCount: "Завершено",
+
+            search: "Поиск турнира...",
+
+            refresh: "Обновить",
+
+            ends: "Окончание:",
+
+            starts: "Начало:",
+
+            noResults: "Ничего не найдено",
+
+            allFinished:
+                "Все опубликованные турниры уже завершены.",
+
+            serverError:
+                "Не удалось загрузить турниры.",
+
+            tryAgain:
+                "Попробуйте обновить страницу.",
+
+            updated:
+                "Турниры обновлены",
+
+            loading:
+                "Синхронизация...",
+
+            tournament:
+                "турнир",
+
+            tournaments:
+                "турниров",
+
+            online:
+                "СЕРВЕР ОНЛАЙН",
+
+            system:
+                "СИСТЕМА",
+
+            rules:
+                "Правила",
+
+            published:
+                "Опубликовано",
+
+            delete:
+                "Удалить",
+
+            confirmDelete:
+                "Отменить этот турнир?",
+
+            deleteError:
+                "Ошибка удаления турнира.",
+
+            connectionError:
+                "Ошибка соединения с Firebase.",
+
+            proposalSent:
+                "Заявка улетела админу!",
+
+            publishedSuccess:
+                "Турнир опубликован!",
+
+            titleRequired:
+                "Напиши название!",
+
+            rulesRequired:
+                "Минимум 30 символов в правилах!",
+
+            approveError:
+                "Ошибка одобрения турнира.",
+
+            proposalDeleteError:
+                "Ошибка удаления заявки.",
+
+            messageError:
+                "Ошибка отправки сообщения.",
+
+            noMessages:
+                "Нет сообщений",
+
+            writeQuestion:
+                "Напишите свой вопрос..."
         },
 
 
-        "EN": {
+        EN: {
 
             login: "Profile Login",
 
@@ -1272,7 +1403,7 @@
             empty: "No tournaments yet",
 
             disc:
-                "Retro Cup is an information platform and is not responsible for user-created tournaments.",
+                "Retro Cup is an information platform and is not responsible for user-created tournaments. Organization, rules and financial operations are handled by tournament creators.",
 
             supp: "💬 Support",
 
@@ -1292,79 +1423,923 @@
 
             prize: "Prize: ",
 
-            no: "None"
+            no: "None",
+
+            all: "All",
+
+            active: "Active",
+
+            finished: "Finished",
+
+            registration: "Registration open",
+
+            running: "Tournament running",
+
+            ended: "Tournament ended",
+
+            finishedShort: "Finished",
+
+            total: "Total",
+
+            activeCount: "Active",
+
+            finishedCount: "Finished",
+
+            search: "Search tournament...",
+
+            refresh: "Refresh",
+
+            ends: "Ends:",
+
+            starts: "Starts:",
+
+            noResults: "Nothing found",
+
+            allFinished:
+                "All published tournaments have already ended.",
+
+            serverError:
+                "Failed to load tournaments.",
+
+            tryAgain:
+                "Try refreshing the page.",
+
+            updated:
+                "Tournaments updated",
+
+            loading:
+                "Synchronizing...",
+
+            tournament:
+                "tournament",
+
+            tournaments:
+                "tournaments",
+
+            online:
+                "SERVER ONLINE",
+
+            system:
+                "SYSTEM",
+
+            rules:
+                "Rules",
+
+            published:
+                "Published",
+
+            delete:
+                "Delete",
+
+            confirmDelete:
+                "Cancel this tournament?",
+
+            deleteError:
+                "Tournament deletion error.",
+
+            connectionError:
+                "Firebase connection error.",
+
+            proposalSent:
+                "Sent to admin!",
+
+            publishedSuccess:
+                "Tournament published!",
+
+            titleRequired:
+                "Enter tournament title!",
+
+            rulesRequired:
+                "Minimum 30 characters in rules!",
+
+            approveError:
+                "Tournament approval error.",
+
+            proposalDeleteError:
+                "Proposal deletion error.",
+
+            messageError:
+                "Message sending error.",
+
+            noMessages:
+                "No messages",
+
+            writeQuestion:
+                "Write your question..."
         }
     };
 
 
-    /* ==========================================
+    /* =========================================================
+       ДОПОЛНИТЕЛЬНЫЕ СТИЛИ
+    ========================================================= */
+
+    function injectExtraStyles() {
+
+        if (
+            document.getElementById(
+                "retro-cup-extra-styles"
+            )
+        ) {
+            return;
+        }
+
+
+        const style =
+            document.createElement("style");
+
+
+        style.id =
+            "retro-cup-extra-styles";
+
+
+        style.innerHTML = `
+
+            /* =========================
+               TOOLBAR
+            ========================= */
+
+            .rc-toolbar {
+                margin-bottom: 20px;
+                background: linear-gradient(
+                    135deg,
+                    rgba(166,124,255,0.08),
+                    rgba(0,255,204,0.03)
+                );
+                border: 1px solid #24242d;
+                border-radius: 14px;
+                padding: 14px;
+            }
+
+            .rc-search-row {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .rc-search {
+                flex: 1;
+                min-width: 0;
+                background: #0b0b0e;
+                color: white;
+                border: 1px solid #2b2b35;
+                border-radius: 9px;
+                padding: 11px 13px;
+                outline: none;
+                transition: .25s;
+                font-family: Inter, sans-serif;
+            }
+
+            .rc-search:focus {
+                border-color: #a67cff;
+                box-shadow:
+                    0 0 0 3px
+                    rgba(166,124,255,.08);
+            }
+
+            .rc-refresh {
+                width: 44px;
+                height: 42px;
+                border-radius: 9px;
+                border: 1px solid #33333d;
+                background: #19191f;
+                color: white;
+                cursor: pointer;
+                font-size: 17px;
+                transition: .25s;
+            }
+
+            .rc-refresh:hover {
+                border-color: #00ffcc;
+                color: #00ffcc;
+                transform: rotate(30deg);
+            }
+
+            .rc-filters {
+                display: flex;
+                gap: 7px;
+                margin-top: 10px;
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+
+            .rc-filters::-webkit-scrollbar {
+                display: none;
+            }
+
+            .rc-filter {
+                white-space: nowrap;
+                border: 1px solid #2d2d36;
+                background: #17171d;
+                color: #777783;
+                border-radius: 7px;
+                padding: 7px 11px;
+                cursor: pointer;
+                font-size: 11px;
+                font-weight: 800;
+                transition: .2s;
+            }
+
+            .rc-filter:hover {
+                color: white;
+                border-color: #555565;
+            }
+
+            .rc-filter.active {
+                background: rgba(166,124,255,.12);
+                color: #a67cff;
+                border-color: #a67cff;
+            }
+
+
+            /* =========================
+               STATS
+            ========================= */
+
+            .rc-stats {
+                display: grid;
+                grid-template-columns:
+                    repeat(3, 1fr);
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .rc-stat {
+                background: #141419;
+                border: 1px solid #22222a;
+                border-radius: 10px;
+                padding: 10px;
+                text-align: center;
+            }
+
+            .rc-stat-value {
+                display: block;
+                color: white;
+                font-size: 19px;
+                font-weight: 900;
+            }
+
+            .rc-stat-label {
+                display: block;
+                color: #666673;
+                font-size: 9px;
+                margin-top: 3px;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+            }
+
+            .rc-stat.active-stat
+            .rc-stat-value {
+                color: #00ffcc;
+            }
+
+            .rc-stat.finished-stat
+            .rc-stat-value {
+                color: #ff3c64;
+            }
+
+
+            /* =========================
+               STATUS
+            ========================= */
+
+            .tourney-card {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .tourney-card.finished {
+                border-left-color: #555 !important;
+                opacity: .76;
+            }
+
+            .tourney-card.finished:hover {
+                transform: none !important;
+                border-color: #1f1f26 !important;
+                border-left-color: #555 !important;
+            }
+
+            .tourney-card.finished
+            .tourney-info h2 {
+                color: #9999a4;
+            }
+
+            .tourney-status {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-size: 9px;
+                font-weight: 900;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                margin-top: 7px;
+            }
+
+            .tourney-status.active {
+                color: #00ffcc;
+                background:
+                    rgba(0,255,204,.07);
+                border:
+                    1px solid
+                    rgba(0,255,204,.25);
+            }
+
+            .tourney-status.running {
+                color: #a67cff;
+                background:
+                    rgba(166,124,255,.08);
+                border:
+                    1px solid
+                    rgba(166,124,255,.25);
+            }
+
+            .tourney-status.finished {
+                color: #ff647f;
+                background:
+                    rgba(255,60,100,.07);
+                border:
+                    1px solid
+                    rgba(255,60,100,.25);
+            }
+
+            .finished-btn {
+                background: #18181d !important;
+                color: #686872 !important;
+                border-color: #303038 !important;
+                cursor: not-allowed !important;
+                pointer-events: none !important;
+            }
+
+            .tourney-date {
+                color: #646470;
+                font-size: 10px;
+                margin-top: 6px;
+            }
+
+
+            /* =========================
+               EMPTY / NO RESULTS
+            ========================= */
+
+            .rc-no-results {
+                padding: 35px 20px;
+                border-radius: 12px;
+                border: 1px dashed #30303a;
+                text-align: center;
+                color: #666673;
+                animation: fadeIn .3s ease;
+            }
+
+            .rc-no-results-icon {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+
+
+            /* =========================
+               ONLINE
+            ========================= */
+
+            .rc-online {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                color: #00ffcc;
+                font-size: 9px;
+                font-weight: 900;
+                letter-spacing: .8px;
+                margin-top: 5px;
+            }
+
+            .rc-online-dot {
+                width: 6px;
+                height: 6px;
+                background: #00ffcc;
+                border-radius: 50%;
+                box-shadow:
+                    0 0 8px #00ffcc;
+                animation:
+                    rcPulse 1.5s infinite;
+            }
+
+            @keyframes rcPulse {
+                0%,100% {
+                    opacity: .4;
+                    transform: scale(.8);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+
+            /* =========================
+               TOAST
+            ========================= */
+
+            #rc-toast-container {
+                position: fixed;
+                right: 18px;
+                top: 18px;
+                z-index: 99999;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                pointer-events: none;
+            }
+
+            .rc-toast {
+                background: #18181f;
+                border: 1px solid #33333d;
+                color: white;
+                border-radius: 9px;
+                padding: 11px 14px;
+                min-width: 220px;
+                max-width: 320px;
+                font-size: 12px;
+                box-shadow:
+                    0 10px 35px
+                    rgba(0,0,0,.55);
+                animation:
+                    rcToastIn .25s ease;
+            }
+
+            .rc-toast.success {
+                border-color: #00ffcc;
+            }
+
+            .rc-toast.error {
+                border-color: #ff3c64;
+            }
+
+            @keyframes rcToastIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+
+            /* =========================
+               MOBILE
+            ========================= */
+
+            @media (max-width: 600px) {
+
+                .rc-search-row {
+                    gap: 7px;
+                }
+
+                .rc-stats {
+                    gap: 6px;
+                }
+
+                .rc-stat {
+                    padding: 8px 4px;
+                }
+
+                .rc-stat-value {
+                    font-size: 16px;
+                }
+
+                .rc-stat-label {
+                    font-size: 8px;
+                }
+
+                #rc-toast-container {
+                    left: 15px;
+                    right: 15px;
+                    top: 15px;
+                }
+
+                .rc-toast {
+                    max-width: none;
+                    min-width: 0;
+                }
+            }
+        `;
+
+
+        document.head.appendChild(style);
+    }
+
+
+    /* =========================================================
+       TOAST
+    ========================================================= */
+
+    function showToast(
+        message,
+        type = "success"
+    ) {
+
+        let container =
+            document.getElementById(
+                "rc-toast-container"
+            );
+
+
+        if (!container) {
+
+            container =
+                document.createElement("div");
+
+            container.id =
+                "rc-toast-container";
+
+            document.body.appendChild(
+                container
+            );
+        }
+
+
+        const toast =
+            document.createElement("div");
+
+
+        toast.className =
+            "rc-toast " + type;
+
+
+        toast.innerText =
+            message;
+
+
+        container.appendChild(
+            toast
+        );
+
+
+        setTimeout(() => {
+
+            toast.style.opacity = "0";
+            toast.style.transform =
+                "translateX(20px)";
+
+            setTimeout(() => {
+
+                toast.remove();
+
+            }, 250);
+
+        }, 2500);
+    }
+
+
+    /* =========================================================
+       HTML SECURITY
+    ========================================================= */
+
+    function escapeHtml(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    /* =========================================================
+       ДАТЫ
+    ========================================================= */
+
+    function parseDate(value) {
+
+        if (!value) {
+            return null;
+        }
+
+
+        const date =
+            new Date(value);
+
+
+        if (
+            isNaN(
+                date.getTime()
+            )
+        ) {
+            return null;
+        }
+
+
+        return date;
+    }
+
+
+    function formatDate(value) {
+
+        const date =
+            parseDate(value);
+
+
+        if (!date) {
+            return "";
+        }
+
+
+        return date.toLocaleString(
+            currentLang === "RU"
+                ? "ru-RU"
+                : "en-US",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+    }
+
+
+    /* =========================================================
+       СТАТУС ТУРНИРА
+    ========================================================= */
+
+    function getTournamentStatus(t) {
+
+        if (!t) {
+            return "registration";
+        }
+
+
+        const status =
+            String(
+                t.status || ""
+            )
+            .toLowerCase()
+            .trim();
+
+
+        /*
+         * Явно завершён
+         */
+
+        if (
+            status === "finished" ||
+            status === "completed" ||
+            status === "ended" ||
+            status === "closed" ||
+            status === "завершен" ||
+            status === "завершён" ||
+            status === "окончен"
+        ) {
+
+            return "finished";
+        }
+
+
+        /*
+         * Явно идёт
+         */
+
+        if (
+            status === "active" ||
+            status === "running" ||
+            status === "started" ||
+            status === "live" ||
+            status === "идет" ||
+            status === "идёт"
+        ) {
+
+            /*
+             * Но даже active должен
+             * закончиться, если вышла endDate.
+             */
+
+            const endValue =
+                t.endDate ||
+                t.endTime ||
+                t.finishedAt ||
+                t.endedAt;
+
+
+            const endDate =
+                parseDate(endValue);
+
+
+            if (
+                endDate &&
+                endDate.getTime() <= Date.now()
+            ) {
+                return "finished";
+            }
+
+
+            return "running";
+        }
+
+
+        /*
+         * Булевые флаги
+         */
+
+        if (
+            t.completed === true ||
+            t.finished === true ||
+            t.ended === true
+        ) {
+
+            return "finished";
+        }
+
+
+        /*
+         * Дата окончания
+         */
+
+        const endValue =
+            t.endDate ||
+            t.endTime ||
+            t.finishedAt ||
+            t.endedAt;
+
+
+        const endDate =
+            parseDate(endValue);
+
+
+        if (
+            endDate &&
+            endDate.getTime() <= Date.now()
+        ) {
+
+            return "finished";
+        }
+
+
+        /*
+         * По умолчанию — регистрация
+         */
+
+        return "registration";
+    }
+
+
+    function isTournamentFinished(t) {
+
+        return (
+            getTournamentStatus(t) ===
+            "finished"
+        );
+    }
+
+
+    /* =========================================================
        ЯЗЫК
-    ========================================== */
+    ========================================================= */
 
     function applyLanguage() {
 
-        document.getElementById(
-            "lang-toggle"
-        ).innerText = currentLang;
+        const d =
+            dictionary[currentLang];
 
 
-        document.getElementById(
-            "txt-login"
-        ).innerText =
-            dictionary[currentLang].login;
+        const langToggle =
+            document.getElementById(
+                "lang-toggle"
+            );
 
 
-        document.getElementById(
-            "txt-tourneys"
-        ).innerText =
-            dictionary[currentLang].tourneys;
+        if (langToggle) {
+
+            langToggle.innerText =
+                currentLang;
+        }
 
 
-        document.getElementById(
-            "txt-create-btn"
-        ).innerText =
-            dictionary[currentLang].create;
-
-
-        document.getElementById(
-            "txt-disclaimer"
-        ).innerText =
-            dictionary[currentLang].disc;
-
-
-        document.getElementById(
-            "txt-supp"
-        ).innerText =
-            dictionary[currentLang].supp;
-
-
-        document.getElementById(
-            "txt-supp-head"
-        ).innerText =
-            dictionary[currentLang].suppHead;
-
-
-        document.getElementById(
-            "txt-cancel"
-        ).innerText =
-            dictionary[currentLang].cancel;
-
-
-        document.getElementById(
-            "sendBtn"
-        ).innerText =
-            dictionary[currentLang].send;
-
-
-        /* Если авторизован — показываем ник */
-
-        if (currentUser) {
-
+        const login =
             document.getElementById(
                 "txt-login"
-            ).innerText =
-                currentUser;
+            );
+
+
+        if (login) {
+
+            login.innerText =
+                currentUser
+                    ? currentUser
+                    : d.login;
         }
+
+
+        const tourneys =
+            document.getElementById(
+                "txt-tourneys"
+            );
+
+
+        if (tourneys) {
+
+            tourneys.innerText =
+                d.tourneys;
+        }
+
+
+        const create =
+            document.getElementById(
+                "txt-create-btn"
+            );
+
+
+        if (create) {
+
+            create.innerText =
+                d.create;
+        }
+
+
+        const disclaimer =
+            document.getElementById(
+                "txt-disclaimer"
+            );
+
+
+        if (disclaimer) {
+
+            disclaimer.innerText =
+                d.disc;
+        }
+
+
+        const supp =
+            document.getElementById(
+                "txt-supp"
+            );
+
+
+        if (supp) {
+
+            supp.innerText =
+                d.supp;
+        }
+
+
+        const suppHead =
+            document.getElementById(
+                "txt-supp-head"
+            );
+
+
+        if (suppHead) {
+
+            suppHead.innerText =
+                d.suppHead;
+        }
+
+
+        const cancel =
+            document.getElementById(
+                "txt-cancel"
+            );
+
+
+        if (cancel) {
+
+            cancel.innerText =
+                d.cancel;
+        }
+
+
+        const sendBtn =
+            document.getElementById(
+                "sendBtn"
+            );
+
+
+        if (sendBtn) {
+
+            sendBtn.innerText =
+                d.send;
+        }
+
+
+        /*
+         * Перерисовываем турниры,
+         * чтобы RU/EN применился сразу.
+         */
+
+        if (tournamentCache) {
+
+            lastRenderSignature = "";
+
+            renderTournaments(
+                tournamentCache
+            );
+        }
+
+
+        updateToolbarLanguage();
     }
 
 
@@ -1375,20 +2350,20 @@
                 ? "EN"
                 : "RU";
 
+
         localStorage.setItem(
             "siteLang",
             currentLang
         );
 
-        applyLanguage();
 
-        loadTournaments();
+        applyLanguage();
     }
 
 
-    /* ==========================================
-       ЗАГРУЗКА АВАТАРКИ В ШАПКУ
-    ========================================== */
+    /* =========================================================
+       АВАТАР
+    ========================================================= */
 
     async function loadHeaderAvatar() {
 
@@ -1396,6 +2371,11 @@
             document.getElementById(
                 "header-avatar"
             );
+
+
+        if (!avatar) {
+            return;
+        }
 
 
         const defaultAvatar =
@@ -1426,7 +2406,7 @@
             if (!response.ok) {
 
                 throw new Error(
-                    "Ошибка HTTP: " +
+                    "HTTP " +
                     response.status
                 );
             }
@@ -1436,26 +2416,19 @@
                 await response.json();
 
 
-            if (
+            avatar.src =
                 userData &&
                 userData.avatar
-            ) {
-
-                avatar.src =
-                    userData.avatar;
-
-            } else {
-
-                avatar.src =
-                    defaultAvatar;
-            }
+                    ? userData.avatar
+                    : defaultAvatar;
 
         } catch (error) {
 
             console.error(
-                "Ошибка загрузки аватарки:",
+                "Avatar error:",
                 error
             );
+
 
             avatar.src =
                 defaultAvatar;
@@ -1463,89 +2436,165 @@
     }
 
 
-    /* ==========================================
-       ФОРМАТЫ ТУРНИРОВ
-    ========================================== */
+    /* =========================================================
+       ФОРМАТЫ
+    ========================================================= */
 
     function updateFormats() {
 
-        let game =
+        const game =
             document.getElementById(
                 "prop-game"
-            ).value;
+            );
 
 
-        let formatSel =
+        const formatSel =
             document.getElementById(
                 "prop-format"
             );
 
 
-        if (game === "CS 2") {
+        if (
+            !game ||
+            !formatSel
+        ) {
+            return;
+        }
+
+
+        if (
+            game.value === "CS 2"
+        ) {
 
             formatSel.innerHTML = `
-                <option value="1v1">1 vs 1</option>
-                <option value="2v2">2 vs 2</option>
-                <option value="5v5">5 vs 5</option>
+
+                <option value="1v1">
+                    1 vs 1
+                </option>
+
+                <option value="2v2">
+                    2 vs 2
+                </option>
+
+                <option value="5v5">
+                    5 vs 5
+                </option>
+
             `;
 
         } else {
 
             formatSel.innerHTML = `
-                <option value="1v1">1 vs 1</option>
-                <option value="5v5">5 vs 5</option>
+
+                <option value="1v1">
+                    1 vs 1
+                </option>
+
+                <option value="5v5">
+                    5 vs 5
+                </option>
+
             `;
         }
     }
 
 
-    /* ==========================================
-       ПРОВЕРКА СЕССИИ
-    ========================================== */
+    /* =========================================================
+       СЕССИЯ
+    ========================================================= */
 
     async function checkUserSession() {
 
-        if (currentUser) {
-
+        const headerButton =
             document.getElementById(
                 "header-user-btn"
-            ).href = "profile.html";
+            );
 
 
-            document.getElementById(
-                "header-user-btn"
-            ).classList.add("logged-in");
-
-
+        const fabUser =
             document.getElementById(
                 "fab-user-btn"
-            ).style.display = "flex";
+            );
 
 
-            /* Загружаем аватар */
+        const fabSupport =
+            document.getElementById(
+                "fab-support-btn"
+            );
+
+
+        const fabAdmin =
+            document.getElementById(
+                "fab-admin-btn"
+            );
+
+
+        if (currentUser) {
+
+            if (headerButton) {
+
+                headerButton.href =
+                    "profile.html";
+
+                headerButton.classList.add(
+                    "logged-in"
+                );
+            }
+
+
+            if (fabUser) {
+
+                fabUser.style.display =
+                    "flex";
+            }
+
 
             await loadHeaderAvatar();
 
 
-            if (currentUser === "0m3gas") {
+            if (
+                currentUser === "0m3gas"
+            ) {
 
-                document.getElementById(
-                    "fab-admin-btn"
-                ).style.display = "flex";
+                if (fabAdmin) {
+
+                    fabAdmin.style.display =
+                        "flex";
+                }
 
             } else {
 
-                document.getElementById(
-                    "fab-support-btn"
-                ).style.display = "flex";
+                if (fabSupport) {
+
+                    fabSupport.style.display =
+                        "flex";
+                }
             }
 
         } else {
 
-            document.getElementById(
-                "header-avatar"
-            ).src =
-                "https://via.placeholder.com/40/141419/a67cff?text=TU";
+            if (headerButton) {
+
+                headerButton.href =
+                    "auth.html";
+
+                headerButton.classList.remove(
+                    "logged-in"
+                );
+            }
+
+
+            const avatar =
+                document.getElementById(
+                    "header-avatar"
+                );
+
+
+            if (avatar) {
+
+                avatar.src =
+                    "https://via.placeholder.com/40/141419/a67cff?text=TU";
+            }
         }
 
 
@@ -1553,482 +2602,1528 @@
     }
 
 
-    /* ==========================================
-       ЧАТ
-    ========================================== */
+    /* =========================================================
+       TOOLBAR
+    ========================================================= */
 
-    function toggleChatWindow(id) {
+    function createTournamentToolbar() {
 
-        let win =
-            document.getElementById(id);
+        if (
+            document.getElementById(
+                "rc-toolbar"
+            )
+        ) {
+            return;
+        }
 
 
-        win.style.display =
-            win.style.display === "flex"
-                ? "none"
-                : "flex";
+        const title =
+            document.getElementById(
+                "txt-tourneys"
+            );
+
+
+        const list =
+            document.getElementById(
+                "tournament-list"
+            );
 
 
         if (
-            id === "user-support" &&
-            win.style.display === "flex"
+            !title ||
+            !list
+        ) {
+            return;
+        }
+
+
+        const toolbar =
+            document.createElement("div");
+
+
+        toolbar.id =
+            "rc-toolbar";
+
+
+        toolbar.className =
+            "rc-toolbar";
+
+
+        toolbar.innerHTML = `
+
+            <div class="rc-search-row">
+
+                <input
+                    id="rc-search"
+                    class="rc-search"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="${dictionary[currentLang].search}"
+                >
+
+                <button
+                    id="rc-refresh"
+                    class="rc-refresh"
+                    title="${dictionary[currentLang].refresh}"
+                >
+                    ↻
+                </button>
+
+            </div>
+
+
+            <div
+                class="rc-filters"
+                id="rc-filters"
+            >
+
+                <button
+                    class="rc-filter active"
+                    data-filter="all"
+                >
+                    ${dictionary[currentLang].all}
+                </button>
+
+                <button
+                    class="rc-filter"
+                    data-filter="active"
+                >
+                    🟢 ${dictionary[currentLang].active}
+                </button>
+
+                <button
+                    class="rc-filter"
+                    data-filter="finished"
+                >
+                    🔴 ${dictionary[currentLang].finished}
+                </button>
+
+            </div>
+
+
+            <div
+                class="rc-online"
+            >
+                <span
+                    class="rc-online-dot"
+                ></span>
+
+                ${dictionary[currentLang].online}
+
+            </div>
+
+        `;
+
+
+        /*
+         * Вставляем toolbar
+         * между заголовком и списком.
+         */
+
+        title.parentNode.insertBefore(
+            toolbar,
+            list
+        );
+
+
+        const search =
+            document.getElementById(
+                "rc-search"
+            );
+
+
+        search.addEventListener(
+            "input",
+            function() {
+
+                searchQuery =
+                    this.value
+                        .trim()
+                        .toLowerCase();
+
+
+                if (tournamentCache) {
+
+                    renderTournaments(
+                        tournamentCache
+                    );
+                }
+            }
+        );
+
+
+        document
+            .getElementById(
+                "rc-refresh"
+            )
+            .addEventListener(
+                "click",
+                async function() {
+
+                    this.style.transform =
+                        "rotate(360deg)";
+
+
+                    setTimeout(() => {
+
+                        this.style.transform =
+                            "";
+
+                    }, 400);
+
+
+                    lastTournamentsData =
+                        "";
+
+
+                    await loadTournaments();
+
+
+                    showToast(
+                        dictionary[
+                            currentLang
+                        ].updated,
+                        "success"
+                    );
+                }
+            );
+
+
+        document
+            .getElementById(
+                "rc-filters"
+            )
+            .addEventListener(
+                "click",
+                function(event) {
+
+                    const button =
+                        event.target.closest(
+                            ".rc-filter"
+                        );
+
+
+                    if (!button) {
+                        return;
+                    }
+
+
+                    document
+                        .querySelectorAll(
+                            ".rc-filter"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "active"
+                                )
+                        );
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    currentTournamentFilter =
+                        button.dataset.filter;
+
+
+                    if (tournamentCache) {
+
+                        renderTournaments(
+                            tournamentCache
+                        );
+                    }
+                }
+            );
+    }
+
+
+    function updateToolbarLanguage() {
+
+        const search =
+            document.getElementById(
+                "rc-search"
+            );
+
+
+        if (search) {
+
+            search.placeholder =
+                dictionary[
+                    currentLang
+                ].search;
+        }
+
+
+        const refresh =
+            document.getElementById(
+                "rc-refresh"
+            );
+
+
+        if (refresh) {
+
+            refresh.title =
+                dictionary[
+                    currentLang
+                ].refresh;
+        }
+
+
+        const filters =
+            document.querySelectorAll(
+                ".rc-filter"
+            );
+
+
+        if (
+            filters.length >= 3
         ) {
 
-            loadMessages();
+            filters[0].innerHTML =
+                dictionary[
+                    currentLang
+                ].all;
+
+
+            filters[1].innerHTML =
+                "🟢 " +
+                dictionary[
+                    currentLang
+                ].active;
+
+
+            filters[2].innerHTML =
+                "🔴 " +
+                dictionary[
+                    currentLang
+                ].finished;
         }
     }
 
 
-    /* ==========================================
-       ТУРНИРЫ
-    ========================================== */
+    /* =========================================================
+       СТАТИСТИКА
+    ========================================================= */
 
-    async function loadTournaments() {
+    function renderStats(tournaments) {
 
-        try {
+        let stats =
+            document.getElementById(
+                "rc-stats"
+            );
 
-            let response =
-                await fetch(
-                    dbBase +
-                    "tournaments.json"
+
+        if (!stats) {
+
+            stats =
+                document.createElement(
+                    "div"
                 );
 
 
-            if (!response.ok) {
-                throw new Error(
-                    "Ошибка загрузки турниров"
-                );
-            }
+            stats.id =
+                "rc-stats";
 
 
-            let data =
-                await response.json();
+            stats.className =
+                "rc-stats";
 
 
-            let currentDataString =
-                JSON.stringify(data);
-
-
-            if (
-                currentDataString ===
-                lastTournamentsData
-            ) {
-
-                return;
-            }
-
-
-            lastTournamentsData =
-                currentDataString;
-
-
-            let list =
+            const list =
                 document.getElementById(
                     "tournament-list"
                 );
 
 
-            list.innerHTML = "";
+            list.parentNode.insertBefore(
+                stats,
+                list
+            );
+        }
 
 
-            if (!data) {
+        const total =
+            tournaments.length;
+
+
+        const finished =
+            tournaments.filter(
+                t =>
+                    isTournamentFinished(t)
+            ).length;
+
+
+        const active =
+            total - finished;
+
+
+        const d =
+            dictionary[currentLang];
+
+
+        stats.innerHTML = `
+
+            <div class="rc-stat">
+
+                <span
+                    class="rc-stat-value"
+                >
+                    ${total}
+                </span>
+
+                <span
+                    class="rc-stat-label"
+                >
+                    ${d.total}
+                </span>
+
+            </div>
+
+
+            <div
+                class="rc-stat active-stat"
+            >
+
+                <span
+                    class="rc-stat-value"
+                >
+                    ${active}
+                </span>
+
+                <span
+                    class="rc-stat-label"
+                >
+                    ${d.activeCount}
+                </span>
+
+            </div>
+
+
+            <div
+                class="rc-stat finished-stat"
+            >
+
+                <span
+                    class="rc-stat-value"
+                >
+                    ${finished}
+                </span>
+
+                <span
+                    class="rc-stat-label"
+                >
+                    ${d.finishedCount}
+                </span>
+
+            </div>
+
+        `;
+    }
+
+
+    /* =========================================================
+       ЗАГРУЗКА ТУРНИРОВ
+    ========================================================= */
+
+    async function loadTournaments() {
+
+        if (refreshInProgress) {
+            return;
+        }
+
+
+        refreshInProgress = true;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    dbTournaments +
+                    ".json?cache=" +
+                    Date.now()
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Tournament HTTP error"
+                );
+            }
+
+
+            const data =
+                await response.json();
+
+
+            tournamentCache =
+                data || {};
+
+
+            const dataString =
+                JSON.stringify(
+                    tournamentCache
+                );
+
+
+            lastTournamentsData =
+                dataString;
+
+
+            renderTournaments(
+                tournamentCache
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Tournament loading error:",
+                error
+            );
+
+
+            const list =
+                document.getElementById(
+                    "tournament-list"
+                );
+
+
+            if (list) {
 
                 list.innerHTML = `
+
                     <div
-                        class="empty-state-btn"
-                        onclick="${
-                            currentUser
-                                ? "openProposeModal()"
-                                : "window.location.href='auth.html'"
-                        }"
+                        class="rc-no-results"
+                        style="
+                            color:#ff647f;
+                            border-color:
+                                rgba(255,60,100,.3);
+                        "
                     >
 
-                        <div class="big-plus">
-                            +
+                        <div
+                            class="rc-no-results-icon"
+                        >
+                            ⚠️
                         </div>
 
-                        <div
-                            style="font-size:18px; font-weight:bold; color:white;"
-                        >
-                            ${dictionary[currentLang].empty}
-                        </div>
+                        <strong>
+                            ${dictionary[currentLang].serverError}
+                        </strong>
+
+                        <br>
+
+                        <small>
+                            ${dictionary[currentLang].tryAgain}
+                        </small>
 
                     </div>
+
+                `;
+            }
+
+        } finally {
+
+            refreshInProgress =
+                false;
+        }
+    }
+
+
+    /* =========================================================
+       РЕНДЕР ТУРНИРОВ
+    ========================================================= */
+
+    function renderTournaments(data) {
+
+        const list =
+            document.getElementById(
+                "tournament-list"
+            );
+
+
+        if (!list) {
+            return;
+        }
+
+
+        createTournamentToolbar();
+
+
+        /*
+         * Firebase object -> array
+         */
+
+        let tournaments =
+            Object.entries(
+                data || {}
+            )
+            .map(
+                ([key, tournament]) => ({
+                    key,
+                    ...tournament
+                })
+            );
+
+
+        /*
+         * Статистика
+         */
+
+        renderStats(
+            tournaments
+        );
+
+
+        /*
+         * Поиск
+         */
+
+        if (searchQuery) {
+
+            tournaments =
+                tournaments.filter(
+                    t => {
+
+                        const text =
+                            [
+                                t.name,
+                                t.game,
+                                t.format,
+                                t.system,
+                                t.author,
+                                t.prize
+                            ]
+                            .join(" ")
+                            .toLowerCase();
+
+
+                        return text.includes(
+                            searchQuery
+                        );
+                    }
+                );
+        }
+
+
+        /*
+         * Фильтр
+         */
+
+        if (
+            currentTournamentFilter ===
+            "active"
+        ) {
+
+            tournaments =
+                tournaments.filter(
+                    t =>
+                        !isTournamentFinished(t)
+                );
+        }
+
+
+        if (
+            currentTournamentFilter ===
+            "finished"
+        ) {
+
+            tournaments =
+                tournaments.filter(
+                    t =>
+                        isTournamentFinished(t)
+                );
+        }
+
+
+        /*
+         * Сначала активные,
+         * потом завершённые.
+         */
+
+        tournaments.sort(
+            (a, b) => {
+
+                const aFinished =
+                    isTournamentFinished(a);
+
+                const bFinished =
+                    isTournamentFinished(b);
+
+
+                if (
+                    aFinished !==
+                    bFinished
+                ) {
+
+                    return aFinished
+                        ? 1
+                        : -1;
+                }
+
+
+                return 0;
+            }
+        );
+
+
+        /*
+         * Сигнатура.
+         *
+         * Каждые 30 секунд обновляем
+         * отображение дат/статусов.
+         */
+
+        const signature =
+            JSON.stringify(
+                data
+            ) +
+            "|" +
+            currentLang +
+            "|" +
+            currentTournamentFilter +
+            "|" +
+            searchQuery +
+            "|" +
+            Math.floor(
+                Date.now() / 30000
+            );
+
+
+        if (
+            signature ===
+            lastRenderSignature
+        ) {
+            return;
+        }
+
+
+        lastRenderSignature =
+            signature;
+
+
+        list.innerHTML = "";
+
+
+        /*
+         * Если ничего нет
+         */
+
+        if (
+            tournaments.length === 0
+        ) {
+
+            const hasData =
+                Object.keys(
+                    data || {}
+                ).length > 0;
+
+
+            if (
+                hasData &&
+                (
+                    searchQuery ||
+                    currentTournamentFilter !==
+                    "all"
+                )
+            ) {
+
+                list.innerHTML = `
+
+                    <div
+                        class="rc-no-results"
+                    >
+
+                        <div
+                            class="rc-no-results-icon"
+                        >
+                            🔎
+                        </div>
+
+                        <strong>
+                            ${dictionary[currentLang].noResults}
+                        </strong>
+
+                    </div>
+
                 `;
 
                 return;
             }
 
 
-            let d =
-                dictionary[currentLang];
+            list.innerHTML = `
+
+                <div
+                    class="empty-state-btn"
+                    onclick="${
+                        currentUser
+                            ? "openProposeModal()"
+                            : "window.location.href='auth.html'"
+                    }"
+                >
+
+                    <div class="big-plus">
+                        +
+                    </div>
+
+                    <div
+                        style="
+                            font-size:18px;
+                            font-weight:bold;
+                            color:white;
+                        "
+                    >
+                        ${dictionary[currentLang].empty}
+                    </div>
+
+                </div>
+
+            `;
+
+            return;
+        }
 
 
-            let keys =
-                Object.keys(data).reverse();
+        /*
+         * Все турниры завершены
+         */
+
+        const allFinished =
+            tournaments.length > 0 &&
+            tournaments.every(
+                t =>
+                    isTournamentFinished(t)
+            );
 
 
-            keys.forEach(key => {
+        if (
+            allFinished &&
+            currentTournamentFilter ===
+            "all" &&
+            !searchQuery
+        ) {
 
-                let t =
-                    data[key];
+            list.innerHTML += `
+
+                <div
+                    style="
+                        background:
+                            rgba(255,60,100,.05);
+                        border:
+                            1px solid
+                            rgba(255,60,100,.18);
+                        color:#8c8c9b;
+                        padding:13px 15px;
+                        border-radius:10px;
+                        margin-bottom:5px;
+                        font-size:12px;
+                    "
+                >
+
+                    🔴
+                    ${dictionary[currentLang].allFinished}
+
+                </div>
+
+            `;
+        }
 
 
-                let targetLink =
+        const d =
+            dictionary[currentLang];
+
+
+        /*
+         * Рисуем карточки
+         */
+
+        tournaments.forEach(
+            t => {
+
+                const key =
+                    t.key;
+
+
+                const status =
+                    getTournamentStatus(t);
+
+
+                const finished =
+                    status ===
+                    "finished";
+
+
+                const running =
+                    status ===
+                    "running";
+
+
+                const targetLink =
                     currentUser
-                        ? "tournament.html?id=" + key
+                        ? "tournament.html?id=" +
+                          encodeURIComponent(key)
                         : "auth.html";
 
 
-                let authorDisplay =
+                /*
+                 * Автор
+                 */
+
+                const authorDisplay =
                     t.author === "0m3gas"
 
                         ? `
-                            <span class="author-tag admin">
+
+                            <span
+                                class="author-tag admin"
+                            >
                                 👑 Retro Cup
                             </span>
-                          `
+
+                        `
 
                         : `
-                            <span class="author-tag">
-                                ${d.org}${t.author || "..."}
+
+                            <span
+                                class="author-tag"
+                            >
+                                ${d.org}
+                                ${escapeHtml(
+                                    t.author ||
+                                    "..."
+                                )}
                             </span>
-                          `;
+
+                        `;
 
 
-                let actionButtons = `
-                    <span
-                        class="enter-btn"
-                        style="pointer-events:none;"
-                    >
-                        ${d.join}
-                    </span>
-                `;
+                /*
+                 * Статус
+                 */
+
+                let statusHTML;
 
 
-                if (
-                    currentUser === "0m3gas"
-                ) {
+                if (finished) {
 
-                    actionButtons += `
-                        <button
-                            class="del-tourney-btn"
-                            onclick="event.stopPropagation(); deleteTourney('${key}')"
-                            title="Удалить"
+                    statusHTML = `
+
+                        <div
+                            class="
+                                tourney-status
+                                finished
+                            "
                         >
-                            ✖
-                        </button>
+                            🔴
+                            ${d.finishedShort}
+                        </div>
+
+                    `;
+
+                } else if (running) {
+
+                    statusHTML = `
+
+                        <div
+                            class="
+                                tourney-status
+                                running
+                            "
+                        >
+                            🟣
+                            ${d.running}
+                        </div>
+
+                    `;
+
+                } else {
+
+                    statusHTML = `
+
+                        <div
+                            class="
+                                tourney-status
+                                active
+                            "
+                        >
+                            🟢
+                            ${d.registration}
+                        </div>
+
                     `;
                 }
 
 
-                list.innerHTML += `
+                /*
+                 * Действие
+                 */
+
+                let actionButtons;
+
+
+                if (finished) {
+
+                    actionButtons = `
+
+                        <span
+                            class="
+                                enter-btn
+                                finished-btn
+                            "
+                        >
+                            🔒
+                            ${d.ended}
+                        </span>
+
+                    `;
+
+                } else {
+
+                    actionButtons = `
+
+                        <span
+                            class="enter-btn"
+                            style="
+                                pointer-events:none;
+                            "
+                        >
+                            ${d.join}
+                        </span>
+
+                    `;
+                }
+
+
+                /*
+                 * Админское удаление
+                 */
+
+                if (
+                    currentUser ===
+                    "0m3gas"
+                ) {
+
+                    actionButtons += `
+
+                        <button
+                            class="
+                                del-tourney-btn
+                            "
+                            onclick="
+                                event.stopPropagation();
+                                deleteTourney(
+                                    '${escapeHtml(key)}'
+                                )
+                            "
+                            title="${d.delete}"
+                        >
+                            ✖
+                        </button>
+
+                    `;
+                }
+
+
+                /*
+                 * Дата окончания
+                 */
+
+                let dateHTML = "";
+
+
+                const endValue =
+                    t.endDate ||
+                    t.endTime ||
+                    t.finishedAt ||
+                    t.endedAt;
+
+
+                if (endValue) {
+
+                    const dateText =
+                        formatDate(
+                            endValue
+                        );
+
+
+                    if (dateText) {
+
+                        dateHTML = `
+
+                            <div
+                                class="tourney-date"
+                            >
+                                📅
+                                ${d.ends}
+                                ${escapeHtml(
+                                    dateText
+                                )}
+                            </div>
+
+                        `;
+                    }
+                }
+
+
+                /*
+                 * Создание карточки
+                 */
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                card.className =
+                    "tourney-card" +
+                    (
+                        finished
+                            ? " finished"
+                            : ""
+                    );
+
+
+                card.style.cursor =
+                    "pointer";
+
+
+                card.innerHTML = `
 
                     <div
-                        class="tourney-card"
-                        style="cursor:pointer; transition:0.2s;"
-                        onmouseover="
-                            this.style.transform='translateY(-3px)';
-                            this.style.borderColor='#00ffcc';
-                        "
-                        onmouseout="
-                            this.style.transform='none';
-                            this.style.borderColor='#1f1f26';
-                            this.style.borderLeftColor='#a67cff';
-                        "
-                        onclick="
-                            window.location.href='${targetLink}'
-                        "
+                        class="tourney-info"
                     >
 
-                        <div class="tourney-info">
+                        <h2>
+                            ${escapeHtml(
+                                t.name ||
+                                "Без названия"
+                            )}
+                        </h2>
 
-                            <h2>
-                                ${escapeHtml(t.name || "Без названия")}
-                            </h2>
 
-                            <p
-                                style="color:#a67cff; font-weight:bold;"
-                            >
-                                ${escapeHtml(t.game || "")}
-                                |
-                                ${escapeHtml(t.format || "")}
-                                ${d.max}
-                                ${t.maxPlayers || 8}
-                            </p>
+                        <p
+                            style="
+                                color:${
+                                    finished
+                                        ? "#777"
+                                        : "#a67cff"
+                                };
+                                font-weight:bold;
+                            "
+                        >
 
-                            <p
-                                style="font-size:12px; color:#8c8c9b;"
-                            >
-                                ${d.sys}
-                                ${escapeHtml(t.system || "")}
-                            </p>
+                            ${escapeHtml(
+                                t.game || ""
+                            )}
 
-                            <p
-                                style="font-size:12px;"
-                            >
-                                ${d.prize}
-                                ${
-                                    t.prize
-                                        ? escapeHtml(t.prize)
-                                        : d.no
-                                }
-                            </p>
+                            |
 
+                            ${escapeHtml(
+                                t.format || ""
+                            )}
+
+                            ${d.max}
+
+                            ${escapeHtml(
+                                String(
+                                    t.maxPlayers ||
+                                    8
+                                )
+                            )}
+
+                        </p>
+
+
+                        <p
+                            style="
+                                font-size:12px;
+                                color:#8c8c9b;
+                            "
+                        >
+
+                            ${d.sys}
+
+                            ${escapeHtml(
+                                t.system || ""
+                            )}
+
+                        </p>
+
+
+                        <p
+                            style="
+                                font-size:12px;
+                            "
+                        >
+
+                            ${d.prize}
+
+                            ${
+                                t.prize
+                                    ? escapeHtml(
+                                        t.prize
+                                    )
+                                    : d.no
+                            }
+
+                        </p>
+
+
+                        ${statusHTML}
+
+
+                        ${dateHTML}
+
+
+                        <div
+                            style="
+                                margin-top:8px;
+                            "
+                        >
                             ${authorDisplay}
-
-                        </div>
-
-
-                        <div class="action-area">
-
-                            ${actionButtons}
-
                         </div>
 
                     </div>
+
+
+                    <div
+                        class="action-area"
+                    >
+
+                        ${actionButtons}
+
+                    </div>
+
                 `;
-            });
 
-        } catch (error) {
 
-            console.error(
-                "Ошибка загрузки турниров:",
-                error
-            );
+                /*
+                 * Переход на турнир.
+                 */
 
-            document.getElementById(
-                "tournament-list"
-            ).innerHTML = `
-                <p style="color:#ff3c64;">
-                    Не удалось загрузить турниры.
-                    Попробуйте обновить страницу.
-                </p>
-            `;
-        }
+                card.addEventListener(
+                    "click",
+                    function() {
+
+                        window.location.href =
+                            targetLink;
+                    }
+                );
+
+
+                list.appendChild(
+                    card
+                );
+            }
+        );
     }
 
 
-    /* ==========================================
-       ЗАЩИТА HTML
-    ========================================== */
-
-    function escapeHtml(value) {
-
-        return String(value)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-
-    /* ==========================================
+    /* =========================================================
        УДАЛЕНИЕ ТУРНИРА
-    ========================================== */
+    ========================================================= */
 
     async function deleteTourney(key) {
 
         if (
             !confirm(
-                "Отменить этот турнир?"
+                dictionary[currentLang]
+                    .confirmDelete
             )
         ) {
-
             return;
         }
 
 
         try {
 
-            await fetch(
-                dbBase +
-                "tournaments/" +
-                key +
-                ".json",
-                {
-                    method: "DELETE"
-                }
+            const response =
+                await fetch(
+                    dbTournaments +
+                    encodeURIComponent(key) +
+                    ".json",
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Delete failed"
+                );
+            }
+
+
+            lastTournamentsData =
+                "";
+
+
+            lastRenderSignature =
+                "";
+
+
+            await loadTournaments();
+
+
+            showToast(
+                currentLang === "RU"
+                    ? "Турнир удалён"
+                    : "Tournament deleted",
+                "success"
             );
 
 
-            lastTournamentsData = "";
-
-            loadTournaments();
-
         } catch (error) {
 
-            alert(
-                "Ошибка удаления турнира."
+            console.error(error);
+
+
+            showToast(
+                dictionary[currentLang]
+                    .deleteError,
+                "error"
             );
         }
     }
 
 
-    /* ==========================================
+    /* =========================================================
        СОЗДАНИЕ ТУРНИРА
-    ========================================== */
+    ========================================================= */
 
     function openProposeModal() {
 
-        document.getElementById(
-            "proposeModal"
-        ).style.display = "flex";
+        const modal =
+            document.getElementById(
+                "proposeModal"
+            );
+
+
+        if (modal) {
+
+            modal.style.display =
+                "flex";
+        }
     }
 
 
     function closeProposeModal() {
 
-        document.getElementById(
-            "proposeModal"
-        ).style.display = "none";
+        const modal =
+            document.getElementById(
+                "proposeModal"
+            );
+
+
+        if (modal) {
+
+            modal.style.display =
+                "none";
+        }
     }
 
 
     async function sendTourneyProposal() {
 
-        let name =
+        if (!currentUser) {
+
+            window.location.href =
+                "auth.html";
+
+            return;
+        }
+
+
+        const name =
             document.getElementById(
                 "prop-name"
             ).value.trim();
 
 
-        let game =
+        const game =
             document.getElementById(
                 "prop-game"
             ).value;
 
 
-        let format =
+        const format =
             document.getElementById(
                 "prop-format"
             ).value;
 
 
-        let system =
+        const system =
             document.getElementById(
                 "prop-system"
             ).value;
 
 
-        let max =
+        const max =
             document.getElementById(
                 "prop-max"
             ).value;
 
 
-        let prize =
+        const prize =
             document.getElementById(
                 "prop-prize"
             ).value.trim();
 
 
-        let rules =
+        const rules =
             document.getElementById(
                 "prop-rules"
-            ).value;
+            ).value.trim();
 
 
         if (!name) {
 
-            return alert(
-                currentLang === "RU"
-                    ? "Напиши название!"
-                    : "Enter title!"
+            showToast(
+                dictionary[currentLang]
+                    .titleRequired,
+                "error"
             );
+
+            return;
         }
 
 
-        if (rules.trim().length < 30) {
+        if (
+            rules.length < 30
+        ) {
 
-            return alert(
-                currentLang === "RU"
-                    ? "Минимум 30 символов в правилах!"
-                    : "Minimum 30 characters in rules!"
+            showToast(
+                dictionary[currentLang]
+                    .rulesRequired,
+                "error"
             );
+
+            return;
         }
 
 
-        let proposal = {
+        const proposal = {
 
-            author: currentUser,
+            author:
+                currentUser,
 
-            name: name,
+            name:
+                name,
 
-            game: game,
+            game:
+                game,
 
-            format: format,
+            format:
+                format,
 
-            system: system,
+            system:
+                system,
 
-            maxPlayers: max,
+            maxPlayers:
+                max,
 
-            prize: prize,
+            prize:
+                prize,
 
-            rules: rules,
+            rules:
+                rules,
+
+            status:
+                "registration",
+
+            createdAt:
+                new Date().toISOString(),
 
             date:
                 new Date().toLocaleString()
+
         };
 
 
         try {
 
             if (
-                currentUser === "0m3gas"
+                currentUser ===
+                "0m3gas"
             ) {
 
-                await fetch(
-                    dbBase +
-                    "tournaments.json",
-                    {
-                        method: "POST",
+                const response =
+                    await fetch(
+                        dbTournaments +
+                        ".json",
+                        {
+                            method: "POST",
 
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
 
-                        body:
-                            JSON.stringify(
-                                proposal
-                            )
-                    }
-                );
+                            body:
+                                JSON.stringify(
+                                    proposal
+                                )
+                        }
+                    );
 
 
-                alert(
-                    currentLang === "RU"
-                        ? "Опубликовано!"
-                        : "Published!"
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Publish error"
+                    );
+                }
+
+
+                showToast(
+                    dictionary[currentLang]
+                        .publishedSuccess,
+                    "success"
                 );
 
             } else {
 
-                await fetch(
-                    dbBase +
-                    "proposals.json",
-                    {
-                        method: "POST",
+                const response =
+                    await fetch(
+                        dbProposals +
+                        ".json",
+                        {
+                            method: "POST",
 
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
 
-                        body:
-                            JSON.stringify(
-                                proposal
-                            )
-                    }
-                );
+                            body:
+                                JSON.stringify(
+                                    proposal
+                                )
+                        }
+                    );
 
 
-                alert(
-                    currentLang === "RU"
-                        ? "Заявка улетела админу!"
-                        : "Sent to admin!"
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Proposal error"
+                    );
+                }
+
+
+                showToast(
+                    dictionary[currentLang]
+                        .proposalSent,
+                    "success"
                 );
             }
 
@@ -2051,148 +4146,209 @@
             ).value = "";
 
 
-            lastTournamentsData = "";
+            lastTournamentsData =
+                "";
 
-            loadTournaments();
+
+            lastRenderSignature =
+                "";
+
+
+            await loadTournaments();
+
 
         } catch (error) {
 
-            console.error(error);
+            console.error(
+                error
+            );
 
-            alert(
-                "Ошибка соединения с Firebase."
+
+            showToast(
+                dictionary[currentLang]
+                    .connectionError,
+                "error"
             );
         }
     }
 
 
-    /* ==========================================
-       АДМИНКА
-    ========================================== */
+    /* =========================================================
+       АДМИН — ЗАЯВКИ
+    ========================================================= */
 
     async function loadAdminProposals() {
 
         if (
-            currentUser !== "0m3gas"
+            currentUser !==
+            "0m3gas"
         ) {
-
             return;
         }
 
 
         try {
 
-            let pRes =
+            const response =
                 await fetch(
-                    dbBase +
-                    "proposals.json"
+                    dbProposals +
+                    ".json?cache=" +
+                    Date.now()
                 );
 
 
-            let pData =
-                await pRes.json();
+            const pData =
+                await response.json();
 
 
             currentProposalsDict =
                 pData || {};
 
 
-            let pList =
+            const pList =
                 document.getElementById(
                     "admin-proposals"
                 );
 
 
-            pList.innerHTML = "";
+            if (!pList) {
+                return;
+            }
 
 
-            if (pData) {
+            pList.innerHTML =
+                "";
+
+
+            if (
+                pData &&
+                Object.keys(pData).length
+            ) {
 
                 Object.keys(pData)
-                    .forEach(key => {
+                    .reverse()
+                    .forEach(
+                        key => {
 
-                        let p =
-                            pData[key];
+                            const p =
+                                pData[key];
 
 
-                        pList.innerHTML += `
-
-                            <div
-                                style="
-                                    background:#1e1e26;
-                                    padding:10px;
-                                    border-radius:6px;
-                                    margin-bottom:5px;
-                                "
-                            >
-
-                                <span style="color:#00ffcc;">
-                                    📩 От:
-                                    ${escapeHtml(p.author)}
-                                </span>
-
-                                <br>
-
-                                <strong>
-                                    ${escapeHtml(p.name)}
-                                </strong>
-
-                                <span style="color:#a67cff;">
-                                    (${escapeHtml(p.game)})
-                                </span>
-
-                                <br>
-
-                                <button
-                                    class="btn-action"
-                                    onclick="showProposalInfo('${key}')"
-                                >
-                                    📖 Читать правила
-                                </button>
+                            pList.innerHTML += `
 
                                 <div
                                     style="
-                                        display:flex;
-                                        gap:5px;
-                                        margin-top:5px;
+                                        background:#1e1e26;
+                                        padding:10px;
+                                        border-radius:6px;
+                                        margin-bottom:5px;
                                     "
                                 >
 
-                                    <button
-                                        onclick="approveTourney('${key}')"
+                                    <span
                                         style="
-                                            flex:1;
-                                            background:#00ffcc;
-                                            border:none;
-                                            padding:5px;
-                                            border-radius:3px;
-                                            font-weight:bold;
-                                            cursor:pointer;
+                                            color:#00ffcc;
                                         "
                                     >
-                                        ОДОБРИТЬ
-                                    </button>
+                                        📩 От:
+                                        ${escapeHtml(
+                                            p.author
+                                        )}
+                                    </span>
+
+                                    <br>
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            p.name
+                                        )}
+                                    </strong>
+
+                                    <span
+                                        style="
+                                            color:#a67cff;
+                                        "
+                                    >
+                                        (
+                                        ${escapeHtml(
+                                            p.game
+                                        )}
+                                        )
+                                    </span>
+
+                                    <br>
 
                                     <button
-                                        onclick="rejectTourney('${key}')"
-                                        style="
-                                            flex:1;
-                                            background:transparent;
-                                            color:#ff3c64;
-                                            border:1px solid #ff3c64;
-                                            padding:5px;
-                                            border-radius:3px;
-                                            cursor:pointer;
+                                        class="btn-action"
+                                        onclick="
+                                            showProposalInfo(
+                                                '${escapeHtml(
+                                                    key
+                                                )}'
+                                            )
                                         "
                                     >
-                                        УДАЛИТЬ
+                                        📖 Читать правила
                                     </button>
+
+                                    <div
+                                        style="
+                                            display:flex;
+                                            gap:5px;
+                                            margin-top:5px;
+                                        "
+                                    >
+
+                                        <button
+                                            onclick="
+                                                approveTourney(
+                                                    '${escapeHtml(
+                                                        key
+                                                    )}'
+                                                )
+                                            "
+                                            style="
+                                                flex:1;
+                                                background:#00ffcc;
+                                                border:none;
+                                                padding:5px;
+                                                border-radius:3px;
+                                                font-weight:bold;
+                                                cursor:pointer;
+                                            "
+                                        >
+                                            ОДОБРИТЬ
+                                        </button>
+
+
+                                        <button
+                                            onclick="
+                                                rejectTourney(
+                                                    '${escapeHtml(
+                                                        key
+                                                    )}'
+                                                )
+                                            "
+                                            style="
+                                                flex:1;
+                                                background:transparent;
+                                                color:#ff3c64;
+                                                border:1px solid #ff3c64;
+                                                padding:5px;
+                                                border-radius:3px;
+                                                cursor:pointer;
+                                            "
+                                        >
+                                            УДАЛИТЬ
+                                        </button>
+
+                                    </div>
 
                                 </div>
 
-                            </div>
-                        `;
-                    });
+                            `;
+                        }
+                    );
 
             } else {
 
@@ -2203,7 +4359,7 @@
         } catch (error) {
 
             console.error(
-                "Ошибка загрузки заявок:",
+                "Proposal loading error:",
                 error
             );
         }
@@ -2212,7 +4368,7 @@
 
     function showProposalInfo(key) {
 
-        let p =
+        const p =
             currentProposalsDict[key];
 
 
@@ -2224,37 +4380,40 @@
         document.getElementById(
             "info-name"
         ).innerText =
-            p.name;
+            p.name || "Без названия";
 
 
         document.getElementById(
             "info-game"
         ).innerText =
-            p.game +
+            (
+                p.game || ""
+            ) +
             " | " +
-            p.format;
+            (
+                p.format || ""
+            );
 
 
         document.getElementById(
             "info-max"
         ).innerText =
-            p.maxPlayers || "8";
+            p.maxPlayers ||
+            "8";
 
 
         document.getElementById(
             "info-prize"
         ).innerText =
-            p.prize
-                ? p.prize
-                : "Нет";
+            p.prize ||
+            "Нет";
 
 
         document.getElementById(
             "info-rules"
         ).innerText =
-            p.rules
-                ? p.rules
-                : "Не указаны";
+            p.rules ||
+            "Не указаны";
 
 
         document.getElementById(
@@ -2266,7 +4425,7 @@
 
     async function approveTourney(key) {
 
-        let prop =
+        const prop =
             currentProposalsDict[key];
 
 
@@ -2277,27 +4436,52 @@
 
         try {
 
-            await fetch(
-                dbBase +
-                "tournaments.json",
+            const tournament =
                 {
-                    method: "POST",
+                    ...prop,
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                    status:
+                        prop.status ||
+                        "registration",
 
-                    body:
-                        JSON.stringify(prop)
-                }
-            );
+                    createdAt:
+                        prop.createdAt ||
+                        new Date()
+                            .toISOString()
+                };
+
+
+            const publishResponse =
+                await fetch(
+                    dbTournaments +
+                    ".json",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                tournament
+                            )
+                    }
+                );
+
+
+            if (!publishResponse.ok) {
+
+                throw new Error(
+                    "Publish failed"
+                );
+            }
 
 
             await fetch(
-                dbBase +
-                "proposals/" +
-                key +
+                dbProposals +
+                encodeURIComponent(key) +
                 ".json",
                 {
                     method: "DELETE"
@@ -2305,16 +4489,35 @@
             );
 
 
-            lastTournamentsData = "";
+            lastTournamentsData =
+                "";
 
-            loadAdminProposals();
 
-            loadTournaments();
+            lastRenderSignature =
+                "";
+
+
+            await loadAdminProposals();
+
+            await loadTournaments();
+
+
+            showToast(
+                dictionary[currentLang]
+                    .publishedSuccess,
+                "success"
+            );
+
 
         } catch (error) {
 
-            alert(
-                "Ошибка одобрения турнира."
+            console.error(error);
+
+
+            showToast(
+                dictionary[currentLang]
+                    .approveError,
+                "error"
             );
         }
     }
@@ -2325,9 +4528,8 @@
         try {
 
             await fetch(
-                dbBase +
-                "proposals/" +
-                key +
+                dbProposals +
+                encodeURIComponent(key) +
                 ".json",
                 {
                     method: "DELETE"
@@ -2335,36 +4537,84 @@
             );
 
 
-            loadAdminProposals();
+            await loadAdminProposals();
+
 
         } catch (error) {
 
-            alert(
-                "Ошибка удаления заявки."
+            console.error(error);
+
+
+            showToast(
+                dictionary[currentLang]
+                    .proposalDeleteError,
+                "error"
             );
         }
     }
 
 
-    /* ==========================================
+    /* =========================================================
        ЧАТ
-    ========================================== */
+    ========================================================= */
+
+    function toggleChatWindow(id) {
+
+        const win =
+            document.getElementById(id);
+
+
+        if (!win) {
+            return;
+        }
+
+
+        win.style.display =
+            win.style.display === "flex"
+                ? "none"
+                : "flex";
+
+
+        if (
+            id === "user-support" &&
+            win.style.display === "flex"
+        ) {
+
+            loadMessages();
+        }
+
+
+        if (
+            id === "admin-terminal" &&
+            win.style.display === "flex"
+        ) {
+
+            loadMessages();
+            loadAdminProposals();
+        }
+    }
+
 
     async function sendSupportMessage(role) {
 
-        let inputId =
+        const inputId =
             role === "user"
                 ? "user-msg-input"
                 : "admin-msg-input";
 
 
-        let input =
+        const input =
             document.getElementById(
                 inputId
             );
 
 
-        let text =
+        if (!input) {
+            return;
+        }
+
+
+        const text =
             input.value.trim();
 
 
@@ -2373,7 +4623,7 @@
         }
 
 
-        let targetUser =
+        const targetUser =
             role === "user"
                 ? currentUser
                 : activeChatUser;
@@ -2384,49 +4634,68 @@
         }
 
 
-        let msg = {
+        const msg = {
 
-            sender: role,
+            sender:
+                role,
 
-            text: text,
+            text:
+                text,
 
             time:
                 new Date()
                     .toLocaleTimeString()
+
         };
 
 
         try {
 
-            await fetch(
-                dbBase +
-                "support/" +
-                encodeURIComponent(
-                    targetUser
-                ) +
-                ".json",
-                {
-                    method: "POST",
+            const response =
+                await fetch(
+                    dbSupport +
+                    encodeURIComponent(
+                        targetUser
+                    ) +
+                    ".json",
+                    {
+                        method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
 
-                    body:
-                        JSON.stringify(msg)
-                }
-            );
+                        body:
+                            JSON.stringify(msg)
+                    }
+                );
 
 
-            input.value = "";
+            if (!response.ok) {
 
-            loadMessages();
+                throw new Error(
+                    "Message failed"
+                );
+            }
+
+
+            input.value =
+                "";
+
+
+            await loadMessages();
+
 
         } catch (error) {
 
-            alert(
-                "Ошибка отправки сообщения."
+            console.error(error);
+
+
+            showToast(
+                dictionary[currentLang]
+                    .messageError,
+                "error"
             );
         }
     }
@@ -2441,28 +4710,40 @@
 
         try {
 
-            let res =
+            const response =
                 await fetch(
-                    dbBase +
-                    "support.json"
+                    dbSupport +
+                    ".json?cache=" +
+                    Date.now()
                 );
 
 
-            let allChats =
-                await res.json();
+            const allChats =
+                await response.json();
 
+
+            /*
+             * Обычный пользователь
+             */
 
             if (
-                currentUser !== "0m3gas"
+                currentUser !==
+                "0m3gas"
             ) {
 
-                let hist =
+                const hist =
                     document.getElementById(
                         "user-chat-history"
                     );
 
 
-                hist.innerHTML = "";
+                if (!hist) {
+                    return;
+                }
+
+
+                hist.innerHTML =
+                    "";
 
 
                 if (
@@ -2472,112 +4753,13 @@
 
                     Object.values(
                         allChats[currentUser]
-                    ).forEach(msg => {
+                    )
+                    .forEach(
+                        msg => {
 
-                        let msgClass =
-                            msg.sender === "user"
-                                ? "msg-right"
-                                : "msg-left";
-
-
-                        hist.innerHTML += `
-
-                            <div
-                                class="chat-msg ${msgClass}"
-                            >
-
-                                ${escapeHtml(msg.text)}
-
-                                <br>
-
-                                <span
-                                    style="
-                                        font-size:10px;
-                                        color:#555;
-                                    "
-                                >
-                                    ${escapeHtml(msg.time || "")}
-                                </span>
-
-                            </div>
-                        `;
-                    });
-
-
-                    hist.scrollTop =
-                        hist.scrollHeight;
-
-                } else {
-
-                    hist.innerHTML =
-                        "<div style='text-align:center; color:#8c8c9b; margin-top:20px;'>Напишите свой вопрос...</div>";
-                }
-
-            } else {
-
-                let list =
-                    document.getElementById(
-                        "admin-chat-list"
-                    );
-
-
-                if (
-                    activeChatUser === ""
-                ) {
-
-                    list.innerHTML = "";
-
-
-                    if (allChats) {
-
-                        Object.keys(
-                            allChats
-                        ).forEach(user => {
-
-                            list.innerHTML += `
-
-                                <div
-                                    class="chat-user-item"
-                                    onclick="openAdminChatRoom('${escapeHtml(user)}')"
-                                >
-                                    Диалог:
-                                    <strong>
-                                        ${escapeHtml(user)}
-                                    </strong>
-                                </div>
-                            `;
-                        });
-
-                    } else {
-
-                        list.innerHTML =
-                            "<span style='color:#8c8c9b;'>Нет сообщений</span>";
-                    }
-
-                } else {
-
-                    let hist =
-                        document.getElementById(
-                            "admin-chat-history"
-                        );
-
-
-                    hist.innerHTML = "";
-
-
-                    if (
-                        allChats &&
-                        allChats[activeChatUser]
-                    ) {
-
-                        Object.values(
-                            allChats[
-                                activeChatUser
-                            ]
-                        ).forEach(msg => {
-
-                            let msgClass =
-                                msg.sender === "admin"
+                            const msgClass =
+                                msg.sender ===
+                                "user"
                                     ? "msg-right"
                                     : "msg-left";
 
@@ -2585,24 +4767,227 @@
                             hist.innerHTML += `
 
                                 <div
-                                    class="chat-msg ${msgClass}"
+                                    class="
+                                        chat-msg
+                                        ${msgClass}
+                                    "
                                 >
-                                    ${escapeHtml(msg.text)}
+
+                                    ${escapeHtml(
+                                        msg.text
+                                    )}
+
+                                    <br>
+
+                                    <span
+                                        style="
+                                            font-size:10px;
+                                            color:#555;
+                                        "
+                                    >
+                                        ${escapeHtml(
+                                            msg.time ||
+                                            ""
+                                        )}
+                                    </span>
+
                                 </div>
+
                             `;
-                        });
+                        }
+                    );
 
 
-                        hist.scrollTop =
-                            hist.scrollHeight;
-                    }
+                    hist.scrollTop =
+                        hist.scrollHeight;
+
+                } else {
+
+                    hist.innerHTML = `
+
+                        <div
+                            style="
+                                text-align:center;
+                                color:#8c8c9b;
+                                margin-top:20px;
+                            "
+                        >
+                            ${dictionary[currentLang]
+                                .writeQuestion}
+                        </div>
+
+                    `;
+                }
+
+
+                return;
+            }
+
+
+            /*
+             * Админ
+             */
+
+            const list =
+                document.getElementById(
+                    "admin-chat-list"
+                );
+
+
+            if (
+                !list
+            ) {
+                return;
+            }
+
+
+            if (
+                activeChatUser === ""
+            ) {
+
+                list.innerHTML =
+                    "";
+
+
+                if (
+                    allChats &&
+                    Object.keys(allChats)
+                        .length
+                ) {
+
+                    Object.keys(
+                        allChats
+                    )
+                    .forEach(
+                        user => {
+
+                            list.innerHTML += `
+
+                                <div
+                                    class="
+                                        chat-user-item
+                                    "
+                                    onclick="
+                                        openAdminChatRoom(
+                                            '${escapeHtml(
+                                                user
+                                            )}'
+                                        )
+                                    "
+                                >
+
+                                    Диалог:
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            user
+                                        )}
+                                    </strong>
+
+                                </div>
+
+                            `;
+                        }
+                    );
+
+                } else {
+
+                    list.innerHTML = `
+
+                        <span
+                            style="
+                                color:#8c8c9b;
+                            "
+                        >
+                            ${dictionary[currentLang]
+                                .noMessages}
+                        </span>
+
+                    `;
+                }
+
+
+            } else {
+
+                const hist =
+                    document.getElementById(
+                        "admin-chat-history"
+                    );
+
+
+                if (!hist) {
+                    return;
+                }
+
+
+                hist.innerHTML =
+                    "";
+
+
+                if (
+                    allChats &&
+                    allChats[activeChatUser]
+                ) {
+
+                    Object.values(
+                        allChats[
+                            activeChatUser
+                        ]
+                    )
+                    .forEach(
+                        msg => {
+
+                            const msgClass =
+                                msg.sender ===
+                                "admin"
+                                    ? "msg-right"
+                                    : "msg-left";
+
+
+                            hist.innerHTML += `
+
+                                <div
+                                    class="
+                                        chat-msg
+                                        ${msgClass}
+                                    "
+                                >
+
+                                    ${escapeHtml(
+                                        msg.text
+                                    )}
+
+                                    <br>
+
+                                    <span
+                                        style="
+                                            font-size:10px;
+                                            color:#555;
+                                        "
+                                    >
+                                        ${escapeHtml(
+                                            msg.time ||
+                                            ""
+                                        )}
+                                    </span>
+
+                                </div>
+
+                            `;
+                        }
+                    );
+
+
+                    hist.scrollTop =
+                        hist.scrollHeight;
                 }
             }
+
 
         } catch (error) {
 
             console.error(
-                "Ошибка загрузки чата:",
+                "Chat loading error:",
                 error
             );
         }
@@ -2615,22 +5000,43 @@
             user;
 
 
-        document.getElementById(
-            "admin-main-menu"
-        ).style.display =
-            "none";
+        const mainMenu =
+            document.getElementById(
+                "admin-main-menu"
+            );
 
 
-        document.getElementById(
-            "admin-chat-room"
-        ).style.display =
-            "flex";
+        const room =
+            document.getElementById(
+                "admin-chat-room"
+            );
 
 
-        document.getElementById(
-            "admin-chat-input-area"
-        ).style.display =
-            "flex";
+        const inputArea =
+            document.getElementById(
+                "admin-chat-input-area"
+            );
+
+
+        if (mainMenu) {
+
+            mainMenu.style.display =
+                "none";
+        }
+
+
+        if (room) {
+
+            room.style.display =
+                "flex";
+        }
+
+
+        if (inputArea) {
+
+            inputArea.style.display =
+                "flex";
+        }
 
 
         loadMessages();
@@ -2639,124 +5045,170 @@
 
     function backToAdminMenu() {
 
-        activeChatUser = "";
+        activeChatUser =
+            "";
 
 
-        document.getElementById(
-            "admin-main-menu"
-        ).style.display =
-            "flex";
+        const mainMenu =
+            document.getElementById(
+                "admin-main-menu"
+            );
 
 
-        document.getElementById(
-            "admin-chat-room"
-        ).style.display =
-            "none";
+        const room =
+            document.getElementById(
+                "admin-chat-room"
+            );
 
 
-        document.getElementById(
-            "admin-chat-input-area"
-        ).style.display =
-            "none";
+        const inputArea =
+            document.getElementById(
+                "admin-chat-input-area"
+            );
+
+
+        if (mainMenu) {
+
+            mainMenu.style.display =
+                "flex";
+        }
+
+
+        if (room) {
+
+            room.style.display =
+                "none";
+        }
+
+
+        if (inputArea) {
+
+            inputArea.style.display =
+                "none";
+        }
 
 
         loadMessages();
     }
 
 
-    /* ==========================================
+    /* =========================================================
        ENTER В ЧАТЕ
-    ========================================== */
+    ========================================================= */
 
-    document.getElementById(
-        "user-msg-input"
-    ).addEventListener(
-        "keydown",
-        function(event) {
+    function setupChatEnter() {
 
-            if (
-                event.key === "Enter"
-            ) {
-
-                sendSupportMessage(
-                    "user"
-                );
-            }
-        }
-    );
+        const userInput =
+            document.getElementById(
+                "user-msg-input"
+            );
 
 
-    document.getElementById(
-        "admin-msg-input"
-    ).addEventListener(
-        "keydown",
-        function(event) {
+        if (userInput) {
 
-            if (
-                event.key === "Enter"
-            ) {
+            userInput.addEventListener(
+                "keydown",
+                function(event) {
 
-                sendSupportMessage(
-                    "admin"
-                );
-            }
-        }
-    );
+                    if (
+                        event.key ===
+                        "Enter"
+                    ) {
 
+                        event.preventDefault();
 
-    /* ==========================================
-       ЗАКРЫТИЕ МОДАЛОК ПО ФОНУ
-    ========================================== */
-
-    document.querySelectorAll(
-        ".modal-overlay"
-    ).forEach(modal => {
-
-        modal.addEventListener(
-            "click",
-            function(event) {
-
-                if (
-                    event.target === modal
-                ) {
-
-                    modal.style.display =
-                        "none";
+                        sendSupportMessage(
+                            "user"
+                        );
+                    }
                 }
-            }
-        );
-    });
+            );
+        }
 
 
-    /* ==========================================
+        const adminInput =
+            document.getElementById(
+                "admin-msg-input"
+            );
+
+
+        if (adminInput) {
+
+            adminInput.addEventListener(
+                "keydown",
+                function(event) {
+
+                    if (
+                        event.key ===
+                        "Enter"
+                    ) {
+
+                        event.preventDefault();
+
+                        sendSupportMessage(
+                            "admin"
+                        );
+                    }
+                }
+            );
+        }
+    }
+
+
+    /* =========================================================
+       ЗАКРЫТИЕ МОДАЛОК
+    ========================================================= */
+
+    function setupModalClosing() {
+
+        document
+            .querySelectorAll(
+                ".modal-overlay"
+            )
+            .forEach(
+                modal => {
+
+                    modal.addEventListener(
+                        "click",
+                        function(event) {
+
+                            if (
+                                event.target ===
+                                modal
+                            ) {
+
+                                modal.style.display =
+                                    "none";
+                            }
+                        }
+                    );
+                }
+            );
+    }
+
+
+    /* =========================================================
        ИНИЦИАЛИЗАЦИЯ
-    ========================================== */
+    ========================================================= */
 
-    checkUserSession();
+    async function initRetroCup() {
 
-    loadTournaments();
-
-
-    if (currentUser) {
-        loadMessages();
-    }
+        injectExtraStyles();
 
 
-    if (
-        currentUser === "0m3gas"
-    ) {
-
-        loadAdminProposals();
-    }
+        createTournamentToolbar();
 
 
-    /* ==========================================
-       АВТОМАТИЧЕСКОЕ ОБНОВЛЕНИЕ
-    ========================================== */
+        setupChatEnter();
 
-    setInterval(() => {
 
-        loadTournaments();
+        setupModalClosing();
+
+
+        await checkUserSession();
+
+
+        await loadTournaments();
 
 
         if (currentUser) {
@@ -2766,29 +5218,99 @@
 
 
         if (
-            currentUser === "0m3gas" &&
-            activeChatUser === ""
+            currentUser ===
+            "0m3gas"
         ) {
 
             loadAdminProposals();
         }
+    }
 
 
-        /*
-         * Проверяем аватар периодически.
-         * Если пользователь сменил аватар
-         * на странице profile.html,
-         * главная страница тоже его подхватит.
-         */
+    /* =========================================================
+       АВТООБНОВЛЕНИЕ
+    ========================================================= */
 
-        if (currentUser) {
+    setInterval(
+        async function() {
 
-            loadHeaderAvatar();
-        }
+            /*
+             * Турниры
+             */
 
-    }, 3000);
+            await loadTournaments();
+
+
+            /*
+             * Чат
+             */
+
+            if (currentUser) {
+
+                loadMessages();
+            }
+
+
+            /*
+             * Админские заявки
+             */
+
+            if (
+                currentUser ===
+                    "0m3gas" &&
+                activeChatUser === ""
+            ) {
+
+                loadAdminProposals();
+            }
+
+
+            /*
+             * Аватар
+             */
+
+            if (currentUser) {
+
+                loadHeaderAvatar();
+            }
+
+        },
+        5000
+    );
+
+
+    /*
+     * Даже если Firebase не изменился,
+     * проверяем время окончания турниров
+     * каждые 30 секунд.
+     */
+
+    setInterval(
+        function() {
+
+            if (
+                tournamentCache
+            ) {
+
+                lastRenderSignature =
+                    "";
+
+                renderTournaments(
+                    tournamentCache
+                );
+            }
+
+        },
+        30000
+    );
+
+
+    /* =========================================================
+       START
+    ========================================================= */
+
+    initRetroCup();
 
 </script>
-
 </body>
 </html>
