@@ -263,11 +263,11 @@
             list.innerHTML = ""; 
             
             if (!data) {
-                list.innerHTML = `<div class="empty-state-btn" onclick="${currentUser ? 'openProposeModal()' : 'window.location.href=\'auth.html\''}"><div class="big-plus">+</div><div style="font-size: 18px; font-weight: bold; color: white;">${dictionary[currentLang].empty}</div></div>`;
+                    list.innerHTML = `<div class="empty-state-btn" onclick="${currentUser ? 'openProposeModal()' : 'window.location.href=\'auth.html\''}"><div class="big-plus">+</div><div style="font-size: 18px; font-weight: bold; color: white;">${dictionary[currentLang].empty}</div></div>`;
                 return;
             }
 
-            let targetLink = currentUser ? "profile.html" : "auth.html";
+            let targetLink = currentUser ? "tournament.html?id=" + key : "auth.html";
             let keys = Object.keys(data).reverse(); 
 
             keys.forEach(key => {
