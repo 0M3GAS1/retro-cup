@@ -1895,7 +1895,15 @@ function updateAdminControls() {
 
     box.innerHTML = "";
 
-    if (currentUser !== ADMIN_USER) {
+    const isAdmin =
+        String(currentUser || "")
+            .trim()
+            .toLowerCase() ===
+        String(ADMIN_USER || "")
+            .trim()
+            .toLowerCase();
+
+    if (!isAdmin) {
         return;
     }
 
@@ -1906,7 +1914,7 @@ function updateAdminControls() {
                 class="admin-start-btn"
                 onclick="changeStatus('active')"
             >
-                🚀 Запустить
+                🚀 Запустить турнир
             </button>
         `;
 
@@ -1917,7 +1925,18 @@ function updateAdminControls() {
                 class="admin-stop-btn"
                 onclick="changeStatus('finished')"
             >
-                🏁 Завершить
+                🏁 Завершить турнир
+            </button>
+        `;
+
+    } else if (tStatus === "finished") {
+
+        box.innerHTML = `
+            <button
+                class="admin-start-btn"
+                onclick="changeStatus('waiting')"
+            >
+                🔄 Открыть регистрацию
             </button>
         `;
     }
