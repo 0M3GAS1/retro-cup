@@ -1932,194 +1932,250 @@ function updateAdminControls() {
    PARTICIPANTS
    ========================================================= */
 
+function copyTeamName(name) {
+    navigator.clipboard.writeText(name)
+        .then(() => {
+            showToast(
+                `Название "${name}" скопировано! Отправь его другу.`,
+                "info"
+            );
+        })
+        .catch(() => {
+            showToast(
+                "Не удалось скопировать название.",
+                "error"
+            );
+        });
+}
+
 function renderParticipants(data) {
-    const container = document.getElementById("players-container");
+    const container =
+        document.getElementById(
+            "players-container"
+        );
+
     container.innerHTML = "";
+
     isJoined = false;
     myTeamName = "";
 
     const validParticipants = [];
     const speedrunParticipants = [];
 
-    const isTeamTournament = tournamentFormat === "2v2" || tournamentFormat === "5v5";
+    const isTeamTournament =
+        tournamentFormat === "2v2" ||
+        tournamentFormat === "5v5";
 
     if (isTeamTournament) {
-        const requiredSize = tournamentFormat === "2v2" ? 2 : 5;
+        const requiredSize =
+            tournamentFormat === "2v2"
+                ? 2
+                : 5;
 
         if (data.teams) {
-            Object.keys(data.teams).forEach(teamName => {
-                const team = data.teams[teamName] || {};
-                const players = team.players ? Object.keys(team.players) : [];
+            Object.keys(data.teams)
+                .forEach(teamName => {
+                    const team =
+                        data.teams[teamName] || {};
 
-                if (players.includes(currentUser)) {
-                    isJoined = true;
-                    myTeamName = teamName;
-                }
+                    const players =
+                        team.players
+                            ? Object.keys(team.players)
+                            : [];
 
-                if (tournamentSystem === "Спидран") {
-                    speedrunParticipants.push({
-                        name: teamName,
-                        time: team.runTime || "00:00:00",
-                        isTeam: true
-                    });
-                    return;
-                }
+                    if (
+                        players.includes(
+                            currentUser
+                        )
+                    ) {
+                        isJoined = true;
+                        myTeamName = teamName;
+                    }
 
-                if (players.length >= requiredSize) {
-                    validParticipants.push(teamName);
-                }
+                    if (
+                        tournamentSystem ===
+                        "Спидран"
+                    ) {
+                        speedrunParticipants.push({
+                            name: teamName,
+                            time:
+                                team.runTime ||
+                                "00:00:00",
+                            isTeam: true
+                        });
 
-                // === КНОПКА ПРИГЛАШЕНИЯ (ПЛЮСИК) ===
-                let inviteBtnHTML = "";
-                // Показываем плюсик только если ты в этой команде и там еще есть место
-                if (players.includes(currentUser) && players.length < requiredSize) {
-                    inviteBtnHTML = `<button class="invite-btn" onclick="copyTeamName('${escapeHTML(teamName)}')" title="Скопировать название">➕</button>`;
-                }
+                        return;
+                    }
 
-                let html = `
-                    <div class="team-block">
-                        <div class="team-name">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="word-break: break-all;">${escapeHTML(teamName)}</span>
-                                ${inviteBtnHTML}
+                    if (
+                        players.length >=
+                        requiredSize
+                    ) {
+                        validParticipants.push(
+                            teamName
+                        );
+                    }
+
+                    let inviteBtnHTML = "";
+
+                    if (
+                        players.includes(
+                            currentUser
+                        ) &&
+                        players.length <
+                            requiredSize
+                    ) {
+                        inviteBtnHTML = `
+                            <button
+                                class="invite-btn"
+                                onclick="copyTeamName('${escapeHTML(teamName)}')"
+                                title="Скопировать название"
+                            >
+                                ➕
+                            </button>
+                        `;
+                    }
+
+                    let html = `
+                        <div class="team-block">
+
+                            <div class="team-name">
+
+                                <div
+                                    style="
+                                        display:flex;
+                                        align-items:center;
+                                        gap:8px;
+                                    "
+                                >
+
+                                    <span
+                                        style="
+                                            word-break:break-all;
+                                        "
+                                    >
+                                        ${escapeHTML(teamName)}
+                                    </span>
+
+                                    ${inviteBtnHTML}
+
+                                </div>
+
+                                ${
+                                    players.length <
+                                    requiredSize
+                                        ? `
+                                            <span
+                                                style="
+                                                    color:#ff3c64;
+                                                    font-size:10px;
+                                                    flex-shrink:0;
+                                                "
+                                            >
+                                                ${players.length}/${requiredSize}
+                                            </span>
+                                        `
+                                        : `
+                                            <span
+                                                style="
+                                                    color:#00ffcc;
+                                                    font-size:10px;
+                                                    flex-shrink:0;
+                                                "
+                                            >
+                                                ${players.length}/${requiredSize}
+                                            </span>
+                                        `
+                                }
+
                             </div>
-                            ${
-                                players.length < requiredSize
-                                ? `<span style="color:#ff3c64; font-size:10px; flex-shrink:0;">${players.length}/${requiredSize}</span>`
-                                : `<span style="color:#00ffcc; font-size:10px; flex-shrink:0;">${players.length}/${requiredSize}</span>`
-                            }
-                        </div>
-                `;
+                    `;
 
-                players.forEach(player => {
-                    const me = player === currentUser ? " me" : "";
+                    players.forEach(player => {
+                        const me =
+                            player === currentUser
+                                ? " me"
+                                : "";
+
+                        html += `
+                            <div class="player-item${me}">
+                                🎮 ${escapeHTML(player)}
+                            </div>
+                        `;
+                    });
+
                     html += `
-                        <div class="player-item${me}">
+                        </div>
+                    `;
+
+                    container.innerHTML += html;
+                });
+        }
+    } else {
+        if (data.players) {
+            Object.keys(data.players)
+                .forEach(player => {
+                    if (
+                        player ===
+                        currentUser
+                    ) {
+                        isJoined = true;
+                    }
+
+                    if (
+                        tournamentSystem ===
+                        "Спидран"
+                    ) {
+                        speedrunParticipants.push({
+                            name: player,
+                            time:
+                                data.players[player]
+                                    ?.runTime ||
+                                "00:00:00",
+                            isTeam: false
+                        });
+
+                        return;
+                    }
+
+                    validParticipants.push(
+                        player
+                    );
+
+                    const me =
+                        player === currentUser
+                            ? " me"
+                            : "";
+
+                    container.innerHTML += `
+                        <div
+                            class="player-item${me}"
+                            style="
+                                margin-bottom:5px;
+                            "
+                        >
                             🎮 ${escapeHTML(player)}
                         </div>
                     `;
                 });
-
-                html += `</div>`;
-                container.innerHTML += html;
-            });
-        }
-    } else {
-        if (data.players) {
-            Object.keys(data.players).forEach(player => {
-                if (player === currentUser) {
-                    isJoined = true;
-                }
-
-                if (tournamentSystem === "Спидран") {
-                    speedrunParticipants.push({
-                        name: player,
-                        time: data.players[player]?.runTime || "00:00:00",
-                        isTeam: false
-                    });
-                    return;
-                }
-
-                validParticipants.push(player);
-                const me = player === currentUser ? " me" : "";
-
-                container.innerHTML += `
-                    <div class="player-item${me}" style="margin-bottom:5px;">
-                        🎮 ${escapeHTML(player)}
-                    </div>
-                `;
-            });
         }
     }
-
-    /* =========================================================
-   COPY TEAM NAME FUNCTION
-   ========================================================= */
-function copyTeamName(name) {
-    navigator.clipboard.writeText(name).then(() => {
-        showToast(`Название "${name}" скопировано! Отправь его другу.`, "info");
-    }).catch(err => {
-        showToast("Не удалось скопировать название.", "error");
-    });
-}
-
-    /* SPEEDRUN */
-    if (tournamentSystem === "Спидран") {
-        speedrunParticipants.sort((a, b) => {
-            const timeA = normalizeTime(a.time);
-            const timeB = normalizeTime(b.time);
-            return timeA - timeB;
-        });
-
-        speedrunParticipants.forEach((player, index) => {
-            const hasTime = player.time !== "00:00:00";
-            const rank = hasTime ? index + 1 : "—";
-            const rankClass = rank === 1 ? "top1" : rank === 2 ? "top2" : rank === 3 ? "top3" : "";
-
-            let editButton = "";
-            if (currentUser === ADMIN_USER && tStatus === "active") {
-                editButton = `
-                    <button class="edit-time-btn" onclick='editSpeedrunTime(${JSON.stringify(player.name)}, ${player.isTeam})'>
-                        ⏱
-                    </button>
-                `;
-            }
-
-            container.innerHTML += `
-                <div class="speedrun-item">
-                    <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                        <div class="speedrun-rank ${rankClass}">#${rank}</div>
-                        <div style="font-size:13px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                            ${escapeHTML(player.name)}
-                        </div>
-                    </div>
-                    <div style="display:flex; align-items:center; flex-shrink:0;">
-                        <div class="speedrun-time">${escapeHTML(player.time)}</div>
-                        ${editButton}
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    if (!container.innerHTML.trim()) {
-        container.innerHTML = `
-            <div class="empty-state">
-                Пока никто не зарегистрирован.
-            </div>
-        `;
-    }
-
-    return { validParticipants };
-}
-    /* SPEEDRUN */
 
     if (
         tournamentSystem ===
         "Спидран"
     ) {
-
         speedrunParticipants.sort(
             (a, b) => {
-
-                const timeA =
-                    normalizeTime(
-                        a.time
-                    );
-
-                const timeB =
-                    normalizeTime(
-                        b.time
-                    );
-
-                return timeA - timeB;
+                return (
+                    normalizeTime(a.time) -
+                    normalizeTime(b.time)
+                );
             }
         );
 
-
         speedrunParticipants.forEach(
             (player, index) => {
-
                 const hasTime =
                     player.time !==
                     "00:00:00";
@@ -2133,19 +2189,18 @@ function copyTeamName(name) {
                     rank === 1
                         ? "top1"
                         : rank === 2
-                            ? "top2"
-                            : rank === 3
-                                ? "top3"
-                                : "";
-
+                        ? "top2"
+                        : rank === 3
+                        ? "top3"
+                        : "";
 
                 let editButton = "";
 
                 if (
-                    currentUser === ADMIN_USER &&
+                    currentUser ===
+                        ADMIN_USER &&
                     tStatus === "active"
                 ) {
-
                     editButton = `
                         <button
                             class="edit-time-btn"
@@ -2158,7 +2213,6 @@ function copyTeamName(name) {
                         </button>
                     `;
                 }
-
 
                 container.innerHTML += `
                     <div class="speedrun-item">
@@ -2217,9 +2271,9 @@ function copyTeamName(name) {
         );
     }
 
-
-    if (!container.innerHTML.trim()) {
-
+    if (
+        !container.innerHTML.trim()
+    ) {
         container.innerHTML = `
             <div class="empty-state">
                 Пока никто не зарегистрирован.
@@ -2227,13 +2281,10 @@ function copyTeamName(name) {
         `;
     }
 
-
     return {
         validParticipants
     };
 }
-
-
 /* =========================================================
    TIME
    ========================================================= */
