@@ -249,8 +249,7 @@
         if(id === 'user-support' && win.style.display === "flex") loadMessages(); 
     }
 
-    // --- ТУРНИРЫ ---
-    async function loadTournaments() {
+       async function loadTournaments() {
         try {
             let response = await fetch(dbBase + "tournaments.json");
             let data = await response.json();
@@ -262,19 +261,30 @@
             let list = document.getElementById("tournament-list");
             list.innerHTML = ""; 
             
+            // Если турниров нет - показываем красивую кнопку создания
             if (!data) {
-                    list.innerHTML = `<div class="empty-state-btn" onclick="${currentUser ? 'openProposeModal()' : 'window.location.href=\'auth.html\''}"><div class="big-plus">+</div><div style="font-size: 18px; font-weight: bold; color: white;">${dictionary[currentLang].empty}</div></div>`;
+                list.innerHTML = `<div class="empty-state-btn" onclick="${currentUser ? 'openProposeModal()' : 'window.location.href=\'auth.html\''}"><div class="big-plus">+</div><div style="font-size: 18px; font-weight: bold; color: white;">${dictionary[currentLang].empty}</div></div>`;
                 return;
             }
 
-            let targetLink = currentUser ? "tournament.html?id=" + key : "auth.html";
+            // Переворачиваем массив, чтобы новые турниры были сверху
             let keys = Object.keys(data).reverse(); 
 
             keys.forEach(key => {
                 let t = data[key];
-                let authorDisplay = (t.author === "0m3gas") ? `<span class="author-tag admin">👑 Retro Cup</span>` : `<span class="author-tag">${t.author || "Аноним"}</span>`;
+                
+                // МАГИЯ ССЫЛОК: Передаем уникальный ID турнира в ссылку!
+                let targetLink = currentUser ? "tournament.html?id=" + key : "auth.html";
+                
+                // ЛОГИКА АВТОРА
+                let authorDisplay = (t.author === "0m3gas") 
+                    ? `<span class="author-tag admin">👑 Retro Cup</span>` 
+                    : `<span class="author-tag">${t.author || "Аноним"}</span>`;
+
+                // ЛОГИКА АДМИНА (Крестик удаления)
                 let adminClass = (currentUser === "0m3gas") ? "admin-mode" : "";
 
+                // РИСУЕМ КАРТОЧКУ
                 list.innerHTML += `
                     <div class="tourney-card ${adminClass}">
                         <div class="tourney-info">
@@ -290,7 +300,9 @@
                     </div>
                 `;
             });
-        } catch(e) {}
+        } catch(e) { 
+            console.log("Ошибка загрузки турниров: ", e); 
+        }
     }
 
     async function deleteTourney(key) {
