@@ -42,7 +42,7 @@
         .wg-btn.leave:hover { background: #ff3c64; color: white; }
 
         .players-title { color: #8c8c9b; font-size: 12px; text-transform: uppercase; margin-top: 25px; margin-bottom: 10px; text-align: left;}
-        .players-list { display: flex; flex-direction: column; gap: 8px; text-align: left; max-height: 300px; overflow-y: auto;}
+        .players-list { display: flex; flex-direction: column; gap: 8px; text-align: left; max-height: 400px; overflow-y: auto;}
         
         .team-block { border: 1px solid #333; border-radius: 6px; padding: 10px; background: #0b0b0e; margin-bottom: 10px;}
         .team-name { color: #a67cff; font-weight: bold; font-size: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
@@ -51,21 +51,23 @@
         .player-item { padding: 5px; font-size: 13px; border-left: 2px solid #333; margin-left: 5px; color: #ccc;}
         .player-item.me { border-left-color: #00ffcc; color: white; font-weight: bold; }
 
-        /* --- CSS ДЛЯ СЕТКИ (BRACKET) --- */
+        /* СПИДРАН ЛИДЕРБОРД */
+        .speedrun-item { background: #0b0b0e; border: 1px solid #333; border-radius: 6px; padding: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
+        .speedrun-rank { font-weight: 900; font-size: 16px; width: 25px; color: #555;}
+        .speedrun-rank.top1 { color: #ffcc00; }
+        .speedrun-rank.top2 { color: #c0c0c0; }
+        .speedrun-rank.top3 { color: #cd7f32; }
+        .speedrun-time { color: #00ffcc; font-family: monospace; font-size: 16px; font-weight: bold; background: #1a1a24; padding: 3px 8px; border-radius: 4px; border: 1px solid #00ffcc;}
+        .edit-time-btn { background: #ff3c64; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; margin-left: 10px;}
+
+        /* СЕТКА (BRACKET) */
+        #bracket-section { margin-bottom: 40px; }
         .bracket-wrapper { overflow-x: auto; padding: 20px 0; }
         .bracket { display: flex; gap: 40px; }
         .round { display: flex; flex-direction: column; justify-content: space-around; gap: 20px; min-width: 200px; }
-        
         .match { background: #1a1a24; border: 1px solid #333; border-radius: 6px; position: relative; }
-        
-        /* Линии коннекта для сетки */
-        .round:not(:last-child) .match::after {
-            content: ''; position: absolute; right: -20px; top: 50%; width: 20px; height: 1px; background: #555;
-        }
-        .round:not(:first-child) .match::before {
-            content: ''; position: absolute; left: -20px; top: 50%; width: 20px; height: 1px; background: #555;
-        }
-        
+        .round:not(:last-child) .match::after { content: ''; position: absolute; right: -20px; top: 50%; width: 20px; height: 1px; background: #555; }
+        .round:not(:first-child) .match::before { content: ''; position: absolute; left: -20px; top: 50%; width: 20px; height: 1px; background: #555; }
         .match-team { padding: 10px; font-size: 13px; font-weight: bold; border-bottom: 1px solid #333; display: flex; justify-content: space-between;}
         .match-team:last-child { border-bottom: none; }
         .seed-num { color: #555; font-size: 10px; margin-right: 5px;}
@@ -110,8 +112,8 @@
         </div>
     </div>
 
-    <!-- ТУРНИРНАЯ СЕТКА (ЖИВАЯ) -->
-    <div class="wg-card" style="margin-bottom: 40px;">
+    <!-- ТУРНИРНАЯ СЕТКА (Скрывается, если это Спидран) -->
+    <div class="wg-card" id="bracket-section" style="display: none;">
         <h2 class="wg-card-title">Турнирная сетка (Live)</h2>
         <div class="bracket-wrapper">
             <div class="bracket" id="bracket-container">
@@ -133,8 +135,8 @@
     // ПЕРЕВОД
     let currentLang = localStorage.getItem("siteLang") || "RU";
     const dict = {
-        "RU": { back: "← Назад к списку", org: "Организатор", fmt: "Формат", sys: "Система", max: "Слоты", prz: "Призовые", rules: "Описание и Регламент", part: "Участники (в лобби)", empty: "Без призовых", none: "Нет описания", join: "Регистрация открыта", btnJ: "УЧАСТВОВАТЬ", btnL: "✖ ОТМЕНИТЬ УЧАСТИЕ", joined: "Вы в турнире", inv: "[+] Пригласить", teamP: "Введите название вашей команды:", teamC: "Ссылка скопирована!\nОтправь её друзьям.", teamInvQ: "Вас приглашают в команду: ", needFull: " (Ждем игроков)"},
-        "EN": { back: "← Back to List", org: "Organizer", fmt: "Format", sys: "System", max: "Slots", prz: "Prize", rules: "Rules & Details", part: "Lobby Participants", empty: "No prize", none: "No description", join: "Registration Open", btnJ: "JOIN NOW", btnL: "✖ LEAVE", joined: "You are joined", inv: "[+] Invite", teamP: "Enter your Team Name:", teamC: "Link copied!\nSend it to friends.", teamInvQ: "You are invited to team: ", needFull: " (Waiting for players)"}
+        "RU": { back: "← Назад к списку", org: "Организатор", fmt: "Формат", sys: "Система", max: "Слоты", prz: "Призовые", rules: "Описание и Регламент", part: "Участники / Топ", empty: "Без призовых", none: "Нет описания", join: "Регистрация открыта", btnJ: "УЧАСТВОВАТЬ", btnL: "✖ ОТМЕНИТЬ УЧАСТИЕ", joined: "Вы в турнире", inv: "[+] Пригласить", teamP: "Введите название вашей команды:", teamC: "Ссылка скопирована!", teamInvQ: "Вас приглашают в команду: ", needFull: " (Ждем игроков)", editTime: "⏱ Изменить время", editTimePrompt: "Введите время для игрока/команды (только цифры и двоеточие). Например: 01:23:45", errTime: "Ошибка! Используйте только цифры и знак двоеточия ( : )"},
+        "EN": { back: "← Back to List", org: "Organizer", fmt: "Format", sys: "System", max: "Slots", prz: "Prize", rules: "Rules & Details", part: "Participants / Leaderboard", empty: "No prize", none: "No description", join: "Registration Open", btnJ: "JOIN NOW", btnL: "✖ LEAVE", joined: "You are joined", inv: "[+] Invite", teamP: "Enter your Team Name:", teamC: "Link copied!", teamInvQ: "You are invited to team: ", needFull: " (Waiting)", editTime: "⏱ Edit Time", editTimePrompt: "Enter time (numbers and colons only). Example: 01:23:45", errTime: "Error! Use only numbers and colons ( : )"}
     };
     function applyLanguage() {
         let d = dict[currentLang]; document.getElementById("lang-toggle").innerText = currentLang;
@@ -146,7 +148,7 @@
     function toggleLanguage() { currentLang = currentLang === "RU" ? "EN" : "RU"; localStorage.setItem("siteLang", currentLang); applyLanguage(); loadTournamentData(); }
     applyLanguage();
 
-    let isJoined = false; let myTeamName = ""; let tournamentFormat = ""; let maxLimit = 8;
+    let isJoined = false; let myTeamName = ""; let tournamentFormat = ""; let tournamentSystem = ""; let maxLimit = 8;
     let cachedData = "";
 
     async function loadTournamentData() {
@@ -155,12 +157,12 @@
             let data = await res.json();
             if (!data) return;
 
-            // Избегаем лишних перерисовок (чтобы не моргало каждые 3 секунды)
             let currString = JSON.stringify(data);
             if (currString === cachedData) return;
             cachedData = currString;
 
             tournamentFormat = data.format;
+            tournamentSystem = data.system; // Проверяем, Спидран ли это
             maxLimit = parseInt(data.maxPlayers) || 8; 
 
             document.getElementById("t-game").innerText = data.game;
@@ -172,55 +174,121 @@
             document.getElementById("t-prize").innerText = data.prize ? data.prize : dict[currentLang].empty;
             document.getElementById("t-rules").innerText = data.rules ? data.rules : dict[currentLang].none;
 
+            // СКРЫВАЕМ ИЛИ ПОКАЗЫВАЕМ СЕТКУ В ЗАВИСИМОСТИ ОТ СИСТЕМЫ
+            if (tournamentSystem === "Спидран") {
+                document.getElementById("bracket-section").style.display = "none";
+            } else {
+                document.getElementById("bracket-section").style.display = "block";
+            }
+
             let pContainer = document.getElementById("players-container");
             pContainer.innerHTML = "";
             isJoined = false; myTeamName = ""; 
             
-            // МАГИЯ СЕТКИ: Собираем ТОЛЬКО фулловые команды
-            let validParticipants = []; 
-            
+            let validParticipants = []; // Для сетки (если не спидран)
+            let speedrunParticipants = []; // Для Лидерборда Спидрана
+
+            // --- ОБРАБОТКА ДАННЫХ ИГРОКОВ ---
             if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
                 let requiredSize = tournamentFormat === "2v2" ? 2 : 5;
                 if (data.teams) {
                     Object.keys(data.teams).forEach(tName => {
-                        let members = data.teams[tName].players ? Object.keys(data.teams[tName].players) : [];
+                        let teamData = data.teams[tName];
+                        let members = teamData.players ? Object.keys(teamData.players) : [];
                         
-                        let teamHTML = `<div class="team-block"><div class="team-name">${tName}`;
-                        if (members.length < requiredSize) teamHTML += `<span style="color:#ff3c64; font-size:10px;">${dict[currentLang].needFull}</span>`;
-                        else validParticipants.push(tName); // Команда фулловая! Кидаем в сетку!
+                        if (members.includes(currentUser)) { isJoined = true; myTeamName = tName; }
+                        
+                        if (tournamentSystem === "Спидран") {
+                            // В Спидране команда попадает в лидерборд сразу
+                            speedrunParticipants.push({ name: tName, time: teamData.runTime || "00:00:00", isTeam: true, members: members, req: requiredSize });
+                        } else {
+                            // Обычный турнир: рисуем карточки команд
+                            let teamHTML = `<div class="team-block"><div class="team-name">${tName}`;
+                            if (members.length < requiredSize) teamHTML += `<span style="color:#ff3c64; font-size:10px;">${dict[currentLang].needFull}</span>`;
+                            else validParticipants.push(tName); 
 
-                        if (members.includes(currentUser)) {
-                            isJoined = true; myTeamName = tName;
-                            // Кнопку инвайта показываем, пока команда не полная
-                            if(members.length < requiredSize) teamHTML += `<button class="invite-btn" onclick="copyInvite('${tName}')">${dict[currentLang].inv}</button>`;
+                            if (members.includes(currentUser) && members.length < requiredSize) {
+                                teamHTML += `<button class="invite-btn" onclick="copyInvite('${tName}')">${dict[currentLang].inv}</button>`;
+                            }
+                            teamHTML += `</div>`;
+                            members.forEach(m => { let meClass = (m === currentUser) ? "me" : ""; teamHTML += `<div class="player-item ${meClass}">🎮 ${m}</div>`; });
+                            teamHTML += `</div>`;
+                            pContainer.innerHTML += teamHTML;
                         }
-                        teamHTML += `</div>`;
-                        members.forEach(m => { let meClass = (m === currentUser) ? "me" : ""; teamHTML += `<div class="player-item ${meClass}">🎮 ${m}</div>`; });
-                        teamHTML += `</div>`;
-                        pContainer.innerHTML += teamHTML;
                     });
                 }
             } else {
-                // СОЛО: Каждый игрок - это участник
+                // СОЛО (1v1)
                 if (data.players) {
-                    let players = Object.keys(data.players);
-                    players.forEach(p => {
-                        validParticipants.push(p); // В сетку!
+                    Object.keys(data.players).forEach(p => {
                         if (p === currentUser) isJoined = true; 
-                        let meClass = (p === currentUser) ? "me" : "";
-                        pContainer.innerHTML += `<div class="player-item ${meClass}" style="margin-bottom:5px;">🎮 ${p}</div>`;
+                        
+                        if (tournamentSystem === "Спидран") {
+                            speedrunParticipants.push({ name: p, time: data.players[p].runTime || "00:00:00", isTeam: false });
+                        } else {
+                            validParticipants.push(p); 
+                            let meClass = (p === currentUser) ? "me" : "";
+                            pContainer.innerHTML += `<div class="player-item ${meClass}" style="margin-bottom:5px;">🎮 ${p}</div>`;
+                        }
                     });
                 }
+            }
+
+            // --- ОТРИСОВКА СПИДРАН ЛИДЕРБОРДА ---
+            if (tournamentSystem === "Спидран") {
+                // Сортировка: 00:00:00 всегда в самом низу (999 место)
+                speedrunParticipants.sort((a, b) => {
+                    let timeA = (a.time === "00:00:00") ? "99:99:99" : a.time;
+                    let timeB = (b.time === "00:00:00") ? "99:99:99" : b.time;
+                    return timeA.localeCompare(timeB);
+                });
+
+                document.getElementById("t-count").innerText = speedrunParticipants.length;
+
+                speedrunParticipants.forEach((p, index) => {
+                    let rank = p.time === "00:00:00" ? "999" : (index + 1);
+                    let rankClass = "";
+                    if (rank == 1) rankClass = "top1";
+                    else if (rank == 2) rankClass = "top2";
+                    else if (rank == 3) rankClass = "top3";
+
+                    let nameDisplay = p.isTeam ? `Команда: ${p.name}` : p.name;
+                    if (p.name === currentUser || (p.members && p.members.includes(currentUser))) nameDisplay += " (Тут ты)";
+
+                    // Кнопка редактирования только для 0m3gas
+                    let adminEditBtn = (currentUser === "0m3gas") 
+                        ? `<button class="edit-time-btn" onclick="editSpeedrunTime('${p.name}', ${p.isTeam})">${dict[currentLang].editTime}</button>` 
+                        : "";
+
+                    pContainer.innerHTML += `
+                        <div class="speedrun-item">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div class="speedrun-rank ${rankClass}">#${rank}</div>
+                                <div style="font-size: 14px; font-weight: bold;">${nameDisplay}</div>
+                            </div>
+                            <div style="display:flex; align-items:center;">
+                                <div class="speedrun-time">${p.time}</div>
+                                ${adminEditBtn}
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Если это команда, и она не полная - добавляем кнопку инвайта под ней
+                    if (p.isTeam && p.members.includes(currentUser) && p.members.length < p.req) {
+                         pContainer.innerHTML += `<button class="invite-btn" style="margin-bottom:10px;" onclick="copyInvite('${p.name}')">${dict[currentLang].inv}</button>`;
+                    }
+                });
+            } else {
+                document.getElementById("t-count").innerText = (tournamentFormat === "2v2" || tournamentFormat === "5v5") ? (data.teams ? Object.keys(data.teams).length : 0) : validParticipants.length;
             }
             
             if (pContainer.innerHTML === "") pContainer.innerHTML = "<div style='color:#555; font-size:12px;'>Пусто.</div>";
 
-            // КНОПКА
+            // НАСТРОЙКА ГЛАВНОЙ КНОПКИ
             let btn = document.getElementById("action-btn"); let txt = document.getElementById("join-status");
             if (isJoined) { btn.innerText = dict[currentLang].btnL; btn.className = "wg-btn leave"; txt.innerText = dict[currentLang].joined; } 
             else { btn.innerText = dict[currentLang].btnJ; btn.className = "wg-btn"; txt.innerText = dict[currentLang].join; }
 
-            // ИНВАЙТ-ССЫЛКА
             if (inviteParam && !isJoined) {
                 if(confirm(dict[currentLang].teamInvQ + "'" + inviteParam + "'?")) {
                     await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + inviteParam + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify({ time: new Date().toLocaleTimeString() }) });
@@ -229,70 +297,92 @@
                 }
             }
 
-            // РИСУЕМ ЖИВУЮ СЕТКУ (SINGLE ELIMINATION)
-            drawBracket(validParticipants, maxLimit);
+            // РИСУЕМ СЕТКУ ТОЛЬКО ЕСЛИ ЭТО НЕ СПИДРАН
+            if (tournamentSystem !== "Спидран") {
+                drawBracket(validParticipants, maxLimit);
+            }
 
-        } catch (e) {}
+        } catch (e) { console.error(e); }
     }
 
-    // --- ЛОГИКА СЕТКИ (ПОСЕВ + ОТРИСОВКА) ---
+    // --- ЛОГИКА СЕТКИ ---
     function drawBracket(participants, max) {
         let bContainer = document.getElementById("bracket-container");
         bContainer.innerHTML = "";
 
-        // Шаблоны посева (Кто с кем играет в 1-м раунде)
         const seeds4 = [1, 4, 2, 3];
         const seeds8 = [1, 8, 4, 5, 2, 7, 3, 6];
         const seeds16 = [1, 16, 8, 9, 4, 13, 5, 12, 2, 15, 7, 10, 3, 14, 6, 11];
-
         let seeds = max == 4 ? seeds4 : (max == 16 ? seeds16 : seeds8);
         
-        // РАУНД 1
         let round1HTML = `<div class="round">`;
         for (let i = 0; i < seeds.length; i += 2) {
             let p1 = participants[seeds[i] - 1] || "<span class='empty-seed'>TBD</span>";
             let p2 = participants[seeds[i+1] - 1] || "<span class='empty-seed'>TBD</span>";
-            
-            round1HTML += `
-                <div class="match">
-                    <div class="match-team"><span class="seed-num">${seeds[i]}</span> <span>${p1}</span></div>
-                    <div class="match-team"><span class="seed-num">${seeds[i+1]}</span> <span>${p2}</span></div>
-                </div>`;
+            round1HTML += `<div class="match"><div class="match-team"><span class="seed-num">${seeds[i]}</span> <span>${p1}</span></div><div class="match-team"><span class="seed-num">${seeds[i+1]}</span> <span>${p2}</span></div></div>`;
         }
         round1HTML += `</div>`;
         bContainer.innerHTML += round1HTML;
 
-        // ПУСТЫЕ ПОСЛЕДУЮЩИЕ РАУНДЫ (Полуфиналы, Финал)
         let numRounds = Math.log2(max);
         for(let r = 1; r < numRounds; r++) {
             let matchesInRound = max / Math.pow(2, r+1);
             let roundHTML = `<div class="round">`;
             for(let m = 0; m < matchesInRound; m++) {
-                roundHTML += `<div class="match">
-                    <div class="match-team" style="color:#555;">TBD</div>
-                    <div class="match-team" style="color:#555;">TBD</div>
-                </div>`;
+                roundHTML += `<div class="match"><div class="match-team" style="color:#555;">TBD</div><div class="match-team" style="color:#555;">TBD</div></div>`;
             }
             roundHTML += `</div>`;
             bContainer.innerHTML += roundHTML;
         }
     }
 
+    // --- ВХОД И ВЫХОД ИЗ ТУРНИРА ---
     async function handleJoinClick() {
         let btn = document.getElementById("action-btn"); btn.disabled = true;
         if (isJoined) {
             if (tournamentFormat === "2v2" || tournamentFormat === "5v5") await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + myTeamName + "/players/" + currentUser + ".json", { method: "DELETE" });
             else await fetch(dbBase + "tournaments/" + tourneyId + "/players/" + currentUser + ".json", { method: "DELETE" });
         } else {
+            let initialData = { time: new Date().toLocaleTimeString() };
+            // Если это спидран - сразу задаем базовое время
+            if (tournamentSystem === "Спидран") initialData.runTime = "00:00:00";
+
             if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
                 let tName = prompt(dict[currentLang].teamP);
                 if (!tName || tName.trim() === "") { btn.disabled = false; return; }
-                await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + tName.trim() + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify({ time: new Date().toLocaleTimeString() }) });
+                
+                // Для команд Спидрана пишем время в саму команду, а не в игрока
+                if (tournamentSystem === "Спидран") {
+                    await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + tName.trim() + ".json", { method: "PATCH", body: JSON.stringify({ runTime: "00:00:00" }) });
+                }
+                
+                await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + tName.trim() + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify(initialData) });
             } else {
-                await fetch(dbBase + "tournaments/" + tourneyId + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify({ time: new Date().toLocaleTimeString() }) });
+                await fetch(dbBase + "tournaments/" + tourneyId + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify(initialData) });
             }
         }
         btn.disabled = false; cachedData = ""; loadTournamentData(); 
+    }
+
+    // --- АДМИН: РЕДАКТИРОВАНИЕ ВРЕМЕНИ СПИДРАНА ---
+    async function editSpeedrunTime(name, isTeam) {
+        let newTime = prompt(dict[currentLang].editTimePrompt);
+        if (!newTime) return;
+
+        // ПРОВЕРКА НА ДУРАКА: Только цифры и двоеточия
+        if (!/^[0-9:]+$/.test(newTime)) {
+            alert(dict[currentLang].errTime);
+            return;
+        }
+
+        // Обновляем только поле runTime, чтобы не стереть игроков
+        let path = isTeam ? `teams/${name}` : `players/${name}`;
+        await fetch(`${dbBase}tournaments/${tourneyId}/${path}.json`, {
+            method: "PATCH",
+            body: JSON.stringify({ runTime: newTime })
+        });
+        
+        cachedData = ""; loadTournamentData(); // Мгновенно обновляем лидерборд
     }
 
     function copyInvite(teamName) {
