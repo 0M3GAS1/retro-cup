@@ -4320,22 +4320,29 @@ async function changeStatus(
    JOIN / LEAVE
    ========================================================= */
 
+/* =========================================================
+   JOIN / LEAVE
+   ========================================================= */
+
 async function handleJoinClick() {
-    if (tStatus !== "waiting") { return; }
+    // ИСПРАВЛЕНИЕ: Теперь мы пропускаем и "waiting", и "registration"
+    if (tStatus === "active" || tStatus === "finished" || tStatus === "running") { 
+        return; 
+    }
 
     const button = document.getElementById("action-btn");
     button.disabled = true;
-    button.innerText = "Загрузка..."; // Сразу показываем, что клик прошел
+    button.innerText = "Загрузка..."; // Визуальный отклик при клике
 
     try {
         if (isJoined) {
             // === ЛОГИКА ВЫХОДА ИЗ ТУРНИРА ===
             if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
-                await fetch(`${dbBase}tournaments/${tourneyId}/teams/${myTeamName}/players/${currentUser}.json`, { method: "DELETE" });
+                await fetch(`${dbBase}tournaments/${safeFirebaseKey(tourneyId)}/teams/${safeFirebaseKey(myTeamName)}/players/${safeFirebaseKey(currentUser)}.json`, { method: "DELETE" });
             } else {
-                await fetch(`${dbBase}tournaments/${tourneyId}/players/${currentUser}.json`, { method: "DELETE" });
+                await fetch(`${dbBase}tournaments/${safeFirebaseKey(tourneyId)}/players/${safeFirebaseKey(currentUser)}.json`, { method: "DELETE" });
             }
-            alert("Вы вышли из турнира.");
+            showToast("Вы вышли из турнира.", "success");
 
         } else {
             // === ЛОГИКА ВХОДА В ТУРНИР ===
@@ -4343,20 +4350,20 @@ async function handleJoinClick() {
                 const teamName = prompt("Введите название команды:");
                 if (!teamName || !teamName.trim()) {
                     button.disabled = false;
-                    updateJoinButton(); // Возвращаем кнопку в норму
+                    updateJoinButton(); 
                     return;
                 }
 
                 const cleanTeamName = teamName.trim();
                 if (cleanTeamName.length > 30) {
-                    alert("Название команды слишком длинное.");
+                    showToast("Название команды слишком длинное.", "error");
                     button.disabled = false;
                     updateJoinButton();
                     return;
                 }
 
-                // Проверяем, есть ли уже такая команда и сколько там человек
-                let res = await fetch(`${dbBase}tournaments/${tourneyId}/teams/${cleanTeamName}.json`);
+                // Проверка команды
+                let res = await fetch(`${dbBase}tournaments/${safeFirebaseKey(tourneyId)}/teams/${safeFirebaseKey(cleanTeamName)}.json`);
                 let existingTeam = await res.json();
 
                 if (existingTeam && existingTeam.players) {
@@ -4364,19 +4371,63 @@ async function handleJoinClick() {
                     let maxTeamSize = (tournamentFormat === "2v2") ? 2 : 5;
 
                     if (currentPlayers >= maxTeamSize) {
-                        alert("В этой команде уже нет свободных мест.");
+                        showToast("В этой команде уже нет свободных мест.", "error");
                         button.disabled = false;
                         updateJoinButton();
                         return;
                     }
 
                     if (existingTeam.players[currentUser]) {
-                        alert("Вы уже состоите в этой команде.");
+                        showToast("Вы уже состоите в этой команде.", "error");
                         button.disabled = false;
                         updateJoinButton();
                         return;
                     }
                 }
+
+                const initialData = { time: new Date().toLocaleTimeString() };
+                if (tournamentSystem === "Спидран") initialData.runTime = "00:00:00";
+
+                if (!existingTeam && tournamentSystem === "Спидран") {
+                    await fetch(`${dbBase}tournaments/${safeFirebaseKey(tourneyId)}/teams/${safeFirebaseKey(cleanTeamName)}.json`, { method: "PATCH", body: JSON.stringify({ runTime: "00:00:00" }) });
+                }
+
+                await fetch(`${dbBase}tournaments/${safeFirebaseKey(tourneyId)}/teams/${safeFirebaseKey(cleanTeamName)}/players/${safeFirebaseKey(currentUser)}.json`, { method: "PUT", body: JSON.stringify(initialData) });
+                showToast("Вы успешно зарегистрированы в команду!", "success");
+
+            } else {
+                // === СОЛО ЛОГИКА (1v1) ===
+                let res = await fetch(`${dbBase}tournaments/${safeFirebaseKey(tourneyId)}/players.json`);
+                let players = await res.json();
+                
+                const playerCount = players ? Object.keys(players).length : 0;
+
+                if (playerCount >= maxLimit) {
+                    showToast("Все места уже заняты. Турнир заполнен!", "error");
+                    button.disabled = false;
+                    updateJoinButton();
+                    return;
+                }
+
+                const initialData = { time: new Date().toLocaleTimeString() };
+                if (tournamentSystem === "Спидран") initialData.runTime = "00:00:00";
+
+                await fetch(`${dbBase}tournaments/${safeFirebaseKey(tourneyId)}/players/${safeFirebaseKey(currentUser)}.json`, { method: "PUT", body: JSON.stringify(initialData) });
+                showToast("Вы успешно зарегистрированы!", "success");
+            }
+        }
+
+        // Обновляем данные на странице
+        cachedData = "";
+        await loadTournamentData(true); 
+
+    } catch (error) {
+        console.error(error);
+        showToast("Произошла ошибка соединения с базой.", "error");
+        button.disabled = false;
+        updateJoinButton();
+    }
+}
 
                 const initialData = { time: new Date().toLocaleTimeString() };
                 if (tournamentSystem === "Спидран") initialData.runTime = "00:00:00";
