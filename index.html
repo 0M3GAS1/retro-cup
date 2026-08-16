@@ -1,540 +1,2797 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retro Cup | Главная</title>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        body { background-color: #0b0b0e; color: #e0e0e0; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; padding-bottom: 120px; }
-        .container { max-width: 800px; margin: 0 auto; }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
 
-        /* ШАПКА */
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; flex-wrap: wrap; gap: 15px; }
-        .logo { font-family: 'Orbitron', sans-serif; color: #ffffff; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(166, 124, 255, 0.5); }
-        .header-controls { display: flex; align-items: center; gap: 15px; }
-        .lang-btn { background: transparent; color: #8c8c9b; border: 1px solid #333; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .lang-btn:hover { background: #333; color: white; }
-        .user-btn { background: #141419; color: #8c8c9b; border: 1px solid #2a2a35; padding: 10px 20px; cursor: pointer; border-radius: 8px; font-weight: bold; text-decoration: none; transition: 0.3s; }
-        .user-btn.logged-in { background: rgba(166, 124, 255, 0.1); color: #a67cff; border-color: #a67cff; }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-        .section-title { font-size: 22px; color: #ffffff; margin-bottom: 20px; font-weight: 900;}
-        #tournament-list { display: flex; flex-direction: column; gap: 15px; }
-        
-        /* КАРТОЧКА ТУРНИРА */
-        .tourney-card { background: #141419; padding: 20px; border-radius: 12px; border: 1px solid #1f1f26; border-left: 5px solid #a67cff; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: fadeIn 0.4s ease-out; flex-wrap: wrap; gap: 15px;}
-        .tourney-info h2 { margin: 0 0 5px 0; font-size: 18px; color: white; }
-        .tourney-info p { margin: 0 0 5px 0; color: #8c8c9b; font-size: 14px; }
-        .author-tag { display: inline-block; background: #1e1e26; padding: 3px 8px; border-radius: 5px; font-size: 11px; color: #aaa;}
-        .author-tag.admin { color: #ffcc00; font-weight: bold; background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; }
+        * {
+            box-sizing: border-box;
+        }
 
-        .action-area { display: flex; gap: 10px; align-items: center; }
-        .enter-btn { background: #23232b; color: white; border: 1px solid #33333d; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: 0.3s; }
-        .enter-btn:hover { background: #a67cff; border-color: #a67cff; }
-        
-        /* КНОПКА УДАЛЕНИЯ (ДЛЯ АДМИНА) */
-        .del-tourney-btn { background: rgba(255, 60, 100, 0.1); color: #ff3c64; border: 1px solid #ff3c64; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        .del-tourney-btn:hover { background: #ff3c64; color: white; }
+        body {
+            background-color: #0b0b0e;
+            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 120px;
+        }
 
-        /* ПУСТАЯ КНОПКА */
-        .empty-state-btn { background: transparent; border: 2px dashed #33333d; border-radius: 12px; padding: 40px; text-align: center; color: #8c8c9b; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; animation: fadeIn 0.5s ease-out; }
-        .empty-state-btn:hover { border-color: white; color: white; background: rgba(255,255,255,0.02); }
-        .empty-state-btn .big-plus { font-size: 32px; width: 50px; height: 50px; border: 2px solid; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-        /* ДИСКЛЕЙМЕР */
-        .disclaimer { margin-top: 60px; text-align: center; color: #555; font-size: 11px; padding: 20px; border-top: 1px solid #1f1f26; line-height: 1.5; }
-        .disclaimer-icon { display: inline-flex; justify-content: center; align-items: center; width: 20px; height: 20px; border: 1px solid #555; border-radius: 50%; font-weight: bold; margin-bottom: 10px; font-size: 12px; }
+        /* =========================
+           ШАПКА
+        ========================= */
 
-        /* ПЛАВАЮЩИЕ КНОПКИ */
-        .fab { position: fixed; bottom: 20px; padding: 10px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transition: 0.3s; font-weight: bold; }
-        .fab-user { right: 20px; background: #141419; border: 2px solid #33333d; color: #8c8c9b; }
-        .fab-user:hover { border-color: white; color: white; }
-        .fab-support { left: 20px; background: rgba(0, 255, 204, 0.1); border: 2px solid #00ffcc; color: #00ffcc; display: none; }
-        .fab-admin { left: 20px; background: rgba(255, 60, 100, 0.1); border: 2px solid #ff3c64; color: #ff3c64; display: none;}
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
-        /* ЧАТЫ */
-        .chat-window { display: none; position: fixed; bottom: 80px; left: 20px; width: calc(100vw - 40px); max-width: 380px; height: 500px; max-height: 70vh; background: #141419; border: 1px solid #333; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 1000; flex-direction: column; overflow: hidden; }
-        .chat-window.admin-style { border-color: #ff3c64; }
-        .chat-window.support-style { border-color: #00ffcc; }
-        .chat-header { padding: 15px; font-weight: 900; display: flex; justify-content: space-between; align-items: center; color: white;}
-        .admin-style .chat-header { background: #ff3c64; }
-        .support-style .chat-header { background: #00ffcc; color: black; }
-        .close-chat { cursor: pointer; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; font-size: 12px;}
-        .chat-body { padding: 15px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px;}
-        .chat-title { font-size: 12px; color: #8c8c9b; text-transform: uppercase; border-bottom: 1px solid #2a2a35; padding-bottom: 5px;}
-        
-        /* СООБЩЕНИЯ */
-        .chat-msg { background: #1e1e26; padding: 10px; border-radius: 8px; font-size: 13px; max-width: 85%; line-height: 1.4;}
-        .msg-left { align-self: flex-start; border-left: 3px solid #ff3c64; } 
-        .msg-right { align-self: flex-end; background: #2a2a35; border-right: 3px solid #00ffcc; } 
-        .chat-input-area { display: flex; padding: 10px; background: #0b0b0e; border-top: 1px solid #2a2a35; }
-        .chat-input { flex: 1; background: #141419; color: white; border: 1px solid #333; padding: 10px; border-radius: 6px; outline: none;}
-        .chat-send-btn { background: #a67cff; color: white; border: none; padding: 0 15px; margin-left: 10px; border-radius: 6px; cursor: pointer;}
-        .chat-user-item { background: #1e1e26; padding: 10px; border-radius: 6px; cursor: pointer; border-left: 3px solid #00ffcc; transition: 0.2s;}
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(166, 124, 255, 0.5);
+        }
 
-        /* МОДАЛКИ (СОЗДАНИЕ И ИНФА АДМИНА) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; overflow-y: auto; padding: 20px 0;}
-        .modal-box { background: #141419; padding: 25px; border-radius: 12px; border: 1px solid #2a2a35; width: 90%; max-width: 400px; margin: auto; }
-        .modal-input, select.modal-input, textarea.modal-input { width: 100%; padding: 12px; margin-bottom: 12px; background: #0b0b0e; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; font-family: 'Inter', sans-serif;}
-        textarea.modal-input { resize: vertical; min-height: 80px; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 10px;}
-        .btn-save { flex: 1; background: white; color: black; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;}
-        .btn-cancel { flex: 1; background: transparent; color: #8c8c9b; border: 1px solid #333; padding: 10px; border-radius: 6px; cursor: pointer;}
-        .btn-action { background: #333; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 5px; width: 100%;}
-        .row-2 { display: flex; gap: 10px; }
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            color: #8c8c9b;
+            border: 1px solid #333;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .lang-btn:hover {
+            background: #333;
+            color: white;
+        }
+
+        /* Кнопка профиля */
+
+        .user-btn {
+            background: #141419;
+            color: #8c8c9b;
+            border: 1px solid #2a2a35;
+            padding: 7px 14px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 46px;
+        }
+
+        .user-btn:hover {
+            border-color: #a67cff;
+            color: white;
+        }
+
+        .user-btn.logged-in {
+            background: rgba(166, 124, 255, 0.1);
+            color: #a67cff;
+            border-color: #a67cff;
+        }
+
+        /* Аватар рядом с ником */
+
+        .header-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #33333d;
+            background: #0b0b0e;
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+
+        .user-btn.logged-in .header-avatar {
+            border-color: #a67cff;
+        }
+
+        .user-btn:hover .header-avatar {
+            border-color: white;
+        }
+
+        #txt-login {
+            white-space: nowrap;
+        }
+
+
+        /* =========================
+           ТУРНИРЫ
+        ========================= */
+
+        .section-title {
+            font-size: 22px;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-weight: 900;
+        }
+
+        #tournament-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tourney-card {
+            background: #141419;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #1f1f26;
+            border-left: 5px solid #a67cff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.4s ease-out;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .tourney-info {
+            min-width: 0;
+        }
+
+        .tourney-info h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: white;
+            word-break: break-word;
+        }
+
+        .tourney-info p {
+            margin: 0 0 5px 0;
+            color: #8c8c9b;
+            font-size: 14px;
+        }
+
+        .author-tag {
+            display: inline-block;
+            background: #1e1e26;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .author-tag.admin {
+            color: #ffcc00;
+            font-weight: bold;
+            background: rgba(255, 204, 0, 0.1);
+            border: 1px solid #ffcc00;
+        }
+
+        .action-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .enter-btn {
+            background: #23232b;
+            color: white;
+            border: 1px solid #33333d;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .enter-btn:hover {
+            background: #a67cff;
+            border-color: #a67cff;
+        }
+
+        /* =========================
+           УДАЛЕНИЕ ТУРНИРА
+        ========================= */
+
+        .del-tourney-btn {
+            background: rgba(255, 60, 100, 0.1);
+            color: #ff3c64;
+            border: 1px solid #ff3c64;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .del-tourney-btn:hover {
+            background: #ff3c64;
+            color: white;
+        }
+
+
+        /* =========================
+           ПУСТОЕ СОСТОЯНИЕ
+        ========================= */
+
+        .empty-state-btn {
+            background: transparent;
+            border: 2px dashed #33333d;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            color: #8c8c9b;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .empty-state-btn:hover {
+            border-color: white;
+            color: white;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .empty-state-btn .big-plus {
+            font-size: 32px;
+            width: 50px;
+            height: 50px;
+            border: 2px solid;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        /* =========================
+           ДИСКЛЕЙМЕР
+        ========================= */
+
+        .disclaimer {
+            margin-top: 60px;
+            text-align: center;
+            color: #555;
+            font-size: 11px;
+            padding: 20px;
+            border-top: 1px solid #1f1f26;
+            line-height: 1.5;
+        }
+
+        .disclaimer-icon {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #555;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           ПЛАВАЮЩИЕ КНОПКИ
+        ========================= */
+
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .fab-user {
+            right: 20px;
+            background: #141419;
+            border: 2px solid #33333d;
+            color: #8c8c9b;
+        }
+
+        .fab-user:hover {
+            border-color: white;
+            color: white;
+        }
+
+        .fab-support {
+            left: 20px;
+            background: rgba(0, 255, 204, 0.1);
+            border: 2px solid #00ffcc;
+            color: #00ffcc;
+            display: none;
+        }
+
+        .fab-admin {
+            left: 20px;
+            background: rgba(255, 60, 100, 0.1);
+            border: 2px solid #ff3c64;
+            color: #ff3c64;
+            display: none;
+        }
+
+
+        /* =========================
+           ЧАТЫ
+        ========================= */
+
+        .chat-window {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            width: calc(100vw - 40px);
+            max-width: 380px;
+            height: 500px;
+            max-height: 70vh;
+            background: #141419;
+            border: 1px solid #333;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-window.admin-style {
+            border-color: #ff3c64;
+        }
+
+        .chat-window.support-style {
+            border-color: #00ffcc;
+        }
+
+        .chat-header {
+            padding: 15px;
+            font-weight: 900;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .admin-style .chat-header {
+            background: #ff3c64;
+        }
+
+        .support-style .chat-header {
+            background: #00ffcc;
+            color: black;
+        }
+
+        .close-chat {
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .chat-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-title {
+            font-size: 12px;
+            color: #8c8c9b;
+            text-transform: uppercase;
+            border-bottom: 1px solid #2a2a35;
+            padding-bottom: 5px;
+        }
+
+        .chat-msg {
+            background: #1e1e26;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            max-width: 85%;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .msg-left {
+            align-self: flex-start;
+            border-left: 3px solid #ff3c64;
+        }
+
+        .msg-right {
+            align-self: flex-end;
+            background: #2a2a35;
+            border-right: 3px solid #00ffcc;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 10px;
+            background: #0b0b0e;
+            border-top: 1px solid #2a2a35;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #141419;
+            color: white;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .chat-send-btn {
+            background: #a67cff;
+            color: white;
+            border: none;
+            padding: 0 15px;
+            margin-left: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .chat-user-item {
+            background: #1e1e26;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            border-left: 3px solid #00ffcc;
+            transition: 0.2s;
+        }
+
+        .chat-user-item:hover {
+            background: #282831;
+        }
+
+
+        /* =========================
+           МОДАЛКИ
+        ========================= */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .modal-box {
+            background: #141419;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #2a2a35;
+            width: 90%;
+            max-width: 400px;
+            margin: auto;
+        }
+
+        .modal-input,
+        select.modal-input,
+        textarea.modal-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #0b0b0e;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-input:focus {
+            border-color: #a67cff;
+        }
+
+        textarea.modal-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-save {
+            flex: 1;
+            background: white;
+            color: black;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-save:hover {
+            background: #a67cff;
+            color: white;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            background: transparent;
+            color: #8c8c9b;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-cancel:hover {
+            background: #23232b;
+            color: white;
+        }
+
+        .btn-action {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        .row-2 {
+            display: flex;
+            gap: 10px;
+        }
+
+
+        /* =========================
+           МОБИЛЬНАЯ ВЕРСИЯ
+        ========================= */
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 15px;
+                padding-bottom: 100px;
+            }
+
+            header {
+                margin-bottom: 30px;
+            }
+
+            .logo {
+                font-size: 22px;
+            }
+
+            .header-controls {
+                gap: 8px;
+            }
+
+            .user-btn {
+                padding: 6px 10px;
+            }
+
+            .header-avatar {
+                width: 30px;
+                height: 30px;
+            }
+
+            .tourney-card {
+                align-items: flex-start;
+            }
+
+            .action-area {
+                width: 100%;
+            }
+
+            .enter-btn {
+                flex: 1;
+                text-align: center;
+            }
+
+            .fab {
+                bottom: 15px;
+            }
+
+            .fab-user {
+                right: 15px;
+            }
+
+            .fab-support,
+            .fab-admin {
+                left: 15px;
+            }
+
+            .row-2 {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
     </style>
 </head>
+
 <body>
 
 <div class="container">
+
+    <!-- =========================
+         ШАПКА
+    ========================= -->
+
     <header>
-        <div class="logo">Retro Cup</div>
-        <div class="header-controls">
-            <!-- КНОПКА ЯЗЫКА -->
-            <button class="lang-btn" onclick="toggleLanguage()" id="lang-toggle">RU</button>
-            <a href="auth.html" id="header-user-btn" class="user-btn"><span id="txt-login">Войти в профиль</span></a>
+
+        <div class="logo">
+            Retro Cup
         </div>
+
+        <div class="header-controls">
+
+            <!-- Язык -->
+            <button
+                class="lang-btn"
+                onclick="toggleLanguage()"
+                id="lang-toggle"
+            >
+                RU
+            </button>
+
+            <!-- Профиль -->
+            <a
+                href="auth.html"
+                id="header-user-btn"
+                class="user-btn"
+            >
+
+                <img
+                    id="header-avatar"
+                    class="header-avatar"
+                    src="https://via.placeholder.com/40/141419/a67cff?text=TU"
+                    alt="Аватар"
+                >
+
+                <span id="txt-login">
+                    Войти в профиль
+                </span>
+
+            </a>
+
+        </div>
+
     </header>
 
-    <div class="section-title" id="txt-tourneys">Ближайшие турниры</div>
-    
+
+    <!-- =========================
+         ТУРНИРЫ
+    ========================= -->
+
+    <div
+        class="section-title"
+        id="txt-tourneys"
+    >
+        Ближайшие турниры
+    </div>
+
     <div id="tournament-list">
-        <p style="color: #8c8c9b;">⏳ Синхронизация с сервером...</p>
+
+        <p style="color: #8c8c9b;">
+            ⏳ Синхронизация с сервером...
+        </p>
+
     </div>
 
-    <!-- ДИСКЛЕЙМЕР -->
+
+    <!-- =========================
+         ДИСКЛЕЙМЕР
+    ========================= -->
+
     <div class="disclaimer">
-        <div class="disclaimer-icon">!</div><br>
-        <span id="txt-disclaimer">Сайт Retro Cup является платформой для публикации информации и не несёт ответственности за турниры, созданные пользователями. Организация, правила и любые финансовые операции осуществляются создателем турнира.</span>
+
+        <div class="disclaimer-icon">
+            !
+        </div>
+
+        <br>
+
+        <span id="txt-disclaimer">
+            Сайт Retro Cup является платформой для публикации информации и не несёт ответственности за турниры, созданные пользователями. Организация, правила и любые финансовые операции осуществляются создателем турнира.
+        </span>
+
     </div>
+
 </div>
 
-<!-- ПЛАВАЮЩИЕ КНОПКИ -->
-<div class="fab fab-user" onclick="openProposeModal()" id="fab-user-btn" style="display: none;">
-    <span style="font-size: 20px;">+</span> <span id="txt-create-btn">Создать турнир</span>
+
+<!-- =========================
+     ПЛАВАЮЩИЕ КНОПКИ
+========================= -->
+
+<div
+    class="fab fab-user"
+    onclick="openProposeModal()"
+    id="fab-user-btn"
+    style="display: none;"
+>
+    <span style="font-size: 20px;">
+        +
+    </span>
+
+    <span id="txt-create-btn">
+        Создать турнир
+    </span>
 </div>
 
-<div class="fab fab-support" onclick="toggleChatWindow('user-support')" id="fab-support-btn">
-    <span id="txt-supp">💬 Поддержка</span>
+
+<div
+    class="fab fab-support"
+    onclick="toggleChatWindow('user-support')"
+    id="fab-support-btn"
+>
+    <span id="txt-supp">
+        💬 Поддержка
+    </span>
 </div>
 
-<div class="fab fab-admin" onclick="toggleChatWindow('admin-terminal')" id="fab-admin-btn">
+
+<div
+    class="fab fab-admin"
+    onclick="toggleChatWindow('admin-terminal')"
+    id="fab-admin-btn"
+>
     👑 Терминал
 </div>
 
-<!-- ЧАТ ПОДДЕРЖКИ (ДЛЯ ИГРОКОВ) -->
-<div id="user-support" class="chat-window support-style">
+
+<!-- =========================
+     ЧАТ ПОДДЕРЖКИ
+========================= -->
+
+<div
+    id="user-support"
+    class="chat-window support-style"
+>
+
     <div class="chat-header">
-        <span id="txt-supp-head">Поддержка</span> 
-        <span class="close-chat" onclick="toggleChatWindow('user-support')">✖</span>
+
+        <span id="txt-supp-head">
+            Поддержка
+        </span>
+
+        <span
+            class="close-chat"
+            onclick="toggleChatWindow('user-support')"
+        >
+            ✖
+        </span>
+
     </div>
-    <div class="chat-body" id="user-chat-history"></div>
+
+    <div
+        class="chat-body"
+        id="user-chat-history"
+    ></div>
+
     <div class="chat-input-area">
-        <input type="text" id="user-msg-input" class="chat-input" placeholder="Вопрос...">
-        <button class="chat-send-btn" onclick="sendSupportMessage('user')">➤</button>
+
+        <input
+            type="text"
+            id="user-msg-input"
+            class="chat-input"
+            placeholder="Вопрос..."
+        >
+
+        <button
+            class="chat-send-btn"
+            onclick="sendSupportMessage('user')"
+        >
+            ➤
+        </button>
+
     </div>
+
 </div>
 
-<!-- ТЕРМИНАЛ (ДЛЯ АДМИНА) -->
-<div id="admin-terminal" class="chat-window admin-style">
-    <div class="chat-header">СИСТЕМА (0m3gas) <span class="close-chat" onclick="toggleChatWindow('admin-terminal')">✖</span></div>
-    
-    <div class="chat-body" id="admin-main-menu">
-        <div class="chat-title">Заявки</div>
-        <div id="admin-proposals"><span style="color:#8c8c9b;">Пусто</span></div>
-        <div class="chat-title">Лайв-Чаты</div>
-        <div id="admin-chat-list"><span style="color:#8c8c9b;">Нет диалогов</span></div>
+
+<!-- =========================
+     ТЕРМИНАЛ АДМИНА
+========================= -->
+
+<div
+    id="admin-terminal"
+    class="chat-window admin-style"
+>
+
+    <div class="chat-header">
+
+        <span>
+            СИСТЕМА (0m3gas)
+        </span>
+
+        <span
+            class="close-chat"
+            onclick="toggleChatWindow('admin-terminal')"
+        >
+            ✖
+        </span>
+
     </div>
-    
-    <div class="chat-body" id="admin-chat-room" style="display: none;">
-        <button onclick="backToAdminMenu()" style="background:transparent; color:#8c8c9b; border:none; text-align:left; cursor:pointer; margin-bottom:10px;">⬅ Назад</button>
-        <div id="admin-chat-history" style="display:flex; flex-direction:column; gap:10px; flex:1; overflow-y:auto;"></div>
+
+
+    <div
+        class="chat-body"
+        id="admin-main-menu"
+    >
+
+        <div class="chat-title">
+            Заявки
+        </div>
+
+        <div id="admin-proposals">
+            <span style="color:#8c8c9b;">
+                Пусто
+            </span>
+        </div>
+
+        <div class="chat-title">
+            Лайв-Чаты
+        </div>
+
+        <div id="admin-chat-list">
+            <span style="color:#8c8c9b;">
+                Нет диалогов
+            </span>
+        </div>
+
     </div>
-    
-    <div class="chat-input-area" id="admin-chat-input-area" style="display: none;">
-        <input type="text" id="admin-msg-input" class="chat-input" placeholder="Ответить...">
-        <button class="chat-send-btn" onclick="sendSupportMessage('admin')">➤</button>
+
+
+    <div
+        class="chat-body"
+        id="admin-chat-room"
+        style="display: none;"
+    >
+
+        <button
+            onclick="backToAdminMenu()"
+            style="background:transparent; color:#8c8c9b; border:none; text-align:left; cursor:pointer; margin-bottom:10px;"
+        >
+            ⬅ Назад
+        </button>
+
+        <div
+            id="admin-chat-history"
+            style="display:flex; flex-direction:column; gap:10px; flex:1; overflow-y:auto;"
+        ></div>
+
     </div>
+
+
+    <div
+        class="chat-input-area"
+        id="admin-chat-input-area"
+        style="display: none;"
+    >
+
+        <input
+            type="text"
+            id="admin-msg-input"
+            class="chat-input"
+            placeholder="Ответить..."
+        >
+
+        <button
+            class="chat-send-btn"
+            onclick="sendSupportMessage('admin')"
+        >
+            ➤
+        </button>
+
+    </div>
+
 </div>
 
-<!-- МОДАЛКА СОЗДАНИЯ ТУРНИРА -->
-<div class="modal-overlay" id="proposeModal">
+
+<!-- =========================
+     МОДАЛКА СОЗДАНИЯ ТУРНИРА
+========================= -->
+
+<div
+    class="modal-overlay"
+    id="proposeModal"
+>
+
     <div class="modal-box">
-        <h3 style="margin-top:0; color:white;" id="txt-modal-title">Настройки турнира</h3>
-        
-        <input type="text" id="prop-name" class="modal-input" placeholder="Название (Напр: Зимний Кубок)">
-        
+
+        <h3
+            style="margin-top:0; color:white;"
+            id="txt-modal-title"
+        >
+            Настройки турнира
+        </h3>
+
+
+        <input
+            type="text"
+            id="prop-name"
+            class="modal-input"
+            placeholder="Название (Напр: Зимний Кубок)"
+        >
+
+
         <div class="row-2">
-            <select id="prop-game" class="modal-input" style="flex: 1;" onchange="updateFormats()">
-                <option value="CS 2">CS 2</option>
-                <option value="Dota 2">Dota 2</option>
+
+            <select
+                id="prop-game"
+                class="modal-input"
+                style="flex: 1;"
+                onchange="updateFormats()"
+            >
+
+                <option value="CS 2">
+                    CS 2
+                </option>
+
+                <option value="Dota 2">
+                    Dota 2
+                </option>
+
             </select>
-            <select id="prop-format" class="modal-input" style="flex: 1;">
-                <option value="1v1">1 vs 1</option>
-                <option value="2v2">2 vs 2</option>
-                <option value="5v5">5 vs 5</option>
+
+
+            <select
+                id="prop-format"
+                class="modal-input"
+                style="flex: 1;"
+            >
+
+                <option value="1v1">
+                    1 vs 1
+                </option>
+
+                <option value="2v2">
+                    2 vs 2
+                </option>
+
+                <option value="5v5">
+                    5 vs 5
+                </option>
+
             </select>
+
         </div>
-        
+
+
         <div class="row-2">
-            <select id="prop-system" class="modal-input" style="flex: 1;">
-                <option value="Single Elimination">На вылет</option>
-                <option value="Спидран">Спидран</option>
+
+            <select
+                id="prop-system"
+                class="modal-input"
+                style="flex: 1;"
+            >
+
+                <option value="Single Elimination">
+                    На вылет
+                </option>
+
+                <option value="Спидран">
+                    Спидран
+                </option>
+
             </select>
-            <select id="prop-max" class="modal-input" style="flex: 1;">
-                <option value="4">4 слота</option>
-                <option value="8" selected>8 слотов</option>
-                <option value="16">16 слотов</option>
+
+
+            <select
+                id="prop-max"
+                class="modal-input"
+                style="flex: 1;"
+            >
+
+                <option value="4">
+                    4 слота
+                </option>
+
+                <option
+                    value="8"
+                    selected
+                >
+                    8 слотов
+                </option>
+
+                <option value="16">
+                    16 слотов
+                </option>
+
             </select>
+
         </div>
-        
-        <input type="text" id="prop-prize" class="modal-input" placeholder="Призовые (Напр: 5000 руб)">
-        
-        <textarea id="prop-rules" class="modal-input" placeholder="Правила (Минимум 30 символов)..."></textarea>
-        
+
+
+        <input
+            type="text"
+            id="prop-prize"
+            class="modal-input"
+            placeholder="Призовые (Напр: 5000 руб)"
+        >
+
+
+        <textarea
+            id="prop-rules"
+            class="modal-input"
+            placeholder="Правила (Минимум 30 символов)..."
+        ></textarea>
+
+
         <div class="modal-buttons">
-            <button class="btn-cancel" onclick="closeProposeModal()" id="txt-cancel">Отмена</button>
-            <button class="btn-save" onclick="sendTourneyProposal()" id="sendBtn">Отправить</button>
+
+            <button
+                class="btn-cancel"
+                onclick="closeProposeModal()"
+                id="txt-cancel"
+            >
+                Отмена
+            </button>
+
+            <button
+                class="btn-save"
+                onclick="sendTourneyProposal()"
+                id="sendBtn"
+            >
+                Отправить
+            </button>
+
         </div>
+
     </div>
+
 </div>
 
-<!-- ОКНО ИНФОРМАЦИИ О ЗАЯВКЕ ДЛЯ АДМИНА -->
-<div class="modal-overlay" id="adminInfoModal" style="z-index: 3000;">
-    <div class="modal-box" style="max-width: 500px;">
-        <h3 id="info-name" style="margin-top:0; color:#00ffcc;">Название</h3>
-        
-        <p style="color:white; font-weight:bold; margin-bottom:5px;">Игра: <span id="info-game" style="color:#a67cff;"></span> | Мест: <span id="info-max"></span></p>
-        <p style="color:#8c8c9b; margin-top:0; font-size:14px;">Призовые: <span id="info-prize"></span></p>
-        
-        <div style="background:#0b0b0e; border: 1px solid #333; padding:15px; border-radius:8px; margin: 15px 0; max-height: 200px; overflow-y:auto;">
-            <strong style="color:white; font-size:12px; text-transform:uppercase;">📝 Правила:</strong>
-            <p id="info-rules" style="color:#e0e0e0; font-size:14px; white-space: pre-wrap; line-height:1.5; margin-top:5px;"></p>
+
+<!-- =========================
+     ИНФОРМАЦИЯ О ЗАЯВКЕ
+========================= -->
+
+<div
+    class="modal-overlay"
+    id="adminInfoModal"
+    style="z-index: 3000;"
+>
+
+    <div
+        class="modal-box"
+        style="max-width: 500px;"
+    >
+
+        <h3
+            id="info-name"
+            style="margin-top:0; color:#00ffcc;"
+        >
+            Название
+        </h3>
+
+
+        <p
+            style="color:white; font-weight:bold; margin-bottom:5px;"
+        >
+            Игра:
+
+            <span
+                id="info-game"
+                style="color:#a67cff;"
+            ></span>
+
+            |
+
+            Мест:
+
+            <span id="info-max"></span>
+
+        </p>
+
+
+        <p
+            style="color:#8c8c9b; margin-top:0; font-size:14px;"
+        >
+            Призовые:
+
+            <span id="info-prize"></span>
+
+        </p>
+
+
+        <div
+            style="background:#0b0b0e; border:1px solid #333; padding:15px; border-radius:8px; margin:15px 0; max-height:200px; overflow-y:auto;"
+        >
+
+            <strong
+                style="color:white; font-size:12px; text-transform:uppercase;"
+            >
+                📝 Правила:
+            </strong>
+
+            <p
+                id="info-rules"
+                style="color:#e0e0e0; font-size:14px; white-space:pre-wrap; line-height:1.5; margin-top:5px;"
+            ></p>
+
         </div>
-        
-        <button class="btn-save" style="width:100%;" onclick="document.getElementById('adminInfoModal').style.display='none'">Закрыть</button>
+
+
+        <button
+            class="btn-save"
+            style="width:100%;"
+            onclick="document.getElementById('adminInfoModal').style.display='none'"
+        >
+            Закрыть
+        </button>
+
     </div>
+
 </div>
+
 
 <script>
-    // БАЗОВЫЕ ПЕРЕМЕННЫЕ
-    const dbBase = "https://retro-cup-51db5-default-rtdb.firebaseio.com/";
-    let currentUser = localStorage.getItem("currentUser");
-    let lastTournamentsData = ""; 
-    let activeChatUser = ""; 
+
+    /* ==========================================
+       FIREBASE
+    ========================================== */
+
+    const dbBase =
+        "https://retro-cup-51db5-default-rtdb.firebaseio.com/";
+
+    const dbUsers =
+        dbBase + "users/";
+
+    let currentUser =
+        localStorage.getItem("currentUser");
+
+    let lastTournamentsData = "";
+
+    let activeChatUser = "";
+
     let currentProposalsDict = {};
 
-    // --- ПЕРЕВОД ---
-    let currentLang = localStorage.getItem("siteLang") || "RU";
-    
+
+    /* ==========================================
+       ПЕРЕВОД
+    ========================================== */
+
+    let currentLang =
+        localStorage.getItem("siteLang") || "RU";
+
+
     const dictionary = {
-        "RU": { 
-            login: "Войти в профиль", tourneys: "Ближайшие турниры", create: "Создать турнир", empty: "Турниров пока нет", 
-            disc: "Сайт Retro Cup является платформой для публикации информации и не несёт ответственности за турниры, созданные пользователями.", 
-            supp: "💬 Поддержка", suppHead: "Поддержка", cancel: "Отмена", send: "Отправить", join: "Участвовать", 
-            org: "Орг: ", sys: "Сист: ", max: " | Мест: ", prize: "Приз: ", no: "Нет" 
+
+        "RU": {
+
+            login: "Войти в профиль",
+
+            tourneys: "Ближайшие турниры",
+
+            create: "Создать турнир",
+
+            empty: "Турниров пока нет",
+
+            disc:
+                "Сайт Retro Cup является платформой для публикации информации и не несёт ответственности за турниры, созданные пользователями.",
+
+            supp: "💬 Поддержка",
+
+            suppHead: "Поддержка",
+
+            cancel: "Отмена",
+
+            send: "Отправить",
+
+            join: "Участвовать",
+
+            org: "Орг: ",
+
+            sys: "Сист: ",
+
+            max: " | Мест: ",
+
+            prize: "Приз: ",
+
+            no: "Нет"
         },
-        "EN": { 
-            login: "Profile Login", tourneys: "Upcoming Tournaments", create: "Create Tournament", empty: "No tournaments yet", 
-            disc: "Retro Cup is an information platform and is not responsible for user-created tournaments.", 
-            supp: "💬 Support", suppHead: "Support", cancel: "Cancel", send: "Submit", join: "Join", 
-            org: "Org: ", sys: "Sys: ", max: " | Slots: ", prize: "Prize: ", no: "None" 
+
+
+        "EN": {
+
+            login: "Profile Login",
+
+            tourneys: "Upcoming Tournaments",
+
+            create: "Create Tournament",
+
+            empty: "No tournaments yet",
+
+            disc:
+                "Retro Cup is an information platform and is not responsible for user-created tournaments.",
+
+            supp: "💬 Support",
+
+            suppHead: "Support",
+
+            cancel: "Cancel",
+
+            send: "Submit",
+
+            join: "Join",
+
+            org: "Org: ",
+
+            sys: "Sys: ",
+
+            max: " | Slots: ",
+
+            prize: "Prize: ",
+
+            no: "None"
         }
     };
 
+
+    /* ==========================================
+       ЯЗЫК
+    ========================================== */
+
     function applyLanguage() {
-        document.getElementById("lang-toggle").innerText = currentLang;
-        document.getElementById("txt-login").innerText = dictionary[currentLang].login;
-        document.getElementById("txt-tourneys").innerText = dictionary[currentLang].tourneys;
-        document.getElementById("txt-create-btn").innerText = dictionary[currentLang].create;
-        document.getElementById("txt-disclaimer").innerText = dictionary[currentLang].disc;
-        document.getElementById("txt-supp").innerText = dictionary[currentLang].supp;
-        document.getElementById("txt-supp-head").innerText = dictionary[currentLang].suppHead;
-        document.getElementById("txt-cancel").innerText = dictionary[currentLang].cancel;
-        document.getElementById("sendBtn").innerText = dictionary[currentLang].send;
-        if(currentUser) document.getElementById("txt-login").innerText = "👤 " + currentUser;
-    }
 
-    function toggleLanguage() { 
-        currentLang = currentLang === "RU" ? "EN" : "RU"; 
-        localStorage.setItem("siteLang", currentLang); 
-        applyLanguage(); 
-        loadTournaments(); 
-    }
+        document.getElementById(
+            "lang-toggle"
+        ).innerText = currentLang;
 
-    // --- УПРАВЛЕНИЕ ФОРМАМИ И СЕССИЕЙ ---
-    function updateFormats() {
-        let game = document.getElementById("prop-game").value;
-        let formatSel = document.getElementById("prop-format");
-        if (game === "CS 2") {
-            formatSel.innerHTML = '<option value="1v1">1 vs 1</option><option value="2v2">2 vs 2</option><option value="5v5">5 vs 5</option>';
-        } else {
-            formatSel.innerHTML = '<option value="1v1">1 vs 1</option><option value="5v5">5 vs 5</option>';
-        }
-    }
 
-    function checkUserSession() {
+        document.getElementById(
+            "txt-login"
+        ).innerText =
+            dictionary[currentLang].login;
+
+
+        document.getElementById(
+            "txt-tourneys"
+        ).innerText =
+            dictionary[currentLang].tourneys;
+
+
+        document.getElementById(
+            "txt-create-btn"
+        ).innerText =
+            dictionary[currentLang].create;
+
+
+        document.getElementById(
+            "txt-disclaimer"
+        ).innerText =
+            dictionary[currentLang].disc;
+
+
+        document.getElementById(
+            "txt-supp"
+        ).innerText =
+            dictionary[currentLang].supp;
+
+
+        document.getElementById(
+            "txt-supp-head"
+        ).innerText =
+            dictionary[currentLang].suppHead;
+
+
+        document.getElementById(
+            "txt-cancel"
+        ).innerText =
+            dictionary[currentLang].cancel;
+
+
+        document.getElementById(
+            "sendBtn"
+        ).innerText =
+            dictionary[currentLang].send;
+
+
+        /* Если авторизован — показываем ник */
+
         if (currentUser) {
-            document.getElementById("header-user-btn").href = "profile.html";
-            document.getElementById("header-user-btn").classList.add("logged-in");
-            document.getElementById("fab-user-btn").style.display = "flex";
-            
-            if (currentUser === "0m3gas") {
-                document.getElementById("fab-admin-btn").style.display = "flex";
-            } else {
-                document.getElementById("fab-support-btn").style.display = "flex"; 
-            }
+
+            document.getElementById(
+                "txt-login"
+            ).innerText =
+                currentUser;
         }
+    }
+
+
+    function toggleLanguage() {
+
+        currentLang =
+            currentLang === "RU"
+                ? "EN"
+                : "RU";
+
+        localStorage.setItem(
+            "siteLang",
+            currentLang
+        );
+
         applyLanguage();
-    }
-    checkUserSession();
 
-    function toggleChatWindow(id) { 
-        let win = document.getElementById(id); 
-        win.style.display = win.style.display === "flex" ? "none" : "flex"; 
-        if(id === 'user-support' && win.style.display === "flex") loadMessages(); 
-    }
-
-    // --- ЗАГРУЗКА И ОТРИСОВКА ТУРНИРОВ ---
-async function loadTournaments() {
-    try {
-        let response = await fetch(dbBase + "tournaments.json");
-        let data = await response.json();
-        
-        let currentDataString = JSON.stringify(data);
-        if (currentDataString === lastTournamentsData) return;
-        lastTournamentsData = currentDataString;
-
-        let list = document.getElementById("tournament-list");
-        list.innerHTML = ""; // Очищаем список перед загрузкой, чтобы не было дублей
-        
-        if (!data) {
-            list.innerHTML = `<div class="empty-state-btn" onclick="${currentUser ? 'openProposeModal()' : 'window.location.href=\'auth.html\''}"><div class="big-plus">+</div><div style="font-size: 18px; font-weight: bold; color: white;">${dictionary[currentLang].empty}</div></div>`;
-            return;
-        }
-
-        let d = dictionary[currentLang];
-        let keys = Object.keys(data).reverse(); 
-
-        keys.forEach(key => {
-            let t = data[key];
-            // Ссылка: если юзер вошел, кидаем в турнир. Если нет - кидаем на авторизацию.
-            let targetLink = currentUser ? "tournament.html?id=" + key : "auth.html";
-            
-            let authorDisplay = (t.author === "0m3gas") 
-                ? `<span class="author-tag admin">👑 Retro Cup</span>` 
-                : `<span class="author-tag">${d.org}${t.author || "..."}</span>`;
-            
-            // Кнопку просмотра оставляем чисто для визуала, клик пойдет по самой карточке
-            let actionButtons = `<span class="enter-btn" style="pointer-events: none;">${d.join}</span>`;
-            
-            if (currentUser === "0m3gas") {
-                // Добавили event.stopPropagation(), чтобы при удалении нас не перекидывало внутрь турнира
-                actionButtons += `<button class="del-tourney-btn" onclick="event.stopPropagation(); deleteTourney('${key}')" title="Удалить">✖</button>`;
-            }
-
-            // Вставляем полностью кликабельную карточку турнира
-            list.innerHTML += `
-                <div class="tourney-card" style="cursor: pointer; transition: 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#00ffcc';" onmouseout="this.style.transform='none'; this.style.borderColor='#1f1f26'; this.style.borderLeftColor='#a67cff';" onclick="window.location.href='${targetLink}'">
-                    <div class="tourney-info">
-                        <h2>${t.name}</h2>
-                        <p style="color: #a67cff; font-weight: bold;">${t.game} | ${t.format}${d.max}${t.maxPlayers || 8}</p>
-                        <p style="font-size: 12px; color: #8c8c9b;">${d.sys}${t.system}</p>
-                        <p style="font-size: 12px;">${d.prize}${t.prize ? t.prize : d.no}</p>
-                        ${authorDisplay}
-                    </div>
-                    <div class="action-area">
-                        ${actionButtons}
-                    </div>
-                </div>
-            `;
-        });
-    } catch(e) {}
-}
-
-    async function deleteTourney(key) { 
-        if(confirm("Отменить этот турнир?")) { 
-            await fetch(dbBase + "tournaments/" + key + ".json", { method: "DELETE" }); 
-            lastTournamentsData = ""; loadTournaments(); 
-        } 
-    }
-
-    // --- ЛОГИКА СОЗДАНИЯ ТУРНИРА ---
-    function openProposeModal() { document.getElementById("proposeModal").style.display = "flex"; }
-    function closeProposeModal() { document.getElementById("proposeModal").style.display = "none"; }
-    
-    async function sendTourneyProposal() {
-        let name = document.getElementById("prop-name").value;
-        let game = document.getElementById("prop-game").value; 
-        let format = document.getElementById("prop-format").value; 
-        let system = document.getElementById("prop-system").value; 
-        let max = document.getElementById("prop-max").value;
-        let prize = document.getElementById("prop-prize").value;
-        let rules = document.getElementById("prop-rules").value;
-
-        if (!name) return alert(currentLang === "RU" ? "Напиши название!" : "Enter title!");
-        if (rules.trim().length < 30) return alert(currentLang === "RU" ? "Минимум 30 символов в правилах!" : "Minimum 30 characters in rules!");
-        
-        let proposal = { 
-            author: currentUser, name: name, game: game, format: format, 
-            system: system, maxPlayers: max, prize: prize, rules: rules, 
-            date: new Date().toLocaleString() 
-        };
-        
-        if (currentUser === "0m3gas") {
-            await fetch(dbBase + "tournaments.json", { method: "POST", body: JSON.stringify(proposal) });
-            alert(currentLang === "RU" ? "Опубликовано!" : "Published!");
-        } else {
-            await fetch(dbBase + "proposals.json", { method: "POST", body: JSON.stringify(proposal) });
-            alert(currentLang === "RU" ? "Заявка улетела админу!" : "Sent to admin!");
-        }
-        
-        closeProposeModal();
-        document.getElementById("prop-name").value = ""; 
-        document.getElementById("prop-rules").value = ""; 
-        lastTournamentsData = ""; 
         loadTournaments();
     }
 
-    // --- АДМИНКА (МОДЕРАЦИЯ ЗАЯВОК) ---
-    async function loadAdminProposals() {
-        if(currentUser !== "0m3gas") return;
-        let pRes = await fetch(dbBase + "proposals.json");
-        let pData = await pRes.json();
-        currentProposalsDict = pData;
-        let pList = document.getElementById("admin-proposals");
-        pList.innerHTML = "";
-        
-        if (pData) {
-            Object.keys(pData).forEach(key => {
-                let p = pData[key];
-                pList.innerHTML += `
-                <div style="background:#1e1e26; padding:10px; border-radius:6px; margin-bottom:5px;">
-                    <span style="color:#00ffcc;">📩 От: ${p.author}</span><br>
-                    <strong>${p.name}</strong> <span style="color:#a67cff;">(${p.game})</span><br>
-                    
-                    <button class="btn-action" onclick="showProposalInfo('${key}')">📖 Читать правила</button>
-                    
-                    <div style="display:flex; gap:5px; margin-top:5px;">
-                        <button onclick="approveTourney('${key}')" style="flex:1; background:#00ffcc; border:none; padding:5px; border-radius:3px; font-weight:bold; cursor:pointer;">ОДОБРИТЬ</button>
-                        <button onclick="rejectTourney('${key}')" style="flex:1; background:transparent; color:#ff3c64; border:1px solid #ff3c64; padding:5px; border-radius:3px; cursor:pointer;">УДАЛИТЬ</button>
-                    </div>
-                </div>`;
-            });
+
+    /* ==========================================
+       ЗАГРУЗКА АВАТАРКИ В ШАПКУ
+    ========================================== */
+
+    async function loadHeaderAvatar() {
+
+        const avatar =
+            document.getElementById(
+                "header-avatar"
+            );
+
+
+        const defaultAvatar =
+            "https://via.placeholder.com/40/141419/a67cff?text=TU";
+
+
+        if (!currentUser) {
+
+            avatar.src =
+                defaultAvatar;
+
+            return;
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    dbUsers +
+                    encodeURIComponent(
+                        currentUser
+                    ) +
+                    ".json"
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Ошибка HTTP: " +
+                    response.status
+                );
+            }
+
+
+            const userData =
+                await response.json();
+
+
+            if (
+                userData &&
+                userData.avatar
+            ) {
+
+                avatar.src =
+                    userData.avatar;
+
+            } else {
+
+                avatar.src =
+                    defaultAvatar;
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Ошибка загрузки аватарки:",
+                error
+            );
+
+            avatar.src =
+                defaultAvatar;
         }
     }
 
+
+    /* ==========================================
+       ФОРМАТЫ ТУРНИРОВ
+    ========================================== */
+
+    function updateFormats() {
+
+        let game =
+            document.getElementById(
+                "prop-game"
+            ).value;
+
+
+        let formatSel =
+            document.getElementById(
+                "prop-format"
+            );
+
+
+        if (game === "CS 2") {
+
+            formatSel.innerHTML = `
+                <option value="1v1">1 vs 1</option>
+                <option value="2v2">2 vs 2</option>
+                <option value="5v5">5 vs 5</option>
+            `;
+
+        } else {
+
+            formatSel.innerHTML = `
+                <option value="1v1">1 vs 1</option>
+                <option value="5v5">5 vs 5</option>
+            `;
+        }
+    }
+
+
+    /* ==========================================
+       ПРОВЕРКА СЕССИИ
+    ========================================== */
+
+    async function checkUserSession() {
+
+        if (currentUser) {
+
+            document.getElementById(
+                "header-user-btn"
+            ).href = "profile.html";
+
+
+            document.getElementById(
+                "header-user-btn"
+            ).classList.add("logged-in");
+
+
+            document.getElementById(
+                "fab-user-btn"
+            ).style.display = "flex";
+
+
+            /* Загружаем аватар */
+
+            await loadHeaderAvatar();
+
+
+            if (currentUser === "0m3gas") {
+
+                document.getElementById(
+                    "fab-admin-btn"
+                ).style.display = "flex";
+
+            } else {
+
+                document.getElementById(
+                    "fab-support-btn"
+                ).style.display = "flex";
+            }
+
+        } else {
+
+            document.getElementById(
+                "header-avatar"
+            ).src =
+                "https://via.placeholder.com/40/141419/a67cff?text=TU";
+        }
+
+
+        applyLanguage();
+    }
+
+
+    /* ==========================================
+       ЧАТ
+    ========================================== */
+
+    function toggleChatWindow(id) {
+
+        let win =
+            document.getElementById(id);
+
+
+        win.style.display =
+            win.style.display === "flex"
+                ? "none"
+                : "flex";
+
+
+        if (
+            id === "user-support" &&
+            win.style.display === "flex"
+        ) {
+
+            loadMessages();
+        }
+    }
+
+
+    /* ==========================================
+       ТУРНИРЫ
+    ========================================== */
+
+    async function loadTournaments() {
+
+        try {
+
+            let response =
+                await fetch(
+                    dbBase +
+                    "tournaments.json"
+                );
+
+
+            if (!response.ok) {
+                throw new Error(
+                    "Ошибка загрузки турниров"
+                );
+            }
+
+
+            let data =
+                await response.json();
+
+
+            let currentDataString =
+                JSON.stringify(data);
+
+
+            if (
+                currentDataString ===
+                lastTournamentsData
+            ) {
+
+                return;
+            }
+
+
+            lastTournamentsData =
+                currentDataString;
+
+
+            let list =
+                document.getElementById(
+                    "tournament-list"
+                );
+
+
+            list.innerHTML = "";
+
+
+            if (!data) {
+
+                list.innerHTML = `
+                    <div
+                        class="empty-state-btn"
+                        onclick="${
+                            currentUser
+                                ? "openProposeModal()"
+                                : "window.location.href='auth.html'"
+                        }"
+                    >
+
+                        <div class="big-plus">
+                            +
+                        </div>
+
+                        <div
+                            style="font-size:18px; font-weight:bold; color:white;"
+                        >
+                            ${dictionary[currentLang].empty}
+                        </div>
+
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            let d =
+                dictionary[currentLang];
+
+
+            let keys =
+                Object.keys(data).reverse();
+
+
+            keys.forEach(key => {
+
+                let t =
+                    data[key];
+
+
+                let targetLink =
+                    currentUser
+                        ? "tournament.html?id=" + key
+                        : "auth.html";
+
+
+                let authorDisplay =
+                    t.author === "0m3gas"
+
+                        ? `
+                            <span class="author-tag admin">
+                                👑 Retro Cup
+                            </span>
+                          `
+
+                        : `
+                            <span class="author-tag">
+                                ${d.org}${t.author || "..."}
+                            </span>
+                          `;
+
+
+                let actionButtons = `
+                    <span
+                        class="enter-btn"
+                        style="pointer-events:none;"
+                    >
+                        ${d.join}
+                    </span>
+                `;
+
+
+                if (
+                    currentUser === "0m3gas"
+                ) {
+
+                    actionButtons += `
+                        <button
+                            class="del-tourney-btn"
+                            onclick="event.stopPropagation(); deleteTourney('${key}')"
+                            title="Удалить"
+                        >
+                            ✖
+                        </button>
+                    `;
+                }
+
+
+                list.innerHTML += `
+
+                    <div
+                        class="tourney-card"
+                        style="cursor:pointer; transition:0.2s;"
+                        onmouseover="
+                            this.style.transform='translateY(-3px)';
+                            this.style.borderColor='#00ffcc';
+                        "
+                        onmouseout="
+                            this.style.transform='none';
+                            this.style.borderColor='#1f1f26';
+                            this.style.borderLeftColor='#a67cff';
+                        "
+                        onclick="
+                            window.location.href='${targetLink}'
+                        "
+                    >
+
+                        <div class="tourney-info">
+
+                            <h2>
+                                ${escapeHtml(t.name || "Без названия")}
+                            </h2>
+
+                            <p
+                                style="color:#a67cff; font-weight:bold;"
+                            >
+                                ${escapeHtml(t.game || "")}
+                                |
+                                ${escapeHtml(t.format || "")}
+                                ${d.max}
+                                ${t.maxPlayers || 8}
+                            </p>
+
+                            <p
+                                style="font-size:12px; color:#8c8c9b;"
+                            >
+                                ${d.sys}
+                                ${escapeHtml(t.system || "")}
+                            </p>
+
+                            <p
+                                style="font-size:12px;"
+                            >
+                                ${d.prize}
+                                ${
+                                    t.prize
+                                        ? escapeHtml(t.prize)
+                                        : d.no
+                                }
+                            </p>
+
+                            ${authorDisplay}
+
+                        </div>
+
+
+                        <div class="action-area">
+
+                            ${actionButtons}
+
+                        </div>
+
+                    </div>
+                `;
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Ошибка загрузки турниров:",
+                error
+            );
+
+            document.getElementById(
+                "tournament-list"
+            ).innerHTML = `
+                <p style="color:#ff3c64;">
+                    Не удалось загрузить турниры.
+                    Попробуйте обновить страницу.
+                </p>
+            `;
+        }
+    }
+
+
+    /* ==========================================
+       ЗАЩИТА HTML
+    ========================================== */
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    /* ==========================================
+       УДАЛЕНИЕ ТУРНИРА
+    ========================================== */
+
+    async function deleteTourney(key) {
+
+        if (
+            !confirm(
+                "Отменить этот турнир?"
+            )
+        ) {
+
+            return;
+        }
+
+
+        try {
+
+            await fetch(
+                dbBase +
+                "tournaments/" +
+                key +
+                ".json",
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+            lastTournamentsData = "";
+
+            loadTournaments();
+
+        } catch (error) {
+
+            alert(
+                "Ошибка удаления турнира."
+            );
+        }
+    }
+
+
+    /* ==========================================
+       СОЗДАНИЕ ТУРНИРА
+    ========================================== */
+
+    function openProposeModal() {
+
+        document.getElementById(
+            "proposeModal"
+        ).style.display = "flex";
+    }
+
+
+    function closeProposeModal() {
+
+        document.getElementById(
+            "proposeModal"
+        ).style.display = "none";
+    }
+
+
+    async function sendTourneyProposal() {
+
+        let name =
+            document.getElementById(
+                "prop-name"
+            ).value.trim();
+
+
+        let game =
+            document.getElementById(
+                "prop-game"
+            ).value;
+
+
+        let format =
+            document.getElementById(
+                "prop-format"
+            ).value;
+
+
+        let system =
+            document.getElementById(
+                "prop-system"
+            ).value;
+
+
+        let max =
+            document.getElementById(
+                "prop-max"
+            ).value;
+
+
+        let prize =
+            document.getElementById(
+                "prop-prize"
+            ).value.trim();
+
+
+        let rules =
+            document.getElementById(
+                "prop-rules"
+            ).value;
+
+
+        if (!name) {
+
+            return alert(
+                currentLang === "RU"
+                    ? "Напиши название!"
+                    : "Enter title!"
+            );
+        }
+
+
+        if (rules.trim().length < 30) {
+
+            return alert(
+                currentLang === "RU"
+                    ? "Минимум 30 символов в правилах!"
+                    : "Minimum 30 characters in rules!"
+            );
+        }
+
+
+        let proposal = {
+
+            author: currentUser,
+
+            name: name,
+
+            game: game,
+
+            format: format,
+
+            system: system,
+
+            maxPlayers: max,
+
+            prize: prize,
+
+            rules: rules,
+
+            date:
+                new Date().toLocaleString()
+        };
+
+
+        try {
+
+            if (
+                currentUser === "0m3gas"
+            ) {
+
+                await fetch(
+                    dbBase +
+                    "tournaments.json",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                proposal
+                            )
+                    }
+                );
+
+
+                alert(
+                    currentLang === "RU"
+                        ? "Опубликовано!"
+                        : "Published!"
+                );
+
+            } else {
+
+                await fetch(
+                    dbBase +
+                    "proposals.json",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                proposal
+                            )
+                    }
+                );
+
+
+                alert(
+                    currentLang === "RU"
+                        ? "Заявка улетела админу!"
+                        : "Sent to admin!"
+                );
+            }
+
+
+            closeProposeModal();
+
+
+            document.getElementById(
+                "prop-name"
+            ).value = "";
+
+
+            document.getElementById(
+                "prop-prize"
+            ).value = "";
+
+
+            document.getElementById(
+                "prop-rules"
+            ).value = "";
+
+
+            lastTournamentsData = "";
+
+            loadTournaments();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Ошибка соединения с Firebase."
+            );
+        }
+    }
+
+
+    /* ==========================================
+       АДМИНКА
+    ========================================== */
+
+    async function loadAdminProposals() {
+
+        if (
+            currentUser !== "0m3gas"
+        ) {
+
+            return;
+        }
+
+
+        try {
+
+            let pRes =
+                await fetch(
+                    dbBase +
+                    "proposals.json"
+                );
+
+
+            let pData =
+                await pRes.json();
+
+
+            currentProposalsDict =
+                pData || {};
+
+
+            let pList =
+                document.getElementById(
+                    "admin-proposals"
+                );
+
+
+            pList.innerHTML = "";
+
+
+            if (pData) {
+
+                Object.keys(pData)
+                    .forEach(key => {
+
+                        let p =
+                            pData[key];
+
+
+                        pList.innerHTML += `
+
+                            <div
+                                style="
+                                    background:#1e1e26;
+                                    padding:10px;
+                                    border-radius:6px;
+                                    margin-bottom:5px;
+                                "
+                            >
+
+                                <span style="color:#00ffcc;">
+                                    📩 От:
+                                    ${escapeHtml(p.author)}
+                                </span>
+
+                                <br>
+
+                                <strong>
+                                    ${escapeHtml(p.name)}
+                                </strong>
+
+                                <span style="color:#a67cff;">
+                                    (${escapeHtml(p.game)})
+                                </span>
+
+                                <br>
+
+                                <button
+                                    class="btn-action"
+                                    onclick="showProposalInfo('${key}')"
+                                >
+                                    📖 Читать правила
+                                </button>
+
+                                <div
+                                    style="
+                                        display:flex;
+                                        gap:5px;
+                                        margin-top:5px;
+                                    "
+                                >
+
+                                    <button
+                                        onclick="approveTourney('${key}')"
+                                        style="
+                                            flex:1;
+                                            background:#00ffcc;
+                                            border:none;
+                                            padding:5px;
+                                            border-radius:3px;
+                                            font-weight:bold;
+                                            cursor:pointer;
+                                        "
+                                    >
+                                        ОДОБРИТЬ
+                                    </button>
+
+                                    <button
+                                        onclick="rejectTourney('${key}')"
+                                        style="
+                                            flex:1;
+                                            background:transparent;
+                                            color:#ff3c64;
+                                            border:1px solid #ff3c64;
+                                            padding:5px;
+                                            border-radius:3px;
+                                            cursor:pointer;
+                                        "
+                                    >
+                                        УДАЛИТЬ
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        `;
+                    });
+
+            } else {
+
+                pList.innerHTML =
+                    '<span style="color:#8c8c9b;">Пусто</span>';
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Ошибка загрузки заявок:",
+                error
+            );
+        }
+    }
+
+
     function showProposalInfo(key) {
-        let p = currentProposalsDict[key];
-        if(!p) return;
-        document.getElementById("info-name").innerText = p.name;
-        document.getElementById("info-game").innerText = p.game + " | " + p.format;
-        document.getElementById("info-max").innerText = p.maxPlayers || "8";
-        document.getElementById("info-prize").innerText = p.prize ? p.prize : "Нет";
-        document.getElementById("info-rules").innerText = p.rules ? p.rules : "Не указаны";
-        document.getElementById("adminInfoModal").style.display = "flex";
+
+        let p =
+            currentProposalsDict[key];
+
+
+        if (!p) {
+            return;
+        }
+
+
+        document.getElementById(
+            "info-name"
+        ).innerText =
+            p.name;
+
+
+        document.getElementById(
+            "info-game"
+        ).innerText =
+            p.game +
+            " | " +
+            p.format;
+
+
+        document.getElementById(
+            "info-max"
+        ).innerText =
+            p.maxPlayers || "8";
+
+
+        document.getElementById(
+            "info-prize"
+        ).innerText =
+            p.prize
+                ? p.prize
+                : "Нет";
+
+
+        document.getElementById(
+            "info-rules"
+        ).innerText =
+            p.rules
+                ? p.rules
+                : "Не указаны";
+
+
+        document.getElementById(
+            "adminInfoModal"
+        ).style.display =
+            "flex";
     }
 
-    async function approveTourney(key) { 
-        let prop = currentProposalsDict[key]; 
-        await fetch(dbBase + "tournaments.json", { method: "POST", body: JSON.stringify(prop) }); 
-        await fetch(dbBase + "proposals/" + key + ".json", { method: "DELETE" }); 
-        lastTournamentsData = ""; loadAdminProposals(); loadTournaments(); 
-    }
-    
-    async function rejectTourney(key) { 
-        await fetch(dbBase + "proposals/" + key + ".json", { method: "DELETE" }); 
-        loadAdminProposals(); 
+
+    async function approveTourney(key) {
+
+        let prop =
+            currentProposalsDict[key];
+
+
+        if (!prop) {
+            return;
+        }
+
+
+        try {
+
+            await fetch(
+                dbBase +
+                "tournaments.json",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(prop)
+                }
+            );
+
+
+            await fetch(
+                dbBase +
+                "proposals/" +
+                key +
+                ".json",
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+            lastTournamentsData = "";
+
+            loadAdminProposals();
+
+            loadTournaments();
+
+        } catch (error) {
+
+            alert(
+                "Ошибка одобрения турнира."
+            );
+        }
     }
 
-    // --- СИСТЕМА ЛАЙВ-ЧАТА ---
+
+    async function rejectTourney(key) {
+
+        try {
+
+            await fetch(
+                dbBase +
+                "proposals/" +
+                key +
+                ".json",
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+            loadAdminProposals();
+
+        } catch (error) {
+
+            alert(
+                "Ошибка удаления заявки."
+            );
+        }
+    }
+
+
+    /* ==========================================
+       ЧАТ
+    ========================================== */
+
     async function sendSupportMessage(role) {
-        let inputId = role === 'user' ? 'user-msg-input' : 'admin-msg-input';
-        let text = document.getElementById(inputId).value;
-        if (!text.trim()) return;
-        
-        let targetUser = role === 'user' ? currentUser : activeChatUser;
-        let msg = { sender: role, text: text, time: new Date().toLocaleTimeString() };
-        
-        await fetch(dbBase + "support/" + targetUser + ".json", { method: "POST", body: JSON.stringify(msg) });
-        document.getElementById(inputId).value = ""; 
-        loadMessages();
+
+        let inputId =
+            role === "user"
+                ? "user-msg-input"
+                : "admin-msg-input";
+
+
+        let input =
+            document.getElementById(
+                inputId
+            );
+
+
+        let text =
+            input.value.trim();
+
+
+        if (!text) {
+            return;
+        }
+
+
+        let targetUser =
+            role === "user"
+                ? currentUser
+                : activeChatUser;
+
+
+        if (!targetUser) {
+            return;
+        }
+
+
+        let msg = {
+
+            sender: role,
+
+            text: text,
+
+            time:
+                new Date()
+                    .toLocaleTimeString()
+        };
+
+
+        try {
+
+            await fetch(
+                dbBase +
+                "support/" +
+                encodeURIComponent(
+                    targetUser
+                ) +
+                ".json",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(msg)
+                }
+            );
+
+
+            input.value = "";
+
+            loadMessages();
+
+        } catch (error) {
+
+            alert(
+                "Ошибка отправки сообщения."
+            );
+        }
     }
+
 
     async function loadMessages() {
-        if (!currentUser) return;
+
+        if (!currentUser) {
+            return;
+        }
+
+
         try {
-            let res = await fetch(dbBase + "support.json");
-            let allChats = await res.json();
-            
-            if (currentUser !== "0m3gas") {
-                let hist = document.getElementById("user-chat-history");
+
+            let res =
+                await fetch(
+                    dbBase +
+                    "support.json"
+                );
+
+
+            let allChats =
+                await res.json();
+
+
+            if (
+                currentUser !== "0m3gas"
+            ) {
+
+                let hist =
+                    document.getElementById(
+                        "user-chat-history"
+                    );
+
+
                 hist.innerHTML = "";
-                if (allChats && allChats[currentUser]) {
-                    Object.values(allChats[currentUser]).forEach(msg => {
-                        let msgClass = msg.sender === 'user' ? 'msg-right' : 'msg-left';
-                        hist.innerHTML += `<div class="chat-msg ${msgClass}">${msg.text} <br><span style="font-size:10px; color:#555;">${msg.time}</span></div>`;
+
+
+                if (
+                    allChats &&
+                    allChats[currentUser]
+                ) {
+
+                    Object.values(
+                        allChats[currentUser]
+                    ).forEach(msg => {
+
+                        let msgClass =
+                            msg.sender === "user"
+                                ? "msg-right"
+                                : "msg-left";
+
+
+                        hist.innerHTML += `
+
+                            <div
+                                class="chat-msg ${msgClass}"
+                            >
+
+                                ${escapeHtml(msg.text)}
+
+                                <br>
+
+                                <span
+                                    style="
+                                        font-size:10px;
+                                        color:#555;
+                                    "
+                                >
+                                    ${escapeHtml(msg.time || "")}
+                                </span>
+
+                            </div>
+                        `;
                     });
-                    hist.scrollTop = hist.scrollHeight; 
-                } else { 
-                    hist.innerHTML = "<div style='text-align:center; color:#8c8c9b; margin-top:20px;'>Напишите свой вопрос...</div>"; 
-                }
-            } else {
-                let list = document.getElementById("admin-chat-list");
-                if (activeChatUser === "") {
-                    list.innerHTML = "";
-                    if (allChats) {
-                        Object.keys(allChats).forEach(user => {
-                            list.innerHTML += `<div class="chat-user-item" onclick="openAdminChatRoom('${user}')">Диалог: <strong>${user}</strong></div>`;
-                        });
-                    } else { 
-                        list.innerHTML = "<span style='color:#8c8c9b;'>Нет сообщений</span>"; 
-                    }
+
+
+                    hist.scrollTop =
+                        hist.scrollHeight;
+
                 } else {
-                    let hist = document.getElementById("admin-chat-history");
-                    hist.innerHTML = "";
-                    if (allChats && allChats[activeChatUser]) {
-                        Object.values(allChats[activeChatUser]).forEach(msg => {
-                            let msgClass = msg.sender === 'admin' ? 'msg-right' : 'msg-left';
-                            hist.innerHTML += `<div class="chat-msg ${msgClass}">${msg.text}</div>`;
+
+                    hist.innerHTML =
+                        "<div style='text-align:center; color:#8c8c9b; margin-top:20px;'>Напишите свой вопрос...</div>";
+                }
+
+            } else {
+
+                let list =
+                    document.getElementById(
+                        "admin-chat-list"
+                    );
+
+
+                if (
+                    activeChatUser === ""
+                ) {
+
+                    list.innerHTML = "";
+
+
+                    if (allChats) {
+
+                        Object.keys(
+                            allChats
+                        ).forEach(user => {
+
+                            list.innerHTML += `
+
+                                <div
+                                    class="chat-user-item"
+                                    onclick="openAdminChatRoom('${escapeHtml(user)}')"
+                                >
+                                    Диалог:
+                                    <strong>
+                                        ${escapeHtml(user)}
+                                    </strong>
+                                </div>
+                            `;
                         });
-                        hist.scrollTop = hist.scrollHeight;
+
+                    } else {
+
+                        list.innerHTML =
+                            "<span style='color:#8c8c9b;'>Нет сообщений</span>";
+                    }
+
+                } else {
+
+                    let hist =
+                        document.getElementById(
+                            "admin-chat-history"
+                        );
+
+
+                    hist.innerHTML = "";
+
+
+                    if (
+                        allChats &&
+                        allChats[activeChatUser]
+                    ) {
+
+                        Object.values(
+                            allChats[
+                                activeChatUser
+                            ]
+                        ).forEach(msg => {
+
+                            let msgClass =
+                                msg.sender === "admin"
+                                    ? "msg-right"
+                                    : "msg-left";
+
+
+                            hist.innerHTML += `
+
+                                <div
+                                    class="chat-msg ${msgClass}"
+                                >
+                                    ${escapeHtml(msg.text)}
+                                </div>
+                            `;
+                        });
+
+
+                        hist.scrollTop =
+                            hist.scrollHeight;
                     }
                 }
             }
-        } catch(e) {}
+
+        } catch (error) {
+
+            console.error(
+                "Ошибка загрузки чата:",
+                error
+            );
+        }
     }
 
-    function openAdminChatRoom(user) { 
-        activeChatUser = user; 
-        document.getElementById("admin-main-menu").style.display = "none"; 
-        document.getElementById("admin-chat-room").style.display = "flex"; 
-        document.getElementById("admin-chat-input-area").style.display = "flex"; 
-        loadMessages(); 
-    }
-    
-    function backToAdminMenu() { 
-        activeChatUser = ""; 
-        document.getElementById("admin-main-menu").style.display = "block"; 
-        document.getElementById("admin-chat-room").style.display = "none"; 
-        document.getElementById("admin-chat-input-area").style.display = "none"; 
-        loadMessages(); 
+
+    function openAdminChatRoom(user) {
+
+        activeChatUser =
+            user;
+
+
+        document.getElementById(
+            "admin-main-menu"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "admin-chat-room"
+        ).style.display =
+            "flex";
+
+
+        document.getElementById(
+            "admin-chat-input-area"
+        ).style.display =
+            "flex";
+
+
+        loadMessages();
     }
 
-    // --- ИНИЦИАЛИЗАЦИЯ И ИНТЕРВАЛЫ ---
-    loadTournaments(); 
-    if(currentUser) loadMessages(); 
-    if(currentUser === "0m3gas") loadAdminProposals();
 
-    setInterval(() => { 
-        loadTournaments(); 
-        if(currentUser) loadMessages(); 
-        if(currentUser === "0m3gas" && activeChatUser === "") loadAdminProposals(); 
+    function backToAdminMenu() {
+
+        activeChatUser = "";
+
+
+        document.getElementById(
+            "admin-main-menu"
+        ).style.display =
+            "flex";
+
+
+        document.getElementById(
+            "admin-chat-room"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "admin-chat-input-area"
+        ).style.display =
+            "none";
+
+
+        loadMessages();
+    }
+
+
+    /* ==========================================
+       ENTER В ЧАТЕ
+    ========================================== */
+
+    document.getElementById(
+        "user-msg-input"
+    ).addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                sendSupportMessage(
+                    "user"
+                );
+            }
+        }
+    );
+
+
+    document.getElementById(
+        "admin-msg-input"
+    ).addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                sendSupportMessage(
+                    "admin"
+                );
+            }
+        }
+    );
+
+
+    /* ==========================================
+       ЗАКРЫТИЕ МОДАЛОК ПО ФОНУ
+    ========================================== */
+
+    document.querySelectorAll(
+        ".modal-overlay"
+    ).forEach(modal => {
+
+        modal.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    event.target === modal
+                ) {
+
+                    modal.style.display =
+                        "none";
+                }
+            }
+        );
+    });
+
+
+    /* ==========================================
+       ИНИЦИАЛИЗАЦИЯ
+    ========================================== */
+
+    checkUserSession();
+
+    loadTournaments();
+
+
+    if (currentUser) {
+        loadMessages();
+    }
+
+
+    if (
+        currentUser === "0m3gas"
+    ) {
+
+        loadAdminProposals();
+    }
+
+
+    /* ==========================================
+       АВТОМАТИЧЕСКОЕ ОБНОВЛЕНИЕ
+    ========================================== */
+
+    setInterval(() => {
+
+        loadTournaments();
+
+
+        if (currentUser) {
+
+            loadMessages();
+        }
+
+
+        if (
+            currentUser === "0m3gas" &&
+            activeChatUser === ""
+        ) {
+
+            loadAdminProposals();
+        }
+
+
+        /*
+         * Проверяем аватар периодически.
+         * Если пользователь сменил аватар
+         * на странице profile.html,
+         * главная страница тоже его подхватит.
+         */
+
+        if (currentUser) {
+
+            loadHeaderAvatar();
+        }
+
     }, 3000);
+
 </script>
 
 </body>
 </html>
+```
+
+Теперь схема такая: **`profile.html` сохраняет аватар в `users/ИМЯ/avatar` → `index.html` автоматически читает его из Firebase → аватар появляется слева от ника в кнопке профиля**. Если аватар не установлен, показывается стандартная заглушка `TU`.
