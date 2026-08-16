@@ -11,10 +11,8 @@
 
         body { background-color: #0b0b0e; color: #e0e0e0; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; padding-bottom: 120px; }
         .container { max-width: 800px; margin: 0 auto; }
-
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; flex-wrap: wrap; gap: 15px; }
         .logo { font-family: 'Orbitron', sans-serif; color: #ffffff; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(166, 124, 255, 0.5); }
-        
         .header-controls { display: flex; align-items: center; gap: 15px; }
         .lang-btn { background: transparent; color: #8c8c9b; border: 1px solid #333; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .lang-btn:hover { background: #333; color: white; }
@@ -23,14 +21,12 @@
 
         .section-title { font-size: 22px; color: #ffffff; margin-bottom: 20px; font-weight: 900;}
         #tournament-list { display: flex; flex-direction: column; gap: 15px; }
-        
         .tourney-card { background: #141419; padding: 20px; border-radius: 12px; border: 1px solid #1f1f26; border-left: 5px solid #a67cff; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: fadeIn 0.4s ease-out; flex-wrap: wrap; gap: 15px;}
         .tourney-info h2 { margin: 0 0 5px 0; font-size: 18px; color: white; }
         .tourney-info p { margin: 0 0 5px 0; color: #8c8c9b; font-size: 14px; }
         .author-tag { display: inline-block; background: #1e1e26; padding: 3px 8px; border-radius: 5px; font-size: 11px; color: #aaa;}
         .author-tag.admin { color: #ffcc00; font-weight: bold; background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; }
 
-        /* ИСПРАВЛЕННЫЕ КНОПКИ (ДЛЯ ТЕЛЕФОНА) */
         .action-area { display: flex; gap: 10px; align-items: center; }
         .enter-btn { background: #23232b; color: white; border: 1px solid #33333d; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: 0.3s; }
         .enter-btn:hover { background: #a67cff; border-color: #a67cff; }
@@ -41,17 +37,14 @@
         .empty-state-btn:hover { border-color: white; color: white; background: rgba(255,255,255,0.02); }
         .empty-state-btn .big-plus { font-size: 32px; width: 50px; height: 50px; border: 2px solid; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
 
-        /* ДИСКЛЕЙМЕР */
         .disclaimer { margin-top: 60px; text-align: center; color: #555; font-size: 11px; padding: 20px; border-top: 1px solid #1f1f26; line-height: 1.5; }
         .disclaimer-icon { display: inline-flex; justify-content: center; align-items: center; width: 20px; height: 20px; border: 1px solid #555; border-radius: 50%; font-weight: bold; margin-bottom: 10px; font-size: 12px; }
 
-        /* ПЛАВАЮЩИЕ КНОПКИ */
         .fab { position: fixed; bottom: 20px; padding: 10px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transition: 0.3s; font-weight: bold; }
         .fab-user { right: 20px; background: #141419; border: 2px solid #33333d; color: #8c8c9b; }
         .fab-support { left: 20px; background: rgba(0, 255, 204, 0.1); border: 2px solid #00ffcc; color: #00ffcc; display: none; }
         .fab-admin { left: 20px; background: rgba(255, 60, 100, 0.1); border: 2px solid #ff3c64; color: #ff3c64; display: none;}
 
-        /* ЧАТЫ */
         .chat-window { display: none; position: fixed; bottom: 80px; left: 20px; width: calc(100vw - 40px); max-width: 380px; height: 500px; max-height: 70vh; background: #141419; border: 1px solid #333; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 1000; flex-direction: column; overflow: hidden; }
         .chat-window.admin-style { border-color: #ff3c64; }
         .chat-window.support-style { border-color: #00ffcc; }
@@ -69,19 +62,14 @@
         .chat-send-btn { background: #a67cff; color: white; border: none; padding: 0 15px; margin-left: 10px; border-radius: 6px; cursor: pointer;}
         .chat-user-item { background: #1e1e26; padding: 10px; border-radius: 6px; cursor: pointer; border-left: 3px solid #00ffcc; transition: 0.2s;}
 
-        /* МОДАЛКИ (СОЗДАНИЕ И ИНФА АДМИНА) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; overflow-y: auto; padding: 20px 0;}
         .modal-box { background: #141419; padding: 25px; border-radius: 12px; border: 1px solid #2a2a35; width: 90%; max-width: 400px; margin: auto; }
-        
         .modal-input, select.modal-input, textarea.modal-input { width: 100%; padding: 12px; margin-bottom: 12px; background: #0b0b0e; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; font-family: 'Inter', sans-serif;}
-        select.modal-input { cursor: pointer; }
         textarea.modal-input { resize: vertical; min-height: 80px; }
-        
         .modal-buttons { display: flex; gap: 10px; margin-top: 10px;}
         .btn-save { flex: 1; background: white; color: black; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;}
         .btn-cancel { flex: 1; background: transparent; color: #8c8c9b; border: 1px solid #333; padding: 10px; border-radius: 6px; cursor: pointer;}
         .btn-action { background: #333; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 5px; width: 100%;}
-        
         .row-2 { display: flex; gap: 10px; }
     </style>
 </head>
@@ -109,12 +97,12 @@
     <span style="font-size: 20px;">+</span> <span id="txt-create-btn">Создать турнир</span>
 </div>
 
-<div class="fab fab-support" onclick="toggleChatWindow('user-support')" id="fab-support-btn">💬 Поддержка</div>
+<div class="fab fab-support" onclick="toggleChatWindow('user-support')" id="fab-support-btn"><span id="txt-supp">💬 Поддержка</span></div>
 <div class="fab fab-admin" onclick="toggleChatWindow('admin-terminal')" id="fab-admin-btn">👑 Терминал</div>
 
 <!-- ОКНО ПОДДЕРЖКИ (ЮЗЕР) -->
 <div id="user-support" class="chat-window support-style">
-    <div class="chat-header">Поддержка <span class="close-chat" onclick="toggleChatWindow('user-support')">✖</span></div>
+    <div class="chat-header"><span id="txt-supp-head">Поддержка</span> <span class="close-chat" onclick="toggleChatWindow('user-support')">✖</span></div>
     <div class="chat-body" id="user-chat-history"></div>
     <div class="chat-input-area">
         <input type="text" id="user-msg-input" class="chat-input" placeholder="Вопрос...">
@@ -147,7 +135,8 @@
         <h3 style="margin-top:0; color:white;" id="txt-modal-title">Настройки турнира</h3>
         <input type="text" id="prop-name" class="modal-input" placeholder="Название (Напр: Зимний Кубок)">
         <div class="row-2">
-            <select id="prop-game" class="modal-input" style="flex: 1;">
+            <!-- При выборе игры вызываем функцию updateFormats() -->
+            <select id="prop-game" class="modal-input" style="flex: 1;" onchange="updateFormats()">
                 <option value="CS 2">CS 2</option>
                 <option value="Dota 2">Dota 2</option>
             </select>
@@ -158,15 +147,15 @@
             </select>
         </div>
         <select id="prop-system" class="modal-input">
-            <option value="Single Elimination">На вылет (Single Elimination)</option>
-            <option value="Double Elimination">Двойная сетка (Double Elim)</option>
-            <option value="Группы + Плей-офф">Группы + Плей-офф (Как на ЧМ)</option>
-            <option value="Спидран">Спидран (На время)</option>
+            <option value="Single Elimination">На вылет</option>
+            <option value="Double Elimination">Двойная сетка</option>
+            <option value="Группы + Плей-офф">Группы + Плей-офф</option>
+            <option value="Спидран">Спидран</option>
         </select>
         <input type="text" id="prop-prize" class="modal-input" placeholder="Призовые (Напр: 5000 руб)">
         <textarea id="prop-rules" class="modal-input" placeholder="Правила (Минимум 30 символов)..."></textarea>
         <div class="modal-buttons">
-            <button class="btn-cancel" onclick="closeProposeModal()">Отмена</button>
+            <button class="btn-cancel" onclick="closeProposeModal()" id="txt-cancel">Отмена</button>
             <button class="btn-save" onclick="sendTourneyProposal()" id="sendBtn">Отправить</button>
         </div>
     </div>
@@ -193,11 +182,21 @@
     let activeChatUser = ""; 
     let currentProposalsDict = {};
 
-    // ПЕРЕВОД
+    // --- ПЕРЕВОД (РАСШИРЕННЫЙ) ---
     let currentLang = localStorage.getItem("siteLang") || "RU";
     const dictionary = {
-        "RU": { login: "Войти в профиль", tourneys: "Ближайшие турниры", create: "Создать турнир", empty: "Турниров пока нет", disc: "Сайт Retro Cup является платформой для публикации информации и не несёт ответственности за турниры, созданные пользователями. Организация, правила и любые финансовые операции осуществляются создателем турнира." },
-        "EN": { login: "Profile Login", tourneys: "Upcoming Tournaments", create: "Create Tournament", empty: "No tournaments yet", disc: "Retro Cup is an information platform and is not responsible for user-created tournaments. Organization, rules, and financial operations are managed independently by the creator." }
+        "RU": { 
+            login: "Войти в профиль", tourneys: "Ближайшие турниры", create: "Создать турнир", empty: "Турниров пока нет", 
+            disc: "Сайт Retro Cup является платформой для публикации информации и не несёт ответственности за турниры, созданные пользователями. Организация, правила и любые финансовые операции осуществляются создателем турнира.",
+            supp: "💬 Поддержка", suppHead: "Поддержка", cancel: "Отмена", send: "Отправить", join: "Участвовать", 
+            org: "Орг: ", sys: "Система: ", prize: "Приз: ", no: "Нет"
+        },
+        "EN": { 
+            login: "Profile Login", tourneys: "Upcoming Tournaments", create: "Create Tournament", empty: "No tournaments yet", 
+            disc: "Retro Cup is an information platform and is not responsible for user-created tournaments. Organization, rules, and financial operations are managed independently by the creator.",
+            supp: "💬 Support", suppHead: "Support", cancel: "Cancel", send: "Submit", join: "Join",
+            org: "Org: ", sys: "System: ", prize: "Prize: ", no: "None"
+        }
     };
     function applyLanguage() {
         document.getElementById("lang-toggle").innerText = currentLang;
@@ -205,9 +204,25 @@
         document.getElementById("txt-tourneys").innerText = dictionary[currentLang].tourneys;
         document.getElementById("txt-create-btn").innerText = dictionary[currentLang].create;
         document.getElementById("txt-disclaimer").innerText = dictionary[currentLang].disc;
+        document.getElementById("txt-supp").innerText = dictionary[currentLang].supp;
+        document.getElementById("txt-supp-head").innerText = dictionary[currentLang].suppHead;
+        document.getElementById("txt-cancel").innerText = dictionary[currentLang].cancel;
+        document.getElementById("sendBtn").innerText = dictionary[currentLang].send;
         if(currentUser) document.getElementById("txt-login").innerText = "👤 " + currentUser;
     }
     function toggleLanguage() { currentLang = currentLang === "RU" ? "EN" : "RU"; localStorage.setItem("siteLang", currentLang); applyLanguage(); loadTournaments(); }
+
+    // ДИНАМИЧЕСКИЙ ВЫБОР ФОРМАТА
+    function updateFormats() {
+        let game = document.getElementById("prop-game").value;
+        let formatSel = document.getElementById("prop-format");
+        formatSel.innerHTML = "";
+        if(game === "CS 2") {
+            formatSel.innerHTML = '<option value="1v1">1 vs 1</option><option value="2v2">2 vs 2</option><option value="5v5">5 vs 5</option>';
+        } else {
+            formatSel.innerHTML = '<option value="1v1">1 vs 1</option><option value="5v5">5 vs 5</option>';
+        }
+    }
 
     function checkUserSession() {
         if (currentUser) {
@@ -221,11 +236,7 @@
     }
     checkUserSession();
 
-    function toggleChatWindow(id) {
-        let win = document.getElementById(id);
-        win.style.display = win.style.display === "flex" ? "none" : "flex";
-        if(id === 'user-support' && win.style.display === "flex") loadMessages(); 
-    }
+    function toggleChatWindow(id) { let win = document.getElementById(id); win.style.display = win.style.display === "flex" ? "none" : "flex"; if(id === 'user-support' && win.style.display === "flex") loadMessages(); }
 
     // ТУРНИРЫ
     async function loadTournaments() {
@@ -246,24 +257,23 @@
             }
 
             let keys = Object.keys(data).reverse(); 
+            let d = dictionary[currentLang];
 
             keys.forEach(key => {
                 let t = data[key];
                 let targetLink = currentUser ? "tournament.html?id=" + key : "auth.html";
                 
-                let authorDisplay = (t.author === "0m3gas") ? `<span class="author-tag admin">👑 Retro Cup</span>` : `<span class="author-tag">Орг: ${t.author || "Аноним"}</span>`;
-                
-                let actionButtons = `<a href="${targetLink}" class="enter-btn">К турниру</a>`;
-                if (currentUser === "0m3gas") {
-                    actionButtons += `<button class="del-tourney-btn" onclick="deleteTourney('${key}')">✖</button>`;
-                }
+                let authorDisplay = (t.author === "0m3gas") ? `<span class="author-tag admin">👑 Retro Cup</span>` : `<span class="author-tag">${d.org}${t.author || "..."}</span>`;
+                let actionButtons = `<a href="${targetLink}" class="enter-btn">${d.join}</a>`;
+                if (currentUser === "0m3gas") actionButtons += `<button class="del-tourney-btn" onclick="deleteTourney('${key}')">✖</button>`;
 
                 list.innerHTML += `
                     <div class="tourney-card">
                         <div class="tourney-info">
                             <h2>${t.name}</h2>
                             <p style="color: #a67cff; font-weight: bold;">${t.game} | ${t.format}</p>
-                            <p style="font-size: 12px; color: #8c8c9b;">Система: ${t.system}</p>
+                            <p style="font-size: 12px; color: #8c8c9b;">${d.sys}${t.system}</p>
+                            <p style="font-size: 12px;">${d.prize}${t.prize ? t.prize : d.no}</p>
                             ${authorDisplay}
                         </div>
                         <div class="action-area">
@@ -275,12 +285,7 @@
         } catch(e) {}
     }
 
-    async function deleteTourney(key) {
-        if(confirm("Отменить этот турнир?")) {
-            await fetch(dbBase + "tournaments/" + key + ".json", { method: "DELETE" });
-            lastTournamentsData = ""; loadTournaments();
-        }
-    }
+    async function deleteTourney(key) { if(confirm("Отменить этот турнир?")) { await fetch(dbBase + "tournaments/" + key + ".json", { method: "DELETE" }); lastTournamentsData = ""; loadTournaments(); } }
 
     // СОЗДАНИЕ
     function openProposeModal() { document.getElementById("proposeModal").style.display = "flex"; }
@@ -293,21 +298,20 @@
         let prize = document.getElementById("prop-prize").value;
         let rules = document.getElementById("prop-rules").value;
 
-        if (!name) return alert("Напиши название!");
-        if (rules.trim().length < 30) return alert("Минимум 30 символов в правилах!");
+        if (!name) return alert(currentLang === "RU" ? "Напиши название!" : "Enter title!");
+        if (rules.trim().length < 30) return alert(currentLang === "RU" ? "Минимум 30 символов в правилах!" : "Minimum 30 characters in rules!");
         
         let proposal = { author: currentUser, name: name, game: game, format: format, system: system, prize: prize, rules: rules, date: new Date().toLocaleString() };
         
         if (currentUser === "0m3gas") {
             await fetch(dbBase + "tournaments.json", { method: "POST", body: JSON.stringify(proposal) });
-            alert("Опубликовано!");
+            alert(currentLang === "RU" ? "Опубликовано!" : "Published!");
         } else {
             await fetch(dbBase + "proposals.json", { method: "POST", body: JSON.stringify(proposal) });
-            alert("Заявка улетела админу!");
+            alert(currentLang === "RU" ? "Заявка улетела админу!" : "Sent to admin!");
         }
         closeProposeModal();
-        document.getElementById("prop-name").value = "";
-        document.getElementById("prop-rules").value = "";
+        document.getElementById("prop-name").value = ""; document.getElementById("prop-rules").value = "";
         lastTournamentsData = ""; loadTournaments();
     }
 
@@ -335,7 +339,6 @@
             });
         }
     }
-
     function showProposalInfo(key) {
         let p = currentProposalsDict[key];
         if(!p) return;
@@ -345,13 +348,7 @@
         document.getElementById("info-rules").innerText = p.rules ? p.rules : "Не указаны";
         document.getElementById("adminInfoModal").style.display = "flex";
     }
-
-    async function approveTourney(key) {
-        let prop = currentProposalsDict[key];
-        await fetch(dbBase + "tournaments.json", { method: "POST", body: JSON.stringify(prop) });
-        await fetch(dbBase + "proposals/" + key + ".json", { method: "DELETE" });
-        lastTournamentsData = ""; loadAdminProposals(); loadTournaments();
-    }
+    async function approveTourney(key) { let prop = currentProposalsDict[key]; await fetch(dbBase + "tournaments.json", { method: "POST", body: JSON.stringify(prop) }); await fetch(dbBase + "proposals/" + key + ".json", { method: "DELETE" }); lastTournamentsData = ""; loadAdminProposals(); loadTournaments(); }
     async function rejectTourney(key) { await fetch(dbBase + "proposals/" + key + ".json", { method: "DELETE" }); loadAdminProposals(); }
 
     // ЧАТЫ
@@ -362,25 +359,18 @@
         let targetUser = role === 'user' ? currentUser : activeChatUser;
         let msg = { sender: role, text: text, time: new Date().toLocaleTimeString() };
         await fetch(dbBase + "support/" + targetUser + ".json", { method: "POST", body: JSON.stringify(msg) });
-        document.getElementById(inputId).value = "";
-        loadMessages();
+        document.getElementById(inputId).value = ""; loadMessages();
     }
-
     async function loadMessages() {
         if (!currentUser) return;
         try {
-            let res = await fetch(dbBase + "support.json");
-            let allChats = await res.json();
+            let res = await fetch(dbBase + "support.json"); let allChats = await res.json();
             if (currentUser !== "0m3gas") {
-                let hist = document.getElementById("user-chat-history");
-                hist.innerHTML = "";
+                let hist = document.getElementById("user-chat-history"); hist.innerHTML = "";
                 if (allChats && allChats[currentUser]) {
-                    Object.values(allChats[currentUser]).forEach(msg => {
-                        let msgClass = msg.sender === 'user' ? 'msg-right' : 'msg-left';
-                        hist.innerHTML += `<div class="chat-msg ${msgClass}">${msg.text} <br><span style="font-size:10px; color:#555;">${msg.time}</span></div>`;
-                    });
+                    Object.values(allChats[currentUser]).forEach(msg => { let msgClass = msg.sender === 'user' ? 'msg-right' : 'msg-left'; hist.innerHTML += `<div class="chat-msg ${msgClass}">${msg.text} <br><span style="font-size:10px; color:#555;">${msg.time}</span></div>`; });
                     hist.scrollTop = hist.scrollHeight; 
-                } else { hist.innerHTML = "<div style='text-align:center; color:#8c8c9b; margin-top:20px;'>Напишите свой вопрос, админ ответит здесь.</div>"; }
+                } else { hist.innerHTML = "<div style='text-align:center; color:#8c8c9b; margin-top:20px;'>Напишите свой вопрос...</div>"; }
             } else {
                 let list = document.getElementById("admin-chat-list");
                 if (activeChatUser === "") {
@@ -388,13 +378,9 @@
                     if (allChats) { Object.keys(allChats).forEach(user => { list.innerHTML += `<div class="chat-user-item" onclick="openAdminChatRoom('${user}')">Диалог: <strong>${user}</strong></div>`; });
                     } else { list.innerHTML = "<span style='color:#8c8c9b;'>Нет сообщений</span>"; }
                 } else {
-                    let hist = document.getElementById("admin-chat-history");
-                    hist.innerHTML = "";
+                    let hist = document.getElementById("admin-chat-history"); hist.innerHTML = "";
                     if (allChats && allChats[activeChatUser]) {
-                        Object.values(allChats[activeChatUser]).forEach(msg => {
-                            let msgClass = msg.sender === 'admin' ? 'msg-right' : 'msg-left';
-                            hist.innerHTML += `<div class="chat-msg ${msgClass}">${msg.text}</div>`;
-                        });
+                        Object.values(allChats[activeChatUser]).forEach(msg => { let msgClass = msg.sender === 'admin' ? 'msg-right' : 'msg-left'; hist.innerHTML += `<div class="chat-msg ${msgClass}">${msg.text}</div>`; });
                         hist.scrollTop = hist.scrollHeight;
                     }
                 }
