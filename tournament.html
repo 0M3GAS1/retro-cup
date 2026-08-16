@@ -1646,7 +1646,6 @@ function switchTab(tab) {
    ========================================================= */
 
 async function loadTournamentData(force = false) {
-
     if (loadingTournament && !force) {
         return;
     }
@@ -1654,323 +1653,156 @@ async function loadTournamentData(force = false) {
     loadingTournament = true;
 
     try {
-
-        const data =
-            await firebaseGet(
-                `tournaments/${safeFirebaseKey(tourneyId)}`
-            );
+        const data = await firebaseGet(`tournaments/${safeFirebaseKey(tourneyId)}`);
 
         if (!data) {
-
-            showToast(
-                "Турнир не найден.",
-                "error"
-            );
-
+            showToast("Турнир не найден.", "error");
             return;
         }
 
-        const currString =
-            JSON.stringify(data);
+        const currString = JSON.stringify(data);
 
-        if (
-            currString === cachedData &&
-            !force
-        ) {
+        if (currString === cachedData && !force) {
             return;
         }
 
         cachedData = currString;
 
-        tournamentFormat =
-            data.format || "";
-
-        tournamentSystem =
-            data.system || "";
-
-        maxLimit =
-            parseInt(data.maxPlayers) || 8;
-
-        tStatus =
-            data.status || "waiting";
-
-        matchResults =
-            data.matches || {};
-
+        tournamentFormat = data.format || "";
+        tournamentSystem = data.system || "";
+        maxLimit = parseInt(data.maxPlayers) || 8;
+        tStatus = data.status || "waiting";
+        matchResults = data.matches || {};
 
         /* HEADER */
+        document.getElementById("t-game").innerText = data.game || "Игра не указана";
+        document.getElementById("t-name").innerText = data.name || "Без названия";
 
-        document.getElementById("t-game")
-            .innerText =
-            data.game || "Игра не указана";
-
-        document.getElementById("t-name")
-            .innerText =
-            data.name || "Без названия";
-
-
-        const author =
-            document.getElementById("t-author");
-
+        const author = document.getElementById("t-author");
         if (data.author === ADMIN_USER) {
-
-            author.innerHTML =
-                `<span style="color:#ffcc00;">
-                    👑 Retro Cup
-                </span>`;
-
+            author.innerHTML = `<span style="color:#ffcc00;">👑 Retro Cup</span>`;
         } else {
-
-            author.innerText =
-                data.author || "Не указан";
+            author.innerText = data.author || "Не указан";
         }
 
-
-        document.getElementById("t-format")
-            .innerText =
-            data.format || "Не указан";
-
-        document.getElementById("t-system")
-            .innerText =
-            data.system || "Не указана";
-
-        document.getElementById("t-max")
-            .innerText =
-            maxLimit;
-
-        document.getElementById("t-prize")
-            .innerText =
-            data.prize || "Нет";
-
-        document.getElementById("t-rules")
-            .innerText =
-            data.rules || "Правила не указаны";
-
+        document.getElementById("t-format").innerText = data.format || "Не указан";
+        document.getElementById("t-system").innerText = data.system || "Не указана";
+        document.getElementById("t-max").innerText = maxLimit;
+        document.getElementById("t-prize").innerText = data.prize || "Нет";
+        document.getElementById("t-rules").innerText = data.rules || "Правила не указаны";
 
         /* STATUS */
-
         updateTournamentStatus();
 
-
-        /* ADMIN */
-
-        /* ADMIN */
-
-let adminBox =
-    document.getElementById(
-        "admin-controls"
-    );
-
-if (!adminBox) {
-
-    adminBox =
-        document.createElement("div");
-
-    adminBox.id =
-        "admin-controls";
-
-    const participantsBox =
-        document.querySelector(
-            ".participants-card"
-        );
-
-    if (participantsBox) {
-
-        participantsBox.prepend(
-            adminBox
-        );
-    }
-}
-
-updateAdminControls();
-
+        /* ADMIN - Вызываем ровно один раз! */
+        updateAdminControls();
 
         /* PLAYERS */
-
-        const result =
-            renderParticipants(data);
-
-        const validParticipants =
-            result.validParticipants;
-
+        const result = renderParticipants(data);
+        const validParticipants = result.validParticipants;
 
         /* SYSTEM */
-
         if (tournamentSystem === "Спидран") {
-
-            document.getElementById(
-                "bracket-section"
-            ).style.display = "none";
-
-            document.getElementById(
-                "tourney-tabs"
-            ).style.display = "none";
-
-            document.getElementById(
-                "leaderboard-section"
-            ).style.display = "none";
-
+            document.getElementById("bracket-section").style.display = "none";
+            document.getElementById("tourney-tabs").style.display = "none";
+            document.getElementById("leaderboard-section").style.display = "none";
         } else {
-
             if (tStatus === "finished") {
-
-                document.getElementById(
-                    "tourney-tabs"
-                ).style.display = "flex";
-
+                document.getElementById("tourney-tabs").style.display = "flex";
                 switchTab(currentTab);
-
             } else {
-
-                document.getElementById(
-                    "tourney-tabs"
-                ).style.display = "none";
-
-                document.getElementById(
-                    "leaderboard-section"
-                ).style.display = "none";
-
-                document.getElementById(
-                    "bracket-section"
-                ).style.display = "block";
+                document.getElementById("tourney-tabs").style.display = "none";
+                document.getElementById("leaderboard-section").style.display = "none";
+                document.getElementById("bracket-section").style.display = "block";
             }
         }
 
-
         /* BUTTON */
-
         updateJoinButton();
 
-
         /* BRACKET */
-
         if (tournamentSystem !== "Спидран") {
-
-            buildAndDrawBracket(
-                validParticipants,
-                maxLimit,
-                matchResults
-            );
+            buildAndDrawBracket(validParticipants, maxLimit, matchResults);
         }
 
     } catch (error) {
-
         console.error(error);
-
-        showToast(
-            "Не удалось загрузить данные турнира.",
-            "error"
-        );
-
+        showToast("Не удалось загрузить данные турнира.", "error");
     } finally {
-
         loadingTournament = false;
     }
 }
-
 
 /* =========================================================
    STATUS
    ========================================================= */
 
 function updateTournamentStatus() {
-
-    const badge =
-        document.getElementById(
-            "tourney-status-badge"
-        );
-
-    badge.className =
-        "status-badge";
+    const badge = document.getElementById("tourney-status-badge");
+    badge.className = "status-badge";
 
     if (tStatus === "waiting") {
-
-        badge.innerText =
-            "Ожидание игроков";
-
+        badge.innerText = "Ожидание игроков";
     } else if (tStatus === "active") {
-
-        badge.innerText =
-            "🔴 Турнир идёт";
-
+        badge.innerText = "🔴 Турнир идёт";
         badge.classList.add("active");
-
     } else if (tStatus === "finished") {
-
-        badge.innerText =
-            "🏆 Завершён";
-
+        badge.innerText = "🏆 Завершён";
         badge.classList.add("finished");
-
     } else {
-
-        badge.innerText =
-            tStatus;
+        badge.innerText = tStatus;
     }
 }
-
 
 /* =========================================================
    ADMIN CONTROLS
    ========================================================= */
 
 function updateAdminControls() {
-
-    const box =
-        document.getElementById(
-            "admin-controls"
-        );
+    const box = document.getElementById("admin-controls");
+    if (!box) return; // Защита от ошибок
 
     box.innerHTML = "";
 
+    // === ВЫВОДИМ В КОНСОЛЬ, ЧТОБЫ НАЙТИ ОШИБКУ ===
+    console.log("--- ПРОВЕРКА АДМИНА ---");
+    console.log("Кто сейчас сидит на сайте (currentUser):", currentUser);
+    console.log("Кого сайт считает админом (ADMIN_USER):", ADMIN_USER);
+    console.log("Какой статус у турнира в базе (tStatus):", tStatus);
+
     const isAdmin =
-        String(currentUser || "")
-            .trim()
-            .toLowerCase() ===
-        String(ADMIN_USER || "")
-            .trim()
-            .toLowerCase();
+        String(currentUser || "").trim().toLowerCase() ===
+        String(ADMIN_USER || "").trim().toLowerCase();
 
     if (!isAdmin) {
+        console.log("❌ Итог: Имена не совпали. Кнопки спрятаны.");
         return;
     }
 
-    if (tStatus === "waiting") {
+    console.log("✅ Итог: Имена совпали! Рисую кнопки...");
 
+    if (tStatus === "waiting") {
         box.innerHTML = `
-            <button
-                class="admin-start-btn"
-                onclick="changeStatus('active')"
-            >
+            <button class="admin-start-btn" onclick="changeStatus('active')">
                 🚀 Запустить турнир
             </button>
         `;
-
     } else if (tStatus === "active") {
-
         box.innerHTML = `
-            <button
-                class="admin-stop-btn"
-                onclick="changeStatus('finished')"
-            >
+            <button class="admin-stop-btn" onclick="changeStatus('finished')">
                 🏁 Завершить турнир
             </button>
         `;
-
     } else if (tStatus === "finished") {
-
         box.innerHTML = `
-            <button
-                class="admin-start-btn"
-                onclick="changeStatus('waiting')"
-            >
+            <button class="admin-start-btn" onclick="changeStatus('waiting')">
                 🔄 Открыть регистрацию
             </button>
         `;
+    } else {
+        console.log("⚠️ Внимание: Кнопка не появилась, потому что статус турнира странный ->", tStatus);
     }
 }
-
-
 /* =========================================================
    PARTICIPANTS
    ========================================================= */
