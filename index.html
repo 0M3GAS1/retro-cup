@@ -182,7 +182,6 @@
         <div class="row-2">
             <select id="prop-system" class="modal-input" style="flex: 1;">
                 <option value="Single Elimination">На вылет</option>
-                <option value="Double Elimination">Двойная сетка</option>
                 <option value="Спидран">Спидран</option>
             </select>
             <select id="prop-max" class="modal-input" style="flex: 1;">
@@ -310,7 +309,18 @@
             lastTournamentsData = currentDataString;
 
             let list = document.getElementById("tournament-list");
-            list.innerHTML = ""; 
+           // Вот так карточка станет кликабельной!
+list.innerHTML += `<div class="tourney-card" style="cursor: pointer; transition: 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#00ffcc';" onmouseout="this.style.transform='none'; this.style.borderColor='#1f1f26'; this.style.borderLeftColor='#a67cff';" onclick="window.location.href='tournament.html?id=${key}'">
+    <div class="tourney-info">
+        <h2>${t.name} ${adminTag}</h2>
+        <p>🎮 ${t.game} | 🏆 ${t.format} | 💰 ${t.prize ? t.prize : 'Без призовых'}</p>
+    </div>
+    <div class="action-area">
+        ${delBtn}
+        <!-- Кнопку делаем просто для красоты (pointer-events: none), клик работает по самой карточке -->
+        <span class="enter-btn" style="pointer-events: none;">Смотреть</span>
+    </div>
+</div>`;
             
             if (!data) {
                 list.innerHTML = `<div class="empty-state-btn" onclick="${currentUser ? 'openProposeModal()' : 'window.location.href=\'auth.html\''}"><div class="big-plus">+</div><div style="font-size: 18px; font-weight: bold; color: white;">${dictionary[currentLang].empty}</div></div>`;
