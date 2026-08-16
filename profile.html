@@ -158,13 +158,6 @@
         </div>
     </div>
 
-    <div class="profile-card">
-        <h2>История турниров</h2>
-        <div id="tournaments-history">
-            <p style="color: #8c8c9b; font-size: 14px;">Ты пока не участвовал ни в одном турнире. Время это исправить!</p>
-        </div>
-    </div>
-
     <div class="profile-card" style="border: 1px solid rgba(255, 60, 100, 0.3);">
         <h2 style="color: #ff3c64;">Активный матч</h2>
         <p style="color: #8c8c9b; font-size: 14px;">Сейчас у тебя нет активных игр.</p>
@@ -188,6 +181,14 @@
     </div>
 </div>
 
+    <!-- Блок аватарки -->
+<div style="text-align: center; margin-bottom: 15px;">
+    <img id="profile-avatar" src="https://i.imgur.com/XqT2J2K.png" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #a67cff; cursor: pointer; transition: 0.3s;" onclick="document.getElementById('avatar-input').click()" onmouseover="this.style.borderColor='#00ffcc'; this.style.transform='scale(1.05)';" onmouseout="this.style.borderColor='#a67cff'; this.style.transform='none';" title="Нажми, чтобы изменить аватарку">
+    
+    <!-- Скрытый инпут для выбора файла -->
+    <input type="file" id="avatar-input" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
+</div>
+
 <script>
     const dbUsersUrl = "https://retro-cup-51db5-default-rtdb.firebaseio.com/users/";
     let currentUser = localStorage.getItem("currentUser");
@@ -204,17 +205,54 @@
             let response = await fetch(dbUsersUrl + currentUser + ".json");
             let data = await response.json();
             
+            // Загрузка Steam ID
             if (data && data.steamCode) {
                 document.getElementById("display-steam").innerText = data.steamCode;
             } else {
                 document.getElementById("display-steam").innerText = "Не указан";
+            }
+
+            // ЗАГРУЗКА АВАТАРКИ
+            if (data && data.avatar) {
+                document.getElementById("profile-avatar").src = data.avatar;
             }
         } catch(e) {
             document.getElementById("display-steam").innerText = "Ошибка загрузки";
         }
     }
 
-    // --- ЛОГИКА ВСПЛЫВАЮЩЕГО ОКНА ---
+    // --- НОВАЯ ФУНКЦИЯ ДЛЯ ЗАГРУЗКИ АВАТАРКИ ---
+    async function uploadAvatar(event) {
+        let file = event.target.files[0];
+        if (!file) return;
+
+        // Ограничиваем вес файла до 800 КБ, чтобы база Firebase не перегружалась
+        if (file.size > 800 * 1024) { 
+            alert("Файл слишком большой! Выберите картинку весом до 800 КБ.");
+            return;
+        }
+
+        let reader = new FileReader();
+        reader.onload = async function(e) {
+            let base64Image = e.target.result; // Конвертируем картинку в текст (Base64)
+            
+            // Сразу отображаем новую картинку на экране
+            document.getElementById("profile-avatar").src = base64Image;
+
+            // Сохраняем в Firebase
+            try {
+                await fetch(dbUsersUrl + currentUser + ".json", {
+                    method: "PATCH",
+                    body: JSON.stringify({ avatar: base64Image })
+                });
+            } catch(err) {
+                alert("Ошибка при сохранении аватарки в базу данных!");
+            }
+        };
+        reader.readAsDataURL(file); // Запускаем процесс чтения файла
+    }
+
+    // --- ЛОГИКА ВСПЛЫВАЮЩЕГО ОКНА (STEAM CODE) ---
     function openModal() {
         document.getElementById("steamModal").style.display = "flex";
         // Подставляем текущий код в поле ввода
@@ -261,6 +299,5 @@
         window.location.href = "index.html";
     }
 </script>
-
 </body>
 </html>
