@@ -3146,19 +3146,15 @@
                 "tournament-list"
             );
 
-
         if (!list) {
             return;
         }
 
-
         createTournamentToolbar();
-
 
         /*
          * Firebase object -> array
          */
-
         let tournaments =
             Object.entries(
                 data || {}
@@ -3170,26 +3166,20 @@
                 })
             );
 
-
         /*
          * Статистика
          */
-
         renderStats(
             tournaments
         );
 
-
         /*
          * Поиск
          */
-
         if (searchQuery) {
-
             tournaments =
                 tournaments.filter(
                     t => {
-
                         const text =
                             [
                                 t.name,
@@ -3202,7 +3192,6 @@
                             .join(" ")
                             .toLowerCase();
 
-
                         return text.includes(
                             searchQuery
                         );
@@ -3210,16 +3199,13 @@
                 );
         }
 
-
         /*
          * Фильтр
          */
-
         if (
             currentTournamentFilter ===
             "active"
         ) {
-
             tournaments =
                 tournaments.filter(
                     t =>
@@ -3227,12 +3213,10 @@
                 );
         }
 
-
         if (
             currentTournamentFilter ===
             "finished"
         ) {
-
             tournaments =
                 tournaments.filter(
                     t =>
@@ -3240,45 +3224,32 @@
                 );
         }
 
-
         /*
          * Сначала активные,
          * потом завершённые.
          */
-
         tournaments.sort(
             (a, b) => {
-
                 const aFinished =
                     isTournamentFinished(a);
-
                 const bFinished =
                     isTournamentFinished(b);
-
 
                 if (
                     aFinished !==
                     bFinished
                 ) {
-
                     return aFinished
                         ? 1
                         : -1;
                 }
-
-
                 return 0;
             }
         );
 
-
         /*
          * Сигнатура.
-         *
-         * Каждые 30 секунд обновляем
-         * отображение дат/статусов.
          */
-
         const signature =
             JSON.stringify(
                 data
@@ -3294,7 +3265,6 @@
                 Date.now() / 30000
             );
 
-
         if (
             signature ===
             lastRenderSignature
@@ -3302,27 +3272,21 @@
             return;
         }
 
-
         lastRenderSignature =
             signature;
 
-
         list.innerHTML = "";
-
 
         /*
          * Если ничего нет
          */
-
         if (
             tournaments.length === 0
         ) {
-
             const hasData =
                 Object.keys(
                     data || {}
                 ).length > 0;
-
 
             if (
                 hasData &&
@@ -3332,33 +3296,24 @@
                     "all"
                 )
             ) {
-
                 list.innerHTML = `
-
                     <div
                         class="rc-no-results"
                     >
-
                         <div
                             class="rc-no-results-icon"
                         >
                             🔎
                         </div>
-
                         <strong>
                             ${dictionary[currentLang].noResults}
                         </strong>
-
                     </div>
-
                 `;
-
                 return;
             }
 
-
             list.innerHTML = `
-
                 <div
                     class="empty-state-btn"
                     onclick="${
@@ -3367,11 +3322,9 @@
                             : "window.location.href='auth.html'"
                     }"
                 >
-
                     <div class="big-plus">
                         +
                     </div>
-
                     <div
                         style="
                             font-size:18px;
@@ -3381,19 +3334,14 @@
                     >
                         ${dictionary[currentLang].empty}
                     </div>
-
                 </div>
-
             `;
-
             return;
         }
-
 
         /*
          * Все турниры завершены
          */
-
         const allFinished =
             tournaments.length > 0 &&
             tournaments.every(
@@ -3401,16 +3349,13 @@
                     isTournamentFinished(t)
             );
 
-
         if (
             allFinished &&
             currentTournamentFilter ===
             "all" &&
             !searchQuery
         ) {
-
             list.innerHTML += `
-
                 <div
                     style="
                         background:
@@ -3425,44 +3370,33 @@
                         font-size:12px;
                     "
                 >
-
                     🔴
                     ${dictionary[currentLang].allFinished}
-
                 </div>
-
             `;
         }
-
 
         const d =
             dictionary[currentLang];
 
-
         /*
          * Рисуем карточки
          */
-
         tournaments.forEach(
             t => {
-
                 const key =
                     t.key;
 
-
                 const status =
                     getTournamentStatus(t);
-
 
                 const finished =
                     status ===
                     "finished";
 
-
                 const running =
                     status ===
                     "running";
-
 
                 const targetLink =
                     currentUser
@@ -3470,26 +3404,19 @@
                           encodeURIComponent(key)
                         : "auth.html";
 
-
                 /*
                  * Автор
                  */
-
                 const authorDisplay =
                     t.author === "0m3gas"
-
                         ? `
-
                             <span
                                 class="author-tag admin"
                             >
                                 👑 Retro Cup
                             </span>
-
                         `
-
                         : `
-
                             <span
                                 class="author-tag"
                             >
@@ -3499,21 +3426,15 @@
                                     "..."
                                 )}
                             </span>
-
                         `;
-
 
                 /*
                  * Статус
                  */
-
                 let statusHTML;
 
-
                 if (finished) {
-
                     statusHTML = `
-
                         <div
                             class="
                                 tourney-status
@@ -3523,13 +3444,9 @@
                             🔴
                             ${d.finishedShort}
                         </div>
-
                     `;
-
                 } else if (running) {
-
                     statusHTML = `
-
                         <div
                             class="
                                 tourney-status
@@ -3539,13 +3456,9 @@
                             🟣
                             ${d.running}
                         </div>
-
                     `;
-
                 } else {
-
                     statusHTML = `
-
                         <div
                             class="
                                 tourney-status
@@ -3555,22 +3468,16 @@
                             🟢
                             ${d.registration}
                         </div>
-
                     `;
                 }
-
 
                 /*
                  * Действие
                  */
-
                 let actionButtons;
 
-
                 if (finished) {
-
                     actionButtons = `
-
                         <span
                             class="
                                 enter-btn
@@ -3580,37 +3487,26 @@
                             🔒
                             ${d.ended}
                         </span>
-
                     `;
-
                 } else {
-
+                    // ТУТ ИСПРАВЛЕНО: убрали pointer-events: none
                     actionButtons = `
-
                         <span
                             class="enter-btn"
-                            style="
-                                pointer-events:none;
-                            "
                         >
                             ${d.join}
                         </span>
-
                     `;
                 }
-
 
                 /*
                  * Админское удаление
                  */
-
                 if (
                     currentUser ===
                     "0m3gas"
                 ) {
-
                     actionButtons += `
-
                         <button
                             class="
                                 del-tourney-btn
@@ -3625,17 +3521,13 @@
                         >
                             ✖
                         </button>
-
                     `;
                 }
-
 
                 /*
                  * Дата окончания
                  */
-
                 let dateHTML = "";
-
 
                 const endValue =
                     t.endDate ||
@@ -3643,19 +3535,14 @@
                     t.finishedAt ||
                     t.endedAt;
 
-
                 if (endValue) {
-
                     const dateText =
                         formatDate(
                             endValue
                         );
 
-
                     if (dateText) {
-
                         dateHTML = `
-
                             <div
                                 class="tourney-date"
                             >
@@ -3665,21 +3552,17 @@
                                     dateText
                                 )}
                             </div>
-
                         `;
                     }
                 }
 
-
                 /*
                  * Создание карточки
                  */
-
                 const card =
                     document.createElement(
                         "div"
                     );
-
 
                 card.className =
                     "tourney-card" +
@@ -3689,24 +3572,19 @@
                             : ""
                     );
 
-
                 card.style.cursor =
                     "pointer";
 
-
                 card.innerHTML = `
-
                     <div
                         class="tourney-info"
                     >
-
                         <h2>
                             ${escapeHtml(
                                 t.name ||
                                 "Без названия"
                             )}
                         </h2>
-
 
                         <p
                             style="
@@ -3718,28 +3596,21 @@
                                 font-weight:bold;
                             "
                         >
-
                             ${escapeHtml(
                                 t.game || ""
                             )}
-
                             |
-
                             ${escapeHtml(
                                 t.format || ""
                             )}
-
                             ${d.max}
-
                             ${escapeHtml(
                                 String(
                                     t.maxPlayers ||
                                     8
                                 )
                             )}
-
                         </p>
-
 
                         <p
                             style="
@@ -3747,24 +3618,18 @@
                                 color:#8c8c9b;
                             "
                         >
-
                             ${d.sys}
-
                             ${escapeHtml(
                                 t.system || ""
                             )}
-
                         </p>
-
 
                         <p
                             style="
                                 font-size:12px;
                             "
                         >
-
                             ${d.prize}
-
                             ${
                                 t.prize
                                     ? escapeHtml(
@@ -3772,15 +3637,10 @@
                                     )
                                     : d.no
                             }
-
                         </p>
 
-
                         ${statusHTML}
-
-
                         ${dateHTML}
-
 
                         <div
                             style="
@@ -3789,34 +3649,26 @@
                         >
                             ${authorDisplay}
                         </div>
-
                     </div>
-
 
                     <div
                         class="action-area"
                     >
-
                         ${actionButtons}
-
                     </div>
-
                 `;
-
 
                 /*
                  * Переход на турнир.
+                 * Т.к. мы убрали pointer-events, клик на кнопку всплывет сюда, и переход сработает!
                  */
-
                 card.addEventListener(
                     "click",
                     function() {
-
                         window.location.href =
                             targetLink;
                     }
                 );
-
 
                 list.appendChild(
                     card
@@ -3824,7 +3676,6 @@
             }
         );
     }
-
 
     /* =========================================================
        УДАЛЕНИЕ ТУРНИРА
