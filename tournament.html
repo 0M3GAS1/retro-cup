@@ -4321,272 +4321,106 @@ async function changeStatus(
    ========================================================= */
 
 async function handleJoinClick() {
+    if (tStatus !== "waiting") { return; }
 
-    if (
-        tStatus !== "waiting"
-    ) {
-        return;
-    }
-
-
-    const button =
-        document.getElementById(
-            "action-btn"
-        );
-
-
+    const button = document.getElementById("action-btn");
     button.disabled = true;
-
+    button.innerText = "Загрузка..."; // Сразу показываем, что клик прошел
 
     try {
-
         if (isJoined) {
-
-            /*
-                LEAVE
-            */
-
-            if (
-                tournamentFormat === "2v2" ||
-                tournamentFormat === "5v5"
-            ) {
-
-                await firebaseDelete(
-                    `tournaments/${safeFirebaseKey(tourneyId)}/teams/${safeFirebaseKey(myTeamName)}/players/${safeFirebaseKey(currentUser)}`
-                );
-
+            // === ЛОГИКА ВЫХОДА ИЗ ТУРНИРА ===
+            if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
+                await fetch(`${dbBase}tournaments/${tourneyId}/teams/${myTeamName}/players/${currentUser}.json`, { method: "DELETE" });
             } else {
-
-                await firebaseDelete(
-                    `tournaments/${safeFirebaseKey(tourneyId)}/players/${safeFirebaseKey(currentUser)}`
-                );
+                await fetch(`${dbBase}tournaments/${tourneyId}/players/${currentUser}.json`, { method: "DELETE" });
             }
-
-
-            showToast(
-                "Вы вышли из турнира.",
-                "success"
-            );
-
+            alert("Вы вышли из турнира.");
 
         } else {
-
-            /*
-                JOIN
-            */
-
-            if (
-                tournamentFormat === "2v2" ||
-                tournamentFormat === "5v5"
-            ) {
-
-                const teamName =
-                    prompt(
-                        "Введите название команды:"
-                    );
-
-
-                if (
-                    !teamName ||
-                    !teamName.trim()
-                ) {
-
+            // === ЛОГИКА ВХОДА В ТУРНИР ===
+            if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
+                const teamName = prompt("Введите название команды:");
+                if (!teamName || !teamName.trim()) {
+                    button.disabled = false;
+                    updateJoinButton(); // Возвращаем кнопку в норму
                     return;
                 }
 
-
-                const cleanTeamName =
-                    teamName.trim();
-
-
-                if (
-                    cleanTeamName.length > 30
-                ) {
-
-                    showToast(
-                        "Название команды слишком длинное.",
-                        "error"
-                    );
-
+                const cleanTeamName = teamName.trim();
+                if (cleanTeamName.length > 30) {
+                    alert("Название команды слишком длинное.");
+                    button.disabled = false;
+                    updateJoinButton();
                     return;
                 }
 
+                // Проверяем, есть ли уже такая команда и сколько там человек
+                let res = await fetch(`${dbBase}tournaments/${tourneyId}/teams/${cleanTeamName}.json`);
+                let existingTeam = await res.json();
 
-                const teamPath =
-                    `tournaments/${safeFirebaseKey(tourneyId)}/teams/${safeFirebaseKey(cleanTeamName)}`;
+                if (existingTeam && existingTeam.players) {
+                    let currentPlayers = Object.keys(existingTeam.players).length;
+                    let maxTeamSize = (tournamentFormat === "2v2") ? 2 : 5;
 
+                    if (currentPlayers >= maxTeamSize) {
+                        alert("В этой команде уже нет свободных мест.");
+                        button.disabled = false;
+                        updateJoinButton();
+                        return;
+                    }
 
-                const existingTeam =
-                    await firebaseGet(
-                        teamPath
-                    );
-
-
-                if (
-                    existingTeam &&
-                    existingTeam.players &&
-                    Object.keys(
-                        existingTeam.players
-                    ).length >=
-                    (
-                        tournamentFormat === "2v2"
-                            ? 2
-                            : 5
-                    )
-                ) {
-
-                    showToast(
-                        "В этой команде уже нет свободных мест.",
-                        "error"
-                    );
-
-                    return;
+                    if (existingTeam.players[currentUser]) {
+                        alert("Вы уже состоите в этой команде.");
+                        button.disabled = false;
+                        updateJoinButton();
+                        return;
+                    }
                 }
 
+                const initialData = { time: new Date().toLocaleTimeString() };
+                if (tournamentSystem === "Спидран") initialData.runTime = "00:00:00";
 
-                if (
-                    existingTeam &&
-                    existingTeam.players &&
-                    existingTeam.players[currentUser]
-                ) {
-
-                    showToast(
-                        "Вы уже состоите в этой команде.",
-                        "error"
-                    );
-
-                    return;
+                if (!existingTeam && tournamentSystem === "Спидран") {
+                    await fetch(`${dbBase}tournaments/${tourneyId}/teams/${cleanTeamName}.json`, { method: "PATCH", body: JSON.stringify({ runTime: "00:00:00" }) });
                 }
 
-
-                const initialData = {
-                    time:
-                        new Date()
-                            .toLocaleTimeString()
-                };
-
-
-                if (
-                    tournamentSystem ===
-                    "Спидран"
-                ) {
-
-                    initialData.runTime =
-                        "00:00:00";
-                }
-
-
-                if (
-                    !existingTeam
-                ) {
-
-                    await firebasePatch(
-                        teamPath,
-                        {
-                            runTime:
-                                tournamentSystem === "Спидран"
-                                    ? "00:00:00"
-                                    : undefined
-                        }
-                    );
-                }
-
-
-                await firebasePut(
-                    `${teamPath}/players/${safeFirebaseKey(currentUser)}`,
-                    initialData
-                );
-
-
-                showToast(
-                    "Вы зарегистрированы!",
-                    "success"
-                );
-
+                await fetch(`${dbBase}tournaments/${tourneyId}/teams/${cleanTeamName}/players/${currentUser}.json`, { method: "PUT", body: JSON.stringify(initialData) });
+                alert("Вы успешно зарегистрированы в команду!");
 
             } else {
+                // === СОЛО ЛОГИКА (1v1) ===
+                let res = await fetch(`${dbBase}tournaments/${tourneyId}/players.json`);
+                let players = await res.json();
+                
+                const playerCount = players ? Object.keys(players).length : 0;
 
-                /*
-                    SOLO
-                */
-
-                const players =
-                    await firebaseGet(
-                        `tournaments/${safeFirebaseKey(tourneyId)}/players`
-                    );
-
-
-                const playerCount =
-                    players
-                        ? Object.keys(players).length
-                        : 0;
-
-
-                if (
-                    playerCount >= maxLimit
-                ) {
-
-                    showToast(
-                        "Все места уже заняты.",
-                        "error"
-                    );
-
+                if (playerCount >= maxLimit) {
+                    alert("Все места уже заняты. Турнир заполнен!");
+                    button.disabled = false;
+                    updateJoinButton();
                     return;
                 }
 
+                const initialData = { time: new Date().toLocaleTimeString() };
+                if (tournamentSystem === "Спидран") initialData.runTime = "00:00:00";
 
-                const initialData = {
-                    time:
-                        new Date()
-                            .toLocaleTimeString()
-                };
-
-
-                if (
-                    tournamentSystem ===
-                    "Спидран"
-                ) {
-
-                    initialData.runTime =
-                        "00:00:00";
-                }
-
-
-                await firebasePut(
-                    `tournaments/${safeFirebaseKey(tourneyId)}/players/${safeFirebaseKey(currentUser)}`,
-                    initialData
-                );
-
-
-                showToast(
-                    "Вы зарегистрированы!",
-                    "success"
-                );
+                await fetch(`${dbBase}tournaments/${tourneyId}/players/${currentUser}.json`, { method: "PUT", body: JSON.stringify(initialData) });
+                alert("Вы успешно зарегистрированы!");
             }
         }
 
-
+        // Обновляем данные на странице
         cachedData = "";
-
-        await loadTournamentData(
-            true
-        );
+        loadTournamentData(); 
 
     } catch (error) {
-
         console.error(error);
-
-        showToast(
-            "Произошла ошибка. Попробуйте ещё раз.",
-            "error"
-        );
-
-    } finally {
-
+        alert("Произошла ошибка соединения с базой. Попробуйте ещё раз.");
         button.disabled = false;
+        updateJoinButton();
     }
 }
-
 
 /* =========================================================
    KEYBOARD
