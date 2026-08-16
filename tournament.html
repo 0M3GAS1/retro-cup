@@ -1741,7 +1741,8 @@ function updateTournamentStatus() {
     const badge = document.getElementById("tourney-status-badge");
     badge.className = "status-badge";
 
-    if (tStatus === "waiting") {
+    // ✅ ДОБАВИЛИ ПРОВЕРКУ НА "registration"
+    if (tStatus === "waiting" || tStatus === "registration") {
         badge.innerText = "Ожидание игроков";
     } else if (tStatus === "active") {
         badge.innerText = "🔴 Турнир идёт";
@@ -1764,24 +1765,16 @@ function updateAdminControls() {
 
     box.innerHTML = "";
 
-    // === ВЫВОДИМ В КОНСОЛЬ, ЧТОБЫ НАЙТИ ОШИБКУ ===
-    console.log("--- ПРОВЕРКА АДМИНА ---");
-    console.log("Кто сейчас сидит на сайте (currentUser):", currentUser);
-    console.log("Кого сайт считает админом (ADMIN_USER):", ADMIN_USER);
-    console.log("Какой статус у турнира в базе (tStatus):", tStatus);
-
     const isAdmin =
         String(currentUser || "").trim().toLowerCase() ===
         String(ADMIN_USER || "").trim().toLowerCase();
 
     if (!isAdmin) {
-        console.log("❌ Итог: Имена не совпали. Кнопки спрятаны.");
         return;
     }
 
-    console.log("✅ Итог: Имена совпали! Рисую кнопки...");
-
-    if (tStatus === "waiting") {
+    // ✅ ДОБАВИЛИ ПРОВЕРКУ НА "registration" ТУТ ТОЖЕ
+    if (tStatus === "waiting" || tStatus === "registration") {
         box.innerHTML = `
             <button class="admin-start-btn" onclick="changeStatus('active')">
                 🚀 Запустить турнир
@@ -1799,8 +1792,6 @@ function updateAdminControls() {
                 🔄 Открыть регистрацию
             </button>
         `;
-    } else {
-        console.log("⚠️ Внимание: Кнопка не появилась, потому что статус турнира странный ->", tStatus);
     }
 }
 /* =========================================================
