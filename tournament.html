@@ -8,18 +8,14 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { background-color: #0b0b0e; color: #e0e0e0; font-family: 'Inter', sans-serif; margin: 0; padding: 0; padding-bottom: 50px; }
         
-        .top-nav { background: #141419; padding: 15px 20px; border-bottom: 1px solid #1f1f26; }
+        .top-nav { background: #141419; padding: 15px 20px; border-bottom: 1px solid #1f1f26; display: flex; justify-content: space-between; align-items: center;}
         .nav-link { color: #8c8c9b; text-decoration: none; font-size: 14px; font-weight: bold; }
         .nav-link:hover { color: white; }
+        .lang-btn { background: transparent; color: #8c8c9b; border: 1px solid #333; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;}
 
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
 
-        /* СТИЛЬ WARGAMING - ШАПКА */
-        .wg-header { 
-            background: linear-gradient(90deg, #1a1a24 0%, #111116 100%); 
-            border: 1px solid #2a2a35; border-radius: 8px; padding: 30px; 
-            margin-bottom: 20px; border-top: 4px solid #a67cff;
-        }
+        .wg-header { background: linear-gradient(90deg, #1a1a24 0%, #111116 100%); border: 1px solid #2a2a35; border-radius: 8px; padding: 30px; margin-bottom: 20px; border-top: 4px solid #a67cff; }
         .wg-game { color: #a67cff; font-weight: 900; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; margin-bottom: 10px;}
         .wg-title { font-size: 32px; color: white; margin: 0 0 15px 0; font-weight: 900; }
         
@@ -29,16 +25,13 @@
         .meta-val { color: white; font-weight: bold; font-size: 15px; }
         .meta-val.green { color: #00ffcc; }
 
-        /* СЕТКА (ЛЕВО И ПРАВО) */
         .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         @media (max-width: 768px) { .content-grid { grid-template-columns: 1fr; } }
 
-        /* ЛЕВЫЙ БЛОК (ОПИСАНИЕ) */
         .wg-card { background: #141419; border: 1px solid #1f1f26; border-radius: 8px; padding: 25px; }
         .wg-card-title { color: white; margin-top: 0; font-size: 18px; font-weight: 900; margin-bottom: 20px; text-transform: uppercase; }
         .rules-text { color: #aaa; line-height: 1.6; font-size: 14px; white-space: pre-wrap; }
 
-        /* ПРАВЫЙ БЛОК (РЕГИСТРАЦИЯ) */
         .action-box { background: #1a1a24; border: 1px solid #2a2a35; border-radius: 8px; padding: 25px; text-align: center; position: sticky; top: 20px;}
         .status-text { color: #00ffcc; font-weight: bold; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; }
         
@@ -48,48 +41,52 @@
         .wg-btn.leave:hover { background: #ff3c64; color: white; }
 
         .players-title { color: #8c8c9b; font-size: 12px; text-transform: uppercase; margin-top: 25px; margin-bottom: 10px; text-align: left;}
-        .players-list { display: flex; flex-direction: column; gap: 8px; text-align: left; max-height: 250px; overflow-y: auto;}
-        .player-item { background: #0b0b0e; padding: 10px; border-radius: 4px; font-size: 13px; border-left: 3px solid #333; }
+        .players-list { display: flex; flex-direction: column; gap: 8px; text-align: left; max-height: 400px; overflow-y: auto;}
+        
+        /* КОМАНДНЫЙ СТИЛЬ */
+        .team-block { border: 1px solid #333; border-radius: 6px; padding: 10px; background: #0b0b0e; margin-bottom: 10px;}
+        .team-name { color: #a67cff; font-weight: bold; font-size: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
+        .invite-btn { background: #333; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+        .invite-btn:hover { background: #a67cff; }
+
+        .player-item { padding: 5px; font-size: 13px; border-left: 2px solid #333; margin-left: 5px; color: #ccc;}
         .player-item.me { border-left-color: #00ffcc; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="top-nav">
-    <div class="container" style="padding: 0;">
-        <a href="index.html" class="nav-link">← Вернуться к списку турниров</a>
+    <div class="container" style="padding: 0; width: 100%; display: flex; justify-content: space-between;">
+        <a href="index.html" class="nav-link" id="txt-back">← Назад к списку</a>
+        <button class="lang-btn" onclick="toggleLanguage()" id="lang-toggle">RU</button>
     </div>
 </div>
 
 <div class="container">
-    <!-- ШАПКА WARGAMING -->
     <div class="wg-header">
         <div class="wg-game" id="t-game">⏳ Загрузка...</div>
         <h1 class="wg-title" id="t-name">...</h1>
         
         <div class="wg-meta-grid">
-            <div class="meta-box"><span class="meta-label">Организатор</span><span class="meta-val" id="t-author">...</span></div>
-            <div class="meta-box"><span class="meta-label">Формат</span><span class="meta-val" id="t-format">...</span></div>
-            <div class="meta-box"><span class="meta-label">Система</span><span class="meta-val" id="t-system">...</span></div>
-            <div class="meta-box"><span class="meta-label">Призовые</span><span class="meta-val green" id="t-prize">...</span></div>
+            <div class="meta-box"><span class="meta-label" id="lbl-org">Организатор</span><span class="meta-val" id="t-author">...</span></div>
+            <div class="meta-box"><span class="meta-label" id="lbl-fmt">Формат</span><span class="meta-val" id="t-format">...</span></div>
+            <div class="meta-box"><span class="meta-label" id="lbl-sys">Система</span><span class="meta-val" id="t-system">...</span></div>
+            <div class="meta-box"><span class="meta-label" id="lbl-prz">Призовые</span><span class="meta-val green" id="t-prize">...</span></div>
         </div>
     </div>
 
-    <!-- КОНТЕНТ -->
     <div class="content-grid">
-        <!-- СЛЕВА: ПРАВИЛА -->
         <div class="wg-card">
-            <h2 class="wg-card-title">Описание и Регламент</h2>
+            <h2 class="wg-card-title" id="txt-rules-head">Описание и Регламент</h2>
             <div class="rules-text" id="t-rules">Загрузка информации...</div>
         </div>
 
-        <!-- СПРАВА: РЕГИСТРАЦИЯ -->
         <div>
             <div class="action-box">
                 <div class="status-text" id="join-status">Регистрация открыта</div>
-                <button class="wg-btn" id="action-btn" onclick="toggleJoin()">Зарегистрироваться</button>
+                <button class="wg-btn" id="action-btn" onclick="handleJoinClick()">Зарегистрироваться</button>
 
-                <div class="players-title">Участники (<span id="t-count">0</span>)</div>
+                <div class="players-title"><span id="txt-participants">Участники</span> (<span id="t-count">0</span>)</div>
                 <div class="players-list" id="players-container">
                     <div style="color:#555; font-size:12px;">Пока пусто.</div>
                 </div>
@@ -103,10 +100,30 @@
     let currentUser = localStorage.getItem("currentUser");
     const urlParams = new URLSearchParams(window.location.search);
     const tourneyId = urlParams.get('id');
+    const inviteParam = urlParams.get('invite'); // ПАРАМЕТР ИНВАЙТА
 
     if (!tourneyId || !currentUser) window.location.href = "index.html";
 
+    // ПЕРЕВОД
+    let currentLang = localStorage.getItem("siteLang") || "RU";
+    const dict = {
+        "RU": { back: "← Назад к списку", org: "Организатор", fmt: "Формат", sys: "Система", prz: "Призовые", rules: "Описание и Регламент", part: "Участники", empty: "Без призовых", none: "Нет описания", join: "Регистрация открыта", btnJ: "УЧАСТВОВАТЬ", btnL: "✖ ОТМЕНИТЬ УЧАСТИЕ", joined: "Вы в турнире", inv: "[+] Пригласить", teamP: "Введите название вашей команды:", teamC: "Приглашение скопировано!\nОтправь эту ссылку другу.", teamInvQ: "Вас приглашают в команду: " },
+        "EN": { back: "← Back to List", org: "Organizer", fmt: "Format", sys: "System", prz: "Prize", rules: "Rules & Details", part: "Participants", empty: "No prize", none: "No description", join: "Registration Open", btnJ: "JOIN NOW", btnL: "✖ LEAVE", joined: "You are joined", inv: "[+] Invite", teamP: "Enter your Team Name:", teamC: "Invite link copied!\nSend it to your friend.", teamInvQ: "You are invited to team: " }
+    };
+    function applyLanguage() {
+        let d = dict[currentLang];
+        document.getElementById("lang-toggle").innerText = currentLang;
+        document.getElementById("txt-back").innerText = d.back; document.getElementById("lbl-org").innerText = d.org;
+        document.getElementById("lbl-fmt").innerText = d.fmt; document.getElementById("lbl-sys").innerText = d.sys;
+        document.getElementById("lbl-prz").innerText = d.prz; document.getElementById("txt-rules-head").innerText = d.rules;
+        document.getElementById("txt-participants").innerText = d.part;
+    }
+    function toggleLanguage() { currentLang = currentLang === "RU" ? "EN" : "RU"; localStorage.setItem("siteLang", currentLang); applyLanguage(); loadTournamentData(); }
+    applyLanguage();
+
     let isJoined = false; 
+    let myTeamName = ""; 
+    let tournamentFormat = "";
 
     async function loadTournamentData() {
         try {
@@ -114,64 +131,125 @@
             let data = await res.json();
             if (!data) return;
 
+            tournamentFormat = data.format; // 1v1, 2v2 или 5v5
+
             document.getElementById("t-game").innerText = data.game;
             document.getElementById("t-name").innerText = data.name;
             document.getElementById("t-author").innerHTML = data.author === "0m3gas" ? "<span style='color:#ffcc00;'>👑 Retro Cup</span>" : data.author;
-            
-            // НОВЫЕ ПОЛЯ
             document.getElementById("t-format").innerText = data.format || "Не указан";
             document.getElementById("t-system").innerText = data.system || "Не указана";
-            
-            document.getElementById("t-prize").innerText = data.prize ? data.prize : "Без призовых";
-            document.getElementById("t-rules").innerText = data.rules ? data.rules : "Описания нет.";
+            document.getElementById("t-prize").innerText = data.prize ? data.prize : dict[currentLang].empty;
+            document.getElementById("t-rules").innerText = data.rules ? data.rules : dict[currentLang].none;
 
             let pContainer = document.getElementById("players-container");
             pContainer.innerHTML = "";
             isJoined = false;
+            myTeamName = "";
             let pCount = 0;
 
-            if (data.players) {
-                let players = Object.keys(data.players);
-                pCount = players.length;
-                players.forEach(p => {
-                    if (p === currentUser) isJoined = true; 
-                    let meClass = (p === currentUser) ? "me" : "";
-                    let meText = (p === currentUser) ? " (Твоя команда)" : "";
-                    pContainer.innerHTML += `<div class="player-item ${meClass}">🎮 ${p}${meText}</div>`;
-                });
-            } else {
-                pContainer.innerHTML = "<div style='color:#555; font-size:12px;'>Никто не зарегистрировался.</div>";
+            // ЕСЛИ ЭТО КОМАНДНЫЙ ТУРНИР (2v2, 5v5)
+            if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
+                if (data.teams) {
+                    Object.keys(data.teams).forEach(tName => {
+                        let members = data.teams[tName].players ? Object.keys(data.teams[tName].players) : [];
+                        pCount += members.length;
+                        
+                        let teamHTML = `<div class="team-block"><div class="team-name">${tName}`;
+                        
+                        // Если я в этой команде - даем мне кнопку ИНВАЙТА
+                        if (members.includes(currentUser)) {
+                            isJoined = true;
+                            myTeamName = tName;
+                            teamHTML += `<button class="invite-btn" onclick="copyInvite('${tName}')">${dict[currentLang].inv}</button>`;
+                        }
+                        teamHTML += `</div>`; // закрываем team-name
+
+                        members.forEach(m => {
+                            let meClass = (m === currentUser) ? "me" : "";
+                            teamHTML += `<div class="player-item ${meClass}">🎮 ${m}</div>`;
+                        });
+                        teamHTML += `</div>`;
+                        pContainer.innerHTML += teamHTML;
+                    });
+                }
+            } 
+            // ЕСЛИ ЭТО СОЛО ТУРНИР (1v1)
+            else {
+                if (data.players) {
+                    let players = Object.keys(data.players);
+                    pCount = players.length;
+                    players.forEach(p => {
+                        if (p === currentUser) isJoined = true; 
+                        let meClass = (p === currentUser) ? "me" : "";
+                        pContainer.innerHTML += `<div class="player-item ${meClass}">🎮 ${p}</div>`;
+                    });
+                }
             }
             
+            if (pContainer.innerHTML === "") pContainer.innerHTML = "<div style='color:#555; font-size:12px;'>Пусто.</div>";
             document.getElementById("t-count").innerText = pCount;
 
+            // НАСТРОЙКА КНОПКИ
             let btn = document.getElementById("action-btn");
             let txt = document.getElementById("join-status");
 
             if (isJoined) {
-                btn.innerText = "✖ Отменить участие";
+                btn.innerText = dict[currentLang].btnL;
                 btn.className = "wg-btn leave";
-                txt.innerText = "Вы участвуете в турнире";
+                txt.innerText = dict[currentLang].joined;
             } else {
-                btn.innerText = "Зарегистрироваться";
+                btn.innerText = dict[currentLang].btnJ;
                 btn.className = "wg-btn";
-                txt.innerText = "Регистрация открыта";
+                txt.innerText = dict[currentLang].join;
             }
+
+            // ОБРАБОТКА ИНВАЙТ-ССЫЛКИ (Если перешел от друга)
+            if (inviteParam && !isJoined) {
+                let checkJoin = confirm(dict[currentLang].teamInvQ + "'" + inviteParam + "'?");
+                if(checkJoin) {
+                    await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + inviteParam + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify({ time: new Date().toLocaleTimeString() }) });
+                    // Очищаем ссылку, чтобы не спрашивало постоянно
+                    window.history.replaceState(null, null, window.location.pathname + "?id=" + tourneyId);
+                    loadTournamentData();
+                }
+            }
+
         } catch (e) {}
     }
 
-    async function toggleJoin() {
+    async function handleJoinClick() {
         let btn = document.getElementById("action-btn");
-        btn.innerText = "Обработка...";
         btn.disabled = true;
 
         if (isJoined) {
-            await fetch(dbBase + "tournaments/" + tourneyId + "/players/" + currentUser + ".json", { method: "DELETE" });
+            // ВЫХОД
+            if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
+                await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + myTeamName + "/players/" + currentUser + ".json", { method: "DELETE" });
+            } else {
+                await fetch(dbBase + "tournaments/" + tourneyId + "/players/" + currentUser + ".json", { method: "DELETE" });
+            }
         } else {
-            await fetch(dbBase + "tournaments/" + tourneyId + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify({ time: new Date().toLocaleTimeString() }) });
+            // ВХОД
+            if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
+                // КОМАНДНЫЙ
+                let tName = prompt(dict[currentLang].teamP);
+                if (!tName || tName.trim() === "") { btn.disabled = false; return; }
+                await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + tName.trim() + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify({ time: new Date().toLocaleTimeString() }) });
+            } else {
+                // СОЛО
+                await fetch(dbBase + "tournaments/" + tourneyId + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify({ time: new Date().toLocaleTimeString() }) });
+            }
         }
         btn.disabled = false;
         loadTournamentData(); 
+    }
+
+    // КОПИРОВАНИЕ ИНВАЙТ-ССЫЛКИ
+    function copyInvite(teamName) {
+        let link = window.location.origin + window.location.pathname + "?id=" + tourneyId + "&invite=" + encodeURIComponent(teamName);
+        navigator.clipboard.writeText(link).then(() => {
+            alert(dict[currentLang].teamC);
+        });
     }
 
     loadTournamentData();
