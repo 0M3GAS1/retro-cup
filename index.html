@@ -747,7 +747,7 @@
 
 
     <!-- =========================
-         ДИСКЛЕЙМЕР
+         ДИСКЛЕЙМЕР + НОВЫЕ ССЫЛКИ
     ========================= -->
 
     <div class="disclaimer">
@@ -761,6 +761,18 @@
         <span id="txt-disclaimer">
             Сайт Retro Cup является платформой для публикации информации и не несёт ответственности за турниры, созданные пользователями. Организация, правила и любые финансовые операции осуществляются создателем турнира.
         </span>
+
+        <br><br>
+
+        <a href="#" onclick="openAboutModal(); return false;" style="color: #00ffcc; text-decoration: underline; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">
+            Все об сайте
+        </a>
+
+        <br><br>
+
+        <a href="https://discord.gg/e6BRP94dq6" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; color: #a67cff; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid #a67cff; padding: 6px 10px; border-radius: 8px; transition: 0.2s;">
+            <span style="font-size: 14px;">💬</span> Discord Сервер
+        </a>
 
     </div>
 
@@ -1108,6 +1120,99 @@
 
     </div>
 
+</div>
+
+<!-- =========================
+     МОДАЛКА "ВСЕ ОБ САЙТЕ" (НОВАЯ)
+========================= -->
+
+<div
+    class="modal-overlay"
+    id="aboutModal"
+    onclick="if(event.target === this) closeAboutModal()"
+>
+
+    <div
+        class="modal-box"
+        style="
+            max-width: 520px;
+            border-color: #2a2a35;
+            background: linear-gradient(180deg, #17171f 0%, #141419 100%);
+        "
+        onclick="event.stopPropagation()"
+    >
+
+        <h2
+            style="
+                margin: 0 0 18px;
+                color: #fff;
+                font-size: 20px;
+                font-weight: 900;
+                border-bottom: 2px solid #a67cff;
+                padding-bottom: 10px;
+            "
+        >
+            О Retro Cup
+        </h2>
+
+        <!-- БЕЗОПАСНОСТЬ -->
+        <div style="margin-bottom: 22px;">
+            <h3 style="color: #ffcc00; margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">
+                Безопасность и ответственность
+            </h3>
+            <p style="color: #aaa; font-size: 13px; line-height: 1.6; margin: 0;">
+                Retro Cup — это независимая информационная платформа для публикации турнирных данных. Мы не являемся организаторами мероприятий, не принимаем платежи и не несем ответственности за действия пользователей или результаты соревнований. Все финансовые операции, правила и дисциплинарные решения полностью лежат на авторе турнира. Данные участников обрабатываются только в рамках функционирования сервиса (Firebase Realtime Database) и не передаются третьим лицам.
+            </p>
+        </div>
+
+        <!-- РЕЖИМЫ -->
+        <div style="margin-bottom: 22px;">
+            <h3 style="color: #00ffcc; margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">
+                Режимы турниров
+            </h3>
+
+            <div style="background: #0b0b0e; border: 1px solid #2a2a35; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+                <h4 style="margin: 0 0 6px; color: white; font-size: 14px;">
+                    Обычная система (Single Elimination)
+                </h4>
+                <p style="color: #aaa; font-size: 12px; line-height: 1.5; margin: 0;">
+                    Классическая сетка на вылет. Участники распределяются по парам в сетке. Победитель матча проходит дальше, проигравший выбывает из турнира. Победитель финала становится чемпионом. Этот режим подходит для соревнований с прямой конфронтацией (например, CS 2 или Dota 2 в форматах 1v1, 2v2, 5v5).
+                </p>
+            </div>
+
+            <div style="background: #0b0b0e; border: 1px solid #2a2a35; border-radius: 10px; padding: 14px;">
+                <h4 style="margin: 0 0 6px; color: #a67cff; font-size: 14px;">
+                    Система Спидран (Speedrun)
+                </h4>
+                <p style="color: #aaa; font-size: 12px; line-height: 1.5; margin: 0;">
+                    Режим на скорость прохождения. Участники или команды выполняют задание независимо друг от друга и фиксируют свое лучшее время. Побеждает тот, кто показал минимальное время в таблице лидеров. Никаких прямых матчей не проводится — результат формируется автоматически по итогам подачи времени.
+                </p>
+            </div>
+        </div>
+
+        <button
+            onclick="closeAboutModal()"
+            style="
+                width: 100%;
+                padding: 12px;
+                background: #a67cff;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: 900;
+                font-size: 14px;
+                cursor: pointer;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                transition: .2s;
+            "
+            onmouseover="this.style.background='#8c5cff'"
+            onmouseout="this.style.background='#a67cff'"
+        >
+            Понятно
+        </button>
+
+    </div>
 </div>
 
 
@@ -3782,6 +3887,23 @@
         }
     }
 
+    /* =========================================================
+       МОДАЛКА "ВСЕ ОБ САЙТЕ"
+    ========================================================= */
+
+    function openAboutModal() {
+        const modal = document.getElementById("aboutModal");
+        if (modal) {
+            modal.style.display = "flex";
+        }
+    }
+
+    function closeAboutModal() {
+        const modal = document.getElementById("aboutModal");
+        if (modal) {
+            modal.style.display = "none";
+        }
+    }
 
     async function sendTourneyProposal() {
 
