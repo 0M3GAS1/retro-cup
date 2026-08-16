@@ -167,25 +167,6 @@
 
     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
     
-    <!-- Аватарка -->
-    <img id="profile-avatar" src="https://i.imgur.com/XqT2J2K.png" 
-        style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #a67cff; cursor: pointer; transition: 0.3s; flex-shrink: 0;" 
-        onclick="document.getElementById('avatar-input').click()" 
-        onmouseover="this.style.borderColor='#00ffcc';" 
-        onmouseout="this.style.borderColor='#a67cff';" 
-        title="Нажми, чтобы изменить аватарку">
-    
-    <!-- Скрытый инпут для загрузки картинки -->
-    <input type="file" id="avatar-input" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
-    
-    <!-- Твой блок с ником -->
-    <div>
-        <div style="color: #8c8c9b; font-size: 12px; text-transform: uppercase;">Профиль игрока</div>
-        <h1 id="welcome-text" style="margin: 0; color: white; font-size: 24px;">...</h1>
-    </div>
-
-</div>
-
 <script>
     const dbUsersUrl = "https://retro-cup-51db5-default-rtdb.firebaseio.com/users/";
     let currentUser = localStorage.getItem("currentUser");
