@@ -1,704 +1,4650 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Retro Cup | Турнир</title>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-        body { background-color: #0b0b0e; color: #e0e0e0; font-family: 'Inter', sans-serif; margin: 0; padding: 0; padding-bottom: 50px; }
-        .top-nav { background: #141419; padding: 15px 20px; border-bottom: 1px solid #1f1f26; display: flex; justify-content: space-between; align-items: center;}
-        .nav-link { color: #8c8c9b; text-decoration: none; font-size: 14px; font-weight: bold; }
-        .nav-link:hover { color: white; }
-        .lang-btn { background: transparent; color: #8c8c9b; border: 1px solid #333; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;}
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        :root {
+            --bg: #09090c;
+            --bg2: #0f0f14;
+            --card: #141419;
+            --card2: #1a1a22;
+            --border: #272731;
+            --border2: #343440;
 
-        .wg-header { background: linear-gradient(90deg, #1a1a24 0%, #111116 100%); border: 1px solid #2a2a35; border-radius: 8px; padding: 30px; margin-bottom: 20px; border-top: 4px solid #a67cff; position: relative; overflow: hidden;}
-        
-        .status-badge { position: absolute; top: 20px; right: 20px; background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .status-badge.active { background: #00ffcc; color: black; box-shadow: 0 0 15px rgba(0,255,204,0.5); animation: pulse 2s infinite; }
-        .status-badge.finished { background: #ffcc00; color: black; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+            --text: #f5f5f7;
+            --muted: #858592;
+            --muted2: #5e5e69;
 
-        .wg-game { color: #a67cff; font-weight: 900; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; margin-bottom: 10px;}
-        .wg-title { font-size: 32px; color: white; margin: 0 0 15px 0; font-weight: 900; }
-        .wg-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-top: 20px; border-top: 1px solid #2a2a35; padding-top: 20px;}
-        .meta-box { display: flex; flex-direction: column; gap: 5px; }
-        .meta-label { color: #8c8c9b; font-size: 12px; text-transform: uppercase; }
-        .meta-val { color: white; font-weight: bold; font-size: 15px; }
-        .meta-val.green { color: #00ffcc; }
+            --purple: #a67cff;
+            --purple2: #8c5cff;
 
-        .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 40px;}
-        @media (max-width: 768px) { .content-grid { grid-template-columns: 1fr; } }
+            --green: #00ffcc;
+            --yellow: #ffcc00;
+            --red: #ff3c64;
+            --blue: #4da3ff;
 
-        .wg-card { background: #141419; border: 1px solid #1f1f26; border-radius: 8px; padding: 25px; }
-        .wg-card-title { color: white; margin-top: 0; font-size: 18px; font-weight: 900; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px solid #2a2a35; padding-bottom: 10px;}
-        .rules-text { color: #aaa; line-height: 1.6; font-size: 14px; white-space: pre-wrap; }
+            --radius: 10px;
+        }
 
-        .action-box { background: #1a1a24; border: 1px solid #2a2a35; border-radius: 8px; padding: 25px; text-align: center; position: sticky; top: 20px;}
-        .status-text { color: #00ffcc; font-weight: bold; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; }
-        .wg-btn { background: #ffcc00; color: black; border: none; padding: 15px; width: 100%; border-radius: 4px; font-weight: 900; font-size: 16px; cursor: pointer; text-transform: uppercase; transition: 0.2s;}
-        .wg-btn:hover { background: white; transform: translateY(-2px);}
-        .wg-btn.leave { background: transparent; color: #ff3c64; border: 1px solid #ff3c64; }
-        .wg-btn.leave:hover { background: #ff3c64; color: white; }
-        .wg-btn.locked { background: #333; color: #555; cursor: not-allowed; border: none; }
-        .wg-btn.locked:hover { transform: none; background: #333; }
+        * {
+            box-sizing: border-box;
+        }
 
-        .admin-controls-box { display: flex; gap: 10px; margin-top: 15px;}
-        .admin-start-btn { flex: 1; background: #00ffcc; color: black; border: none; padding: 10px; border-radius: 4px; font-weight: 900; font-size: 12px; cursor: pointer; text-transform: uppercase; animation: fadeIn 0.5s;}
-        .admin-stop-btn { flex: 1; background: #ff3c64; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: 900; font-size: 12px; cursor: pointer; text-transform: uppercase; animation: fadeIn 0.5s;}
+        html {
+            scroll-behavior: smooth;
+        }
 
-        .players-title { color: #8c8c9b; font-size: 12px; text-transform: uppercase; margin-top: 25px; margin-bottom: 10px; text-align: left;}
-        .players-list { display: flex; flex-direction: column; gap: 8px; text-align: left; max-height: 400px; overflow-y: auto;}
-        
-        .team-block { border: 1px solid #333; border-radius: 6px; padding: 10px; background: #0b0b0e; margin-bottom: 10px;}
-        .team-name { color: #a67cff; font-weight: bold; font-size: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
-        .invite-btn { background: #333; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
-        .invite-btn:hover { background: #a67cff; }
-        .player-item { padding: 5px; font-size: 13px; border-left: 2px solid #333; margin-left: 5px; color: #ccc;}
-        .player-item.me { border-left-color: #00ffcc; color: white; font-weight: bold; }
+        body {
+            margin: 0;
+            padding: 0 0 60px;
+            background:
+                radial-gradient(circle at 50% -20%, rgba(166,124,255,.08), transparent 35%),
+                var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
 
-        .speedrun-item { background: #0b0b0e; border: 1px solid #333; border-radius: 6px; padding: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
-        .speedrun-rank { font-weight: 900; font-size: 16px; width: 25px; color: #555;}
-        .speedrun-rank.top1 { color: #ffcc00; }
-        .speedrun-rank.top2 { color: #c0c0c0; }
-        .speedrun-rank.top3 { color: #cd7f32; }
-        .speedrun-time { color: #00ffcc; font-family: monospace; font-size: 16px; font-weight: bold; background: #1a1a24; padding: 3px 8px; border-radius: 4px; border: 1px solid #00ffcc;}
-        .edit-time-btn { background: #ff3c64; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; margin-left: 10px;}
+        button,
+        input {
+            font-family: inherit;
+        }
 
-        .tabs-container { display: flex; gap: 10px; margin-bottom: 20px;}
-        .tab-btn { flex: 1; background: #2a2a35; color: white; border: none; padding: 15px; border-radius: 6px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; transition: 0.2s;}
-        .tab-btn:hover { background: #3a3a45; }
-        .tab-btn.active { background: #00ffcc; color: black; }
+        button {
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        .bracket-wrapper { overflow-x: auto; padding: 20px 0; }
-        .bracket { display: flex; gap: 40px; }
-        .round { display: flex; flex-direction: column; justify-content: space-around; gap: 20px; min-width: 220px; }
-        .match { background: #1a1a24; border: 1px solid #333; border-radius: 6px; position: relative; transition: 0.2s;}
-        
-        /* Изменен стиль для кликабельных матчей игроков и админа */
-        .match.match-clickable { cursor: pointer; border-color: #a67cff; }
-        .match.match-clickable:hover { background: #2a2a35; box-shadow: 0 0 15px rgba(166, 124, 255, 0.4); transform: scale(1.02); }
-        
-        .round:not(:last-child) .match::after { content: ''; position: absolute; right: -20px; top: 50%; width: 20px; height: 1px; background: #555; }
-        .round:not(:first-child) .match::before { content: ''; position: absolute; left: -20px; top: 50%; width: 20px; height: 1px; background: #555; }
-        .match-team { padding: 8px 10px; font-size: 13px; font-weight: bold; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;}
-        .match-team:last-child { border-bottom: none; }
-        .match-team.winner { color: #00ffcc; }
-        .match-team.loser { color: #555; text-decoration: line-through; }
-        
-        .match-score { background: #0b0b0e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; border: 1px solid #333; }
-        .match-team.winner .match-score { background: #00ffcc; color: black; border-color: #00ffcc; }
-        .score-auto { background: transparent; color: #a67cff; border: none; font-size: 10px; font-weight: bold; text-transform: uppercase;}
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
 
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-box { background: #141419; padding: 25px; border-radius: 12px; border: 1px solid #2a2a35; width: 90%; max-width: 450px; }
-        .score-input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #1e1e26; padding: 10px; border-radius: 8px;}
-        .score-input { width: 50px; background: #0b0b0e; color: white; border: 1px solid #333; border-radius: 6px; padding: 8px; text-align: center; font-weight: bold; font-size: 18px; outline: none;}
-        .score-input:focus { border-color: #00ffcc; }
-        .btn-save { flex: 1; background: #ff3c64; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; text-transform: uppercase;}
-        .btn-cancel { background: transparent; color: #8c8c9b; border: none; cursor: pointer; font-size: 12px; margin-top: 15px; width: 100%;}
-        
-        #chat-history::-webkit-scrollbar { width: 5px; }
-        #chat-history::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 rgba(0,255,204,0);
+            }
+
+            50% {
+                transform: scale(1.04);
+                box-shadow: 0 0 20px rgba(0,255,204,.35);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* NAV */
+
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(14,14,18,.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-inner {
+            max-width: 1100px;
+            min-height: 58px;
+            margin: 0 auto;
+            padding: 0 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-link {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 800;
+            transition: .2s;
+        }
+
+        .nav-link:hover {
+            color: white;
+            transform: translateX(-2px);
+        }
+
+        .lang-btn {
+            background: #17171e;
+            color: var(--muted);
+            border: 1px solid var(--border2);
+            padding: 7px 11px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 900;
+            transition: .2s;
+        }
+
+        .lang-btn:hover {
+            color: white;
+            border-color: var(--purple);
+        }
+
+        /* MAIN */
+
+        .container {
+            width: min(1100px, calc(100% - 30px));
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+
+        .wg-header {
+            position: relative;
+            overflow: hidden;
+
+            margin-top: 22px;
+            margin-bottom: 20px;
+            padding: 30px;
+
+            background:
+                radial-gradient(circle at 100% 0%, rgba(166,124,255,.12), transparent 35%),
+                linear-gradient(135deg, #191921, #101015);
+
+            border: 1px solid var(--border2);
+            border-top: 3px solid var(--purple);
+            border-radius: var(--radius);
+
+            animation: fadeIn .35s ease;
+        }
+
+        .wg-header::after {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            right: -100px;
+            bottom: -140px;
+
+            background: var(--purple);
+            opacity: .05;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .status-badge {
+            position: absolute;
+            right: 22px;
+            top: 22px;
+
+            padding: 6px 12px;
+            border-radius: 999px;
+
+            background: #292930;
+            color: #aaa;
+
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+        }
+
+        .status-badge.active {
+            background: var(--green);
+            color: #001a14;
+            animation: pulse 2s infinite;
+        }
+
+        .status-badge.finished {
+            background: var(--yellow);
+            color: #161200;
+        }
+
+        .wg-game {
+            color: var(--purple);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .wg-title {
+            margin: 0;
+            padding-right: 180px;
+
+            color: white;
+            font-size: clamp(25px, 4vw, 36px);
+            line-height: 1.15;
+            font-weight: 900;
+        }
+
+        .wg-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+
+            margin-top: 25px;
+            padding-top: 20px;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .meta-box {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .meta-label {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .meta-val {
+            color: white;
+            font-size: 14px;
+            font-weight: 800;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .meta-val.green {
+            color: var(--green);
+        }
+
+        /* GRID */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .wg-card {
+            background: rgba(20,20,25,.94);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 25px;
+            animation: fadeIn .4s ease;
+        }
+
+        .wg-card-title {
+            margin: 0 0 20px;
+
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+
+            color: white;
+            font-size: 17px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .rules-text {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* ACTION */
+
+        .action-box {
+            position: sticky;
+            top: 78px;
+
+            background:
+                linear-gradient(180deg, #1a1a22, #121217);
+
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            padding: 22px;
+            text-align: center;
+        }
+
+        .status-text {
+            margin-bottom: 14px;
+
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .wg-btn {
+            width: 100%;
+            border: 0;
+            border-radius: 7px;
+
+            padding: 14px 15px;
+
+            background: var(--yellow);
+            color: #080800;
+
+            font-size: 14px;
+            font-weight: 900;
+
+            cursor: pointer;
+            text-transform: uppercase;
+
+            transition: .2s;
+        }
+
+        .wg-btn:hover:not(:disabled) {
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .wg-btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .wg-btn.leave {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
+
+        .wg-btn.leave:hover:not(:disabled) {
+            background: var(--red);
+            color: white;
+        }
+
+        .wg-btn.locked {
+            background: #292930;
+            color: #707078;
+            cursor: not-allowed;
+        }
+
+        /* ADMIN */
+
+        .admin-controls-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .admin-start-btn,
+        .admin-stop-btn {
+            flex: 1;
+            border: 0;
+            border-radius: 6px;
+
+            padding: 10px;
+
+            font-size: 10px;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .admin-start-btn {
+            background: var(--green);
+            color: black;
+        }
+
+        .admin-stop-btn {
+            background: var(--red);
+            color: white;
+        }
+
+        /* PLAYERS */
+
+        .players-title {
+            margin: 24px 0 10px;
+
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 900;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 3px;
+        }
+
+        .players-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .players-list::-webkit-scrollbar-thumb {
+            background: #303039;
+            border-radius: 5px;
+        }
+
+        .team-block {
+            padding: 10px;
+
+            background: #0c0c10;
+            border: 1px solid #2b2b34;
+            border-radius: 7px;
+        }
+
+        .team-name {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+
+            margin-bottom: 8px;
+
+            color: var(--purple);
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .player-item {
+            padding: 6px 7px;
+
+            color: #aaa;
+            border-left: 2px solid #333;
+
+            font-size: 12px;
+        }
+
+        .player-item.me {
+            color: white;
+            border-left-color: var(--green);
+            background: rgba(0,255,204,.035);
+        }
+
+        /* SPEEDRUN */
+
+        .speedrun-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+
+            margin-bottom: 7px;
+            padding: 10px;
+
+            background: #0c0c10;
+            border: 1px solid #303039;
+            border-radius: 7px;
+        }
+
+        .speedrun-rank {
+            width: 28px;
+
+            color: #555;
+            font-size: 15px;
+            font-weight: 900;
+        }
+
+        .speedrun-rank.top1 {
+            color: var(--yellow);
+        }
+
+        .speedrun-rank.top2 {
+            color: #c0c0c0;
+        }
+
+        .speedrun-rank.top3 {
+            color: #cd7f32;
+        }
+
+        .speedrun-time {
+            padding: 4px 8px;
+
+            color: var(--green);
+            background: #17171e;
+            border: 1px solid rgba(0,255,204,.4);
+            border-radius: 5px;
+
+            font-family: monospace;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .edit-time-btn {
+            margin-left: 7px;
+            padding: 5px 8px;
+
+            background: var(--red);
+            color: white;
+
+            border: 0;
+            border-radius: 5px;
+
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        /* TABS */
+
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .tab-btn {
+            flex: 1;
+
+            padding: 13px;
+
+            color: #aaa;
+            background: #1b1b22;
+
+            border: 1px solid var(--border);
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+
+            transition: .2s;
+        }
+
+        .tab-btn:hover {
+            background: #25252e;
+            color: white;
+        }
+
+        .tab-btn.active {
+            color: #001a14;
+            background: var(--green);
+            border-color: var(--green);
+        }
+
+        /* BRACKET */
+
+        .bracket-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            padding: 10px 3px 20px;
+        }
+
+        .bracket-wrapper::-webkit-scrollbar {
+            height: 7px;
+        }
+
+        .bracket-wrapper::-webkit-scrollbar-thumb {
+            background: #35353f;
+            border-radius: 10px;
+        }
+
+        .bracket {
+            display: flex;
+            gap: 45px;
+            min-width: max-content;
+        }
+
+        .round {
+            min-width: 220px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 20px;
+        }
+
+        .match {
+            position: relative;
+
+            background: #191920;
+            border: 1px solid #30303a;
+            border-radius: 7px;
+
+            overflow: hidden;
+            transition: .2s;
+        }
+
+        .match.match-clickable {
+            cursor: pointer;
+            border-color: var(--purple);
+        }
+
+        .match.match-clickable:hover {
+            background: #25252f;
+            box-shadow: 0 0 20px rgba(166,124,255,.18);
+            transform: translateY(-2px);
+        }
+
+        .round:not(:last-child) .match::after {
+            content: "";
+
+            position: absolute;
+            right: -45px;
+            top: 50%;
+
+            width: 45px;
+            height: 1px;
+
+            background: #41414a;
+        }
+
+        .round:not(:first-child) .match::before {
+            content: "";
+
+            position: absolute;
+            left: -45px;
+            top: 50%;
+
+            width: 45px;
+            height: 1px;
+
+            background: #41414a;
+        }
+
+        .match-team {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+
+            min-height: 39px;
+            padding: 8px 10px;
+
+            border-bottom: 1px solid #303039;
+
+            color: #ddd;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .match-team:last-child {
+            border-bottom: 0;
+        }
+
+        .match-team.winner {
+            color: var(--green);
+        }
+
+        .match-team.loser {
+            color: #555;
+            text-decoration: line-through;
+        }
+
+        .match-score {
+            flex-shrink: 0;
+
+            padding: 3px 6px;
+
+            background: #0b0b0f;
+            border: 1px solid #35353e;
+            border-radius: 4px;
+
+            color: white;
+            font-size: 11px;
+        }
+
+        .match-team.winner .match-score {
+            color: #001a14;
+            background: var(--green);
+            border-color: var(--green);
+        }
+
+        .score-auto {
+            color: var(--purple);
+            font-size: 9px;
+            font-weight: 900;
+        }
+
+        /* MODAL */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+
+            padding: 15px;
+
+            background: rgba(0,0,0,.82);
+            backdrop-filter: blur(7px);
+        }
+
+        .modal-box {
+            width: min(470px, 100%);
+            max-height: calc(100vh - 30px);
+            overflow-y: auto;
+
+            padding: 22px;
+
+            background: #141419;
+            border: 1px solid #30303a;
+            border-radius: 12px;
+
+            box-shadow: 0 20px 80px rgba(0,0,0,.6);
+
+            animation: fadeIn .2s ease;
+        }
+
+        .modal-box::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .modal-box::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 5px;
+        }
+
+        .chat-history {
+            height: 240px;
+            overflow-y: auto;
+
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            padding: 10px;
+
+            background: #09090c;
+            border: 1px solid #30303a;
+            border-radius: 7px;
+        }
+
+        .chat-history::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .chat-history::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 5px;
+        }
+
+        .chat-row {
+            font-size: 12px;
+        }
+
+        .chat-bubble {
+            display: inline-block;
+
+            max-width: 90%;
+
+            margin-top: 3px;
+            padding: 6px 9px;
+
+            color: white;
+            background: #1b1b23;
+            border: 1px solid #30303a;
+            border-radius: 7px;
+
+            word-break: break-word;
+        }
+
+        .chat-time {
+            margin-top: 3px;
+            color: #555;
+            font-size: 9px;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 6px;
+            margin: 9px 0 18px;
+        }
+
+        .chat-input {
+            flex: 1;
+
+            min-width: 0;
+
+            padding: 10px;
+
+            background: #1a1a22;
+            color: white;
+
+            border: 1px solid #30303a;
+            border-radius: 7px;
+
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--green);
+        }
+
+        .chat-send {
+            width: 45px;
+
+            background: var(--green);
+            color: black;
+
+            border: 0;
+            border-radius: 7px;
+
+            cursor: pointer;
+            font-weight: 900;
+        }
+
+        .admin-score-section {
+            padding: 15px;
+
+            background: #1a1a22;
+            border: 1px solid var(--red);
+            border-radius: 8px;
+        }
+
+        .score-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            margin-bottom: 10px;
+        }
+
+        .score-name {
+            flex: 1;
+
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .score-input {
+            width: 60px;
+
+            padding: 8px;
+
+            background: #09090c;
+            color: white;
+
+            border: 1px solid #34343e;
+            border-radius: 6px;
+
+            text-align: center;
+            font-size: 17px;
+            font-weight: 900;
+            outline: none;
+        }
+
+        .score-input:focus {
+            border-color: var(--green);
+        }
+
+        .btn-save {
+            width: 100%;
+
+            margin-top: 5px;
+            padding: 11px;
+
+            background: var(--red);
+            color: white;
+
+            border: 0;
+            border-radius: 6px;
+
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .btn-cancel {
+            width: 100%;
+
+            margin-top: 14px;
+
+            background: transparent;
+            color: var(--muted);
+
+            border: 0;
+
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .btn-cancel:hover {
+            color: white;
+        }
+
+        /* TOAST */
+
+        #toast-container {
+            position: fixed;
+            z-index: 5000;
+
+            right: 18px;
+            bottom: 18px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            width: min(350px, calc(100% - 36px));
+        }
+
+        .toast {
+            padding: 12px 14px;
+
+            background: #1b1b22;
+            color: white;
+
+            border: 1px solid #33333d;
+            border-radius: 8px;
+
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+
+            font-size: 12px;
+            font-weight: 700;
+
+            animation: fadeIn .2s ease;
+        }
+
+        .toast.success {
+            border-color: rgba(0,255,204,.5);
+        }
+
+        .toast.error {
+            border-color: rgba(255,60,100,.6);
+        }
+
+        .toast.info {
+            border-color: rgba(166,124,255,.5);
+        }
+
+        /* EMPTY */
+
+        .empty-state {
+            padding: 25px 10px;
+            color: #555;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 850px) {
+            .wg-meta-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-box {
+                position: static;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: min(100% - 20px, 1100px);
+            }
+
+            .wg-header {
+                padding: 22px;
+            }
+
+            .status-badge {
+                position: static;
+                display: inline-block;
+                margin-bottom: 15px;
+            }
+
+            .wg-title {
+                padding-right: 0;
+            }
+
+            .wg-meta-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .wg-card {
+                padding: 18px;
+            }
+
+            .tabs-container {
+                flex-direction: column;
+            }
+
+            .bracket {
+                gap: 35px;
+            }
+
+            .round {
+                min-width: 200px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
+<!-- NAV -->
 <div class="top-nav">
-    <div class="container" style="padding: 0; width: 100%; display: flex; justify-content: space-between;">
+    <div class="nav-inner">
         <a href="index.html" class="nav-link">← Назад</a>
-        <button class="lang-btn" onclick="toggleLanguage()" id="lang-toggle">RU</button>
+
+        <button
+            class="lang-btn"
+            id="lang-toggle"
+            onclick="toggleLanguage()"
+        >
+            RU
+        </button>
     </div>
 </div>
+
 
 <div class="container">
+
+    <!-- HEADER -->
     <div class="wg-header">
-        <div id="tourney-status-badge" class="status-badge">Ожидание игроков</div>
-        <div class="wg-game" id="t-game">⏳ Загрузка...</div>
-        <h1 class="wg-title" id="t-name">...</h1>
+
+        <div id="tourney-status-badge" class="status-badge">
+            Ожидание
+        </div>
+
+        <div class="wg-game" id="t-game">
+            ⏳ Загрузка...
+        </div>
+
+        <h1 class="wg-title" id="t-name">
+            Загрузка турнира...
+        </h1>
+
         <div class="wg-meta-grid">
-            <div class="meta-box"><span class="meta-label">Орг</span><span class="meta-val" id="t-author">...</span></div>
-            <div class="meta-box"><span class="meta-label">Формат</span><span class="meta-val" id="t-format">...</span></div>
-            <div class="meta-box"><span class="meta-label">Система</span><span class="meta-val" id="t-system">...</span></div>
-            <div class="meta-box"><span class="meta-label">Слоты</span><span class="meta-val" id="t-max">...</span></div>
-            <div class="meta-box"><span class="meta-label">Призовые</span><span class="meta-val green" id="t-prize">...</span></div>
+
+            <div class="meta-box">
+                <span class="meta-label">Организатор</span>
+                <span class="meta-val" id="t-author">...</span>
+            </div>
+
+            <div class="meta-box">
+                <span class="meta-label">Формат</span>
+                <span class="meta-val" id="t-format">...</span>
+            </div>
+
+            <div class="meta-box">
+                <span class="meta-label">Система</span>
+                <span class="meta-val" id="t-system">...</span>
+            </div>
+
+            <div class="meta-box">
+                <span class="meta-label">Слоты</span>
+                <span class="meta-val" id="t-max">...</span>
+            </div>
+
+            <div class="meta-box">
+                <span class="meta-label">Призовые</span>
+                <span class="meta-val green" id="t-prize">...</span>
+            </div>
+
         </div>
     </div>
 
+
+    <!-- DESCRIPTION + ACTION -->
     <div class="content-grid">
+
         <div class="wg-card">
-            <h2 class="wg-card-title">Описание и Регламент</h2>
-            <div class="rules-text" id="t-rules">Загрузка информации...</div>
+
+            <h2 class="wg-card-title">
+                Описание и регламент
+            </h2>
+
+            <div class="rules-text" id="t-rules">
+                Загрузка информации...
+            </div>
+
         </div>
+
 
         <div>
+
             <div class="action-box">
-                <div class="status-text" id="join-status">Регистрация открыта</div>
-                <button class="wg-btn" id="action-btn" onclick="handleJoinClick()">Зарегистрироваться</button>
-                <div id="admin-controls" class="admin-controls-box"></div>
-                <div class="players-title">Участники (в лобби)</div>
-                <div class="players-list" id="players-container"><div style="color:#555; font-size:12px;">Пока пусто.</div></div>
+
+                <div class="status-text" id="join-status">
+                    Загрузка...
+                </div>
+
+                <button
+                    class="wg-btn"
+                    id="action-btn"
+                    onclick="handleJoinClick()"
+                >
+                    Загрузка...
+                </button>
+
+                <div
+                    id="admin-controls"
+                    class="admin-controls-box"
+                ></div>
+
+                <div class="players-title">
+                    Участники
+                </div>
+
+                <div
+                    class="players-list"
+                    id="players-container"
+                >
+                    <div class="empty-state">
+                        Загрузка...
+                    </div>
+                </div>
+
             </div>
+
         </div>
+
     </div>
 
-    <div class="tabs-container" id="tourney-tabs" style="display: none;">
-        <button class="tab-btn active" id="tab-btn-leaderboard" onclick="switchTab('leaderboard')">🏆 Итоги (Топ)</button>
-        <button class="tab-btn" id="tab-btn-bracket" onclick="switchTab('bracket')">🌳 Сетка матчей</button>
+
+    <!-- TABS -->
+    <div
+        class="tabs-container"
+        id="tourney-tabs"
+        style="display:none;"
+    >
+
+        <button
+            class="tab-btn active"
+            id="tab-btn-leaderboard"
+            onclick="switchTab('leaderboard')"
+        >
+            🏆 Итоги
+        </button>
+
+        <button
+            class="tab-btn"
+            id="tab-btn-bracket"
+            onclick="switchTab('bracket')"
+        >
+            🌳 Сетка
+        </button>
+
     </div>
 
-    <div class="wg-card" id="leaderboard-section" style="display: none; margin-bottom: 40px;">
-        <h2 class="wg-card-title">Итоговая Таблица Лидеров</h2>
+
+    <!-- LEADERBOARD -->
+    <div
+        class="wg-card"
+        id="leaderboard-section"
+        style="display:none; margin-bottom:30px;"
+    >
+
+        <h2 class="wg-card-title">
+            Итоговая таблица
+        </h2>
+
         <div id="final-leaderboard-container"></div>
+
     </div>
 
-    <div class="wg-card" id="bracket-section" style="display: none; margin-bottom: 40px;">
-        <h2 class="wg-card-title">Турнирная сетка (Live)</h2>
+
+    <!-- BRACKET -->
+    <div
+        class="wg-card"
+        id="bracket-section"
+        style="display:none; margin-bottom:30px;"
+    >
+
+        <h2 class="wg-card-title">
+            Турнирная сетка
+        </h2>
+
         <div class="bracket-wrapper">
-            <div class="bracket" id="bracket-container" style="flex-direction: column;">
-                <div style="color:#8c8c9b; font-size:14px;">Ожидание...</div>
+
+            <div
+                class="bracket"
+                id="bracket-container"
+            >
+                <div class="empty-state">
+                    Ожидание...
+                </div>
             </div>
+
         </div>
+
     </div>
+
 </div>
 
-<!-- ОКНО ЧАТА И СЧЕТА -->
-<div class="modal-overlay" id="matchModal">
-    <div class="modal-box">
-        <h3 id="match-modal-title" style="margin-top:0; color:white; text-align:center;">Чат матча</h3>
-        
-        <div id="chat-history" style="height:220px; overflow-y:auto; background:#0b0b0e; border:1px solid #333; border-radius:6px; padding:10px; margin-bottom:10px; display:flex; flex-direction:column; gap:5px;"></div>
-        
-        <div style="display:flex; gap:5px; margin-bottom: 20px;">
-            <input type="text" id="chat-input" placeholder="Сообщение или ссылка на скриншот..." style="flex:1; background:#1a1a24; color:white; border:1px solid #333; border-radius:6px; padding:10px; outline:none; font-size:12px;">
-            <button onclick="sendChatMessage()" style="background:#00ffcc; color:black; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer;">➤</button>
+
+<!-- MATCH MODAL -->
+<div
+    class="modal-overlay"
+    id="matchModal"
+    onclick="handleModalBackground(event)"
+>
+
+    <div
+        class="modal-box"
+        onclick="event.stopPropagation()"
+    >
+
+        <h3
+            id="match-modal-title"
+            style="margin:0 0 15px; color:white; text-align:center;"
+        >
+            Чат матча
+        </h3>
+
+
+        <div
+            class="chat-history"
+            id="chat-history"
+        ></div>
+
+
+        <div class="chat-input-row">
+
+            <input
+                type="text"
+                id="chat-input"
+                class="chat-input"
+                maxlength="1000"
+                placeholder="Сообщение или ссылка..."
+            >
+
+            <button
+                class="chat-send"
+                onclick="sendChatMessage()"
+            >
+                ➤
+            </button>
+
         </div>
 
-        <div id="admin-score-section" style="display:none; background:#1a1a24; padding:15px; border-radius:8px; border:1px solid #ff3c64;">
-            <h4 style="margin:0 0 10px 0; color:#ff3c64; text-align:center; font-size:12px; text-transform:uppercase;">Панель Судьи</h4>
-            <div class="score-input-row" style="background:transparent; padding:0;">
-                <span id="score-p1-name" style="color:white; font-weight:bold; flex:1; overflow:hidden; text-overflow:ellipsis;">Игрок 1</span>
-                <input type="number" id="score-p1-val" class="score-input" value="1" min="0">
+
+        <!-- ADMIN SCORE -->
+        <div
+            id="admin-score-section"
+            class="admin-score-section"
+            style="display:none;"
+        >
+
+            <h4
+                style="
+                    margin:0 0 12px;
+                    color:#ff3c64;
+                    text-align:center;
+                    font-size:11px;
+                    text-transform:uppercase;
+                "
+            >
+                Панель судьи
+            </h4>
+
+
+            <div class="score-input-row">
+
+                <span
+                    id="score-p1-name"
+                    class="score-name"
+                >
+                    Игрок 1
+                </span>
+
+                <input
+                    type="number"
+                    id="score-p1-val"
+                    class="score-input"
+                    value="1"
+                    min="0"
+                    max="999"
+                >
+
             </div>
-            <div class="score-input-row" style="background:transparent; padding:0; margin-bottom:0;">
-                <span id="score-p2-name" style="color:white; font-weight:bold; flex:1; overflow:hidden; text-overflow:ellipsis;">Игрок 2</span>
-                <input type="number" id="score-p2-val" class="score-input" value="0" min="0">
+
+
+            <div class="score-input-row">
+
+                <span
+                    id="score-p2-name"
+                    class="score-name"
+                >
+                    Игрок 2
+                </span>
+
+                <input
+                    type="number"
+                    id="score-p2-val"
+                    class="score-input"
+                    value="0"
+                    min="0"
+                    max="999"
+                >
+
             </div>
-            <button class="btn-save" onclick="saveMatchScore()">Сохранить результат</button>
+
+
+            <button
+                class="btn-save"
+                onclick="saveMatchScore()"
+            >
+                Сохранить результат
+            </button>
+
         </div>
-        
+
+
         <input type="hidden" id="active-match-id">
         <input type="hidden" id="active-p1-raw">
         <input type="hidden" id="active-p2-raw">
-        
-        <button class="btn-cancel" onclick="closeMatchModal()">Закрыть окно</button>
+
+
+        <button
+            class="btn-cancel"
+            onclick="closeMatchModal()"
+        >
+            Закрыть
+        </button>
+
     </div>
+
 </div>
 
+
+<!-- TOASTS -->
+<div id="toast-container"></div>
+
+
 <script>
-    const dbBase = "https://retro-cup-51db5-default-rtdb.firebaseio.com/";
-    let currentUser = localStorage.getItem("currentUser");
-    const urlParams = new URLSearchParams(window.location.search);
-    const tourneyId = urlParams.get('id');
+/* =========================================================
+   RETRO CUP TOURNAMENT
+   ========================================================= */
 
-    if (!tourneyId || !currentUser) window.location.href = "index.html";
+const dbBase =
+    "https://retro-cup-51db5-default-rtdb.firebaseio.com/";
 
-    let isJoined = false; let myTeamName = ""; let tournamentFormat = ""; let tournamentSystem = ""; let maxLimit = 8;
-    let tStatus = "waiting"; let matchResults = {}; let cachedData = ""; let currentTab = "bracket";
-    let activeMatchChatInterval = null;
+const ADMIN_USER = "0m3gas";
 
-    function switchTab(tab) {
-        currentTab = tab;
-        if (tab === 'leaderboard') {
-            document.getElementById('leaderboard-section').style.display = 'block';
-            document.getElementById('bracket-section').style.display = 'none';
-            document.getElementById('tab-btn-leaderboard').className = 'tab-btn active';
-            document.getElementById('tab-btn-bracket').className = 'tab-btn';
-        } else {
-            document.getElementById('leaderboard-section').style.display = 'none';
-            document.getElementById('bracket-section').style.display = 'block';
-            document.getElementById('tab-btn-bracket').className = 'tab-btn active';
-            document.getElementById('tab-btn-leaderboard').className = 'tab-btn';
-        }
+let currentUser =
+    localStorage.getItem("currentUser");
+
+const urlParams =
+    new URLSearchParams(window.location.search);
+
+const tourneyId =
+    urlParams.get("id");
+
+let isJoined = false;
+let myTeamName = "";
+
+let tournamentFormat = "";
+let tournamentSystem = "";
+
+let maxLimit = 8;
+let tStatus = "waiting";
+
+let matchResults = {};
+let cachedData = "";
+
+let currentTab = "bracket";
+
+let activeMatchChatInterval = null;
+let loadingTournament = false;
+
+let currentLang =
+    localStorage.getItem("siteLang") || "RU";
+
+
+/* =========================================================
+   BASIC CHECK
+   ========================================================= */
+
+if (!tourneyId || !currentUser) {
+    window.location.href = "index.html";
+}
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function escapeHTML(value) {
+    if (value === null || value === undefined) {
+        return "";
     }
 
-    let currentLang = localStorage.getItem("siteLang") || "RU";
-    function toggleLanguage() { currentLang = currentLang === "RU" ? "EN" : "RU"; localStorage.setItem("siteLang", currentLang); loadTournamentData(); }
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
-    async function loadTournamentData() {
-        try {
-            let res = await fetch(dbBase + "tournaments/" + tourneyId + ".json");
-            let data = await res.json();
-            if (!data) return;
 
-            let currString = JSON.stringify(data);
-            if (currString === cachedData) return;
-            cachedData = currString;
+function safeFirebaseKey(value) {
+    return encodeURIComponent(String(value));
+}
 
-            tournamentFormat = data.format; tournamentSystem = data.system; maxLimit = parseInt(data.maxPlayers) || 8; 
-            tStatus = data.status || "waiting"; matchResults = data.matches || {}; 
 
-            document.getElementById("t-game").innerText = data.game;
-            document.getElementById("t-name").innerText = data.name;
-            document.getElementById("t-author").innerHTML = data.author === "0m3gas" ? "<span style='color:#ffcc00;'>👑 Retro Cup</span>" : data.author;
-            document.getElementById("t-format").innerText = data.format || "Не указан";
-            document.getElementById("t-system").innerText = data.system || "Не указана";
-            document.getElementById("t-max").innerText = maxLimit;
-            document.getElementById("t-prize").innerText = data.prize ? data.prize : "Нет";
-            document.getElementById("t-rules").innerText = data.rules ? data.rules : "Нет правил";
+function showToast(message, type = "info") {
 
-            let badge = document.getElementById("tourney-status-badge");
-            if (tStatus === "waiting") { badge.innerText = "Ожидание"; badge.className = "status-badge"; } 
-            else if (tStatus === "active") { badge.innerText = "🔴 ИДЕТ"; badge.className = "status-badge active"; }
-            else if (tStatus === "finished") { badge.innerText = "🏆 ЗАВЕРШЕН"; badge.className = "status-badge finished"; }
+    const container =
+        document.getElementById("toast-container");
 
-            let adminControls = document.getElementById("admin-controls");
-            if (currentUser === "0m3gas") {
-                if (tStatus === "waiting") adminControls.innerHTML = `<button class="admin-start-btn" onclick="changeStatus('active')">🚀 Запустить турнир</button>`;
-                else if (tStatus === "active") adminControls.innerHTML = `<button class="admin-stop-btn" onclick="changeStatus('finished')">🏁 Завершить турнир</button>`;
-                else adminControls.innerHTML = "";
-            } else { adminControls.innerHTML = ""; }
+    const toast =
+        document.createElement("div");
 
-            if (tournamentSystem === "Спидран") {
-                document.getElementById("bracket-section").style.display = "none";
-                document.getElementById("tourney-tabs").style.display = "none";
-            } else {
-                if (tStatus === "finished") {
-                    document.getElementById("tourney-tabs").style.display = "flex";
-                    switchTab(currentTab); 
-                } else {
-                    document.getElementById("tourney-tabs").style.display = "none";
-                    document.getElementById("leaderboard-section").style.display = "none";
-                    document.getElementById("bracket-section").style.display = "block";
+    toast.className =
+        `toast ${type}`;
+
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(5px)";
+
+        setTimeout(() => {
+            toast.remove();
+        }, 200);
+
+    }, 3000);
+}
+
+
+function setLoadingButton(button, loading) {
+
+    if (!button) return;
+
+    if (loading) {
+        button.dataset.oldText = button.innerText;
+        button.innerText = "Загрузка...";
+        button.disabled = true;
+    } else {
+        button.innerText =
+            button.dataset.oldText || button.innerText;
+
+        button.disabled = false;
+    }
+}
+
+
+/* =========================================================
+   FIREBASE API
+   ========================================================= */
+
+async function firebaseRequest(path, options = {}) {
+
+    const response =
+        await fetch(
+            dbBase + path + ".json",
+            {
+                ...options,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(options.headers || {})
                 }
             }
+        );
 
-            let pContainer = document.getElementById("players-container"); pContainer.innerHTML = "";
-            isJoined = false; myTeamName = ""; 
-            let validParticipants = []; 
-            let speedrunParticipants = []; 
+    if (!response.ok) {
+        throw new Error(
+            `Firebase error: ${response.status}`
+        );
+    }
 
-            if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
-                let requiredSize = tournamentFormat === "2v2" ? 2 : 5;
-                if (data.teams) {
-                    Object.keys(data.teams).forEach(tName => {
-                        let members = data.teams[tName].players ? Object.keys(data.teams[tName].players) : [];
-                        if (members.includes(currentUser)) { isJoined = true; myTeamName = tName; }
-                        
-                        if (tournamentSystem === "Спидран") speedrunParticipants.push({ name: tName, time: data.teams[tName].runTime || "00:00:00", isTeam: true });
-                        else {
-                            let teamHTML = `<div class="team-block"><div class="team-name">${tName}`;
-                            if (members.length < requiredSize) teamHTML += `<span style="color:#ff3c64; font-size:10px;">Ждем игроков</span>`;
-                            else validParticipants.push(tName); 
-                            teamHTML += `</div>`;
-                            members.forEach(m => { let meClass = (m === currentUser) ? "me" : ""; teamHTML += `<div class="player-item ${meClass}">🎮 ${m}</div>`; });
-                            teamHTML += `</div>`;
-                            pContainer.innerHTML += teamHTML;
-                        }
-                    });
-                }
+    return response;
+}
+
+
+async function firebaseGet(path) {
+
+    const response =
+        await firebaseRequest(path);
+
+    return await response.json();
+}
+
+
+async function firebasePut(path, data) {
+
+    return await firebaseRequest(
+        path,
+        {
+            method: "PUT",
+            body: JSON.stringify(data)
+        }
+    );
+}
+
+
+async function firebasePatch(path, data) {
+
+    return await firebaseRequest(
+        path,
+        {
+            method: "PATCH",
+            body: JSON.stringify(data)
+        }
+    );
+}
+
+
+async function firebaseDelete(path) {
+
+    return await firebaseRequest(
+        path,
+        {
+            method: "DELETE"
+        }
+    );
+}
+
+
+/* =========================================================
+   LANGUAGE
+   ========================================================= */
+
+function toggleLanguage() {
+
+    currentLang =
+        currentLang === "RU"
+            ? "EN"
+            : "RU";
+
+    localStorage.setItem(
+        "siteLang",
+        currentLang
+    );
+
+    document.getElementById(
+        "lang-toggle"
+    ).innerText = currentLang;
+
+    loadTournamentData(true);
+}
+
+
+/* =========================================================
+   TABS
+   ========================================================= */
+
+function switchTab(tab) {
+
+    currentTab = tab;
+
+    const leaderboard =
+        document.getElementById(
+            "leaderboard-section"
+        );
+
+    const bracket =
+        document.getElementById(
+            "bracket-section"
+        );
+
+    const lbBtn =
+        document.getElementById(
+            "tab-btn-leaderboard"
+        );
+
+    const bracketBtn =
+        document.getElementById(
+            "tab-btn-bracket"
+        );
+
+    if (tab === "leaderboard") {
+
+        leaderboard.style.display = "block";
+        bracket.style.display = "none";
+
+        lbBtn.className =
+            "tab-btn active";
+
+        bracketBtn.className =
+            "tab-btn";
+
+    } else {
+
+        leaderboard.style.display = "none";
+        bracket.style.display = "block";
+
+        bracketBtn.className =
+            "tab-btn active";
+
+        lbBtn.className =
+            "tab-btn";
+    }
+}
+
+
+/* =========================================================
+   TOURNAMENT LOAD
+   ========================================================= */
+
+async function loadTournamentData(force = false) {
+
+    if (loadingTournament && !force) {
+        return;
+    }
+
+    loadingTournament = true;
+
+    try {
+
+        const data =
+            await firebaseGet(
+                `tournaments/${safeFirebaseKey(tourneyId)}`
+            );
+
+        if (!data) {
+
+            showToast(
+                "Турнир не найден.",
+                "error"
+            );
+
+            return;
+        }
+
+        const currString =
+            JSON.stringify(data);
+
+        if (
+            currString === cachedData &&
+            !force
+        ) {
+            return;
+        }
+
+        cachedData = currString;
+
+        tournamentFormat =
+            data.format || "";
+
+        tournamentSystem =
+            data.system || "";
+
+        maxLimit =
+            parseInt(data.maxPlayers) || 8;
+
+        tStatus =
+            data.status || "waiting";
+
+        matchResults =
+            data.matches || {};
+
+
+        /* HEADER */
+
+        document.getElementById("t-game")
+            .innerText =
+            data.game || "Игра не указана";
+
+        document.getElementById("t-name")
+            .innerText =
+            data.name || "Без названия";
+
+
+        const author =
+            document.getElementById("t-author");
+
+        if (data.author === ADMIN_USER) {
+
+            author.innerHTML =
+                `<span style="color:#ffcc00;">
+                    👑 Retro Cup
+                </span>`;
+
+        } else {
+
+            author.innerText =
+                data.author || "Не указан";
+        }
+
+
+        document.getElementById("t-format")
+            .innerText =
+            data.format || "Не указан";
+
+        document.getElementById("t-system")
+            .innerText =
+            data.system || "Не указана";
+
+        document.getElementById("t-max")
+            .innerText =
+            maxLimit;
+
+        document.getElementById("t-prize")
+            .innerText =
+            data.prize || "Нет";
+
+        document.getElementById("t-rules")
+            .innerText =
+            data.rules || "Правила не указаны";
+
+
+        /* STATUS */
+
+        updateTournamentStatus();
+
+
+        /* ADMIN */
+
+        updateAdminControls();
+
+
+        /* PLAYERS */
+
+        const result =
+            renderParticipants(data);
+
+        const validParticipants =
+            result.validParticipants;
+
+
+        /* SYSTEM */
+
+        if (tournamentSystem === "Спидран") {
+
+            document.getElementById(
+                "bracket-section"
+            ).style.display = "none";
+
+            document.getElementById(
+                "tourney-tabs"
+            ).style.display = "none";
+
+            document.getElementById(
+                "leaderboard-section"
+            ).style.display = "none";
+
+        } else {
+
+            if (tStatus === "finished") {
+
+                document.getElementById(
+                    "tourney-tabs"
+                ).style.display = "flex";
+
+                switchTab(currentTab);
+
             } else {
-                if (data.players) {
-                    Object.keys(data.players).forEach(p => {
-                        if (p === currentUser) isJoined = true; 
-                        if (tournamentSystem === "Спидран") speedrunParticipants.push({ name: p, time: data.players[p].runTime || "00:00:00", isTeam: false });
-                        else { validParticipants.push(p); let meClass = (p === currentUser) ? "me" : ""; pContainer.innerHTML += `<div class="player-item ${meClass}" style="margin-bottom:5px;">🎮 ${p}</div>`; }
-                    });
-                }
-            }
 
-            if (tournamentSystem === "Спидран") {
-                speedrunParticipants.sort((a, b) => { let timeA = (a.time === "00:00:00") ? "99:99:99" : a.time; let timeB = (b.time === "00:00:00") ? "99:99:99" : b.time; return timeA.localeCompare(timeB); });
-                speedrunParticipants.forEach((p, index) => {
-                    let rank = p.time === "00:00:00" ? "999" : (index + 1);
-                    let rankClass = rank == 1 ? "top1" : (rank == 2 ? "top2" : (rank == 3 ? "top3" : ""));
-                    let adminEditBtn = (currentUser === "0m3gas" && tStatus === "active") ? `<button class="edit-time-btn" onclick="editSpeedrunTime('${p.name}', ${p.isTeam})">⏱</button>` : "";
-                    pContainer.innerHTML += `<div class="speedrun-item"><div style="display:flex; align-items:center; gap:10px;"><div class="speedrun-rank ${rankClass}">#${rank}</div><div style="font-size: 14px; font-weight: bold;">${p.name}</div></div><div style="display:flex; align-items:center;"><div class="speedrun-time">${p.time}</div>${adminEditBtn}</div></div>`;
+                document.getElementById(
+                    "tourney-tabs"
+                ).style.display = "none";
+
+                document.getElementById(
+                    "leaderboard-section"
+                ).style.display = "none";
+
+                document.getElementById(
+                    "bracket-section"
+                ).style.display = "block";
+            }
+        }
+
+
+        /* BUTTON */
+
+        updateJoinButton();
+
+
+        /* BRACKET */
+
+        if (tournamentSystem !== "Спидран") {
+
+            buildAndDrawBracket(
+                validParticipants,
+                maxLimit,
+                matchResults
+            );
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Не удалось загрузить данные турнира.",
+            "error"
+        );
+
+    } finally {
+
+        loadingTournament = false;
+    }
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+function updateTournamentStatus() {
+
+    const badge =
+        document.getElementById(
+            "tourney-status-badge"
+        );
+
+    badge.className =
+        "status-badge";
+
+    if (tStatus === "waiting") {
+
+        badge.innerText =
+            "Ожидание игроков";
+
+    } else if (tStatus === "active") {
+
+        badge.innerText =
+            "🔴 Турнир идёт";
+
+        badge.classList.add("active");
+
+    } else if (tStatus === "finished") {
+
+        badge.innerText =
+            "🏆 Завершён";
+
+        badge.classList.add("finished");
+
+    } else {
+
+        badge.innerText =
+            tStatus;
+    }
+}
+
+
+/* =========================================================
+   ADMIN CONTROLS
+   ========================================================= */
+
+function updateAdminControls() {
+
+    const box =
+        document.getElementById(
+            "admin-controls"
+        );
+
+    box.innerHTML = "";
+
+    if (currentUser !== ADMIN_USER) {
+        return;
+    }
+
+    if (tStatus === "waiting") {
+
+        box.innerHTML = `
+            <button
+                class="admin-start-btn"
+                onclick="changeStatus('active')"
+            >
+                🚀 Запустить
+            </button>
+        `;
+
+    } else if (tStatus === "active") {
+
+        box.innerHTML = `
+            <button
+                class="admin-stop-btn"
+                onclick="changeStatus('finished')"
+            >
+                🏁 Завершить
+            </button>
+        `;
+    }
+}
+
+
+/* =========================================================
+   PARTICIPANTS
+   ========================================================= */
+
+function renderParticipants(data) {
+
+    const container =
+        document.getElementById(
+            "players-container"
+        );
+
+    container.innerHTML = "";
+
+    isJoined = false;
+    myTeamName = "";
+
+    const validParticipants = [];
+    const speedrunParticipants = [];
+
+    const isTeamTournament =
+        tournamentFormat === "2v2" ||
+        tournamentFormat === "5v5";
+
+
+    if (isTeamTournament) {
+
+        const requiredSize =
+            tournamentFormat === "2v2"
+                ? 2
+                : 5;
+
+        if (data.teams) {
+
+            Object.keys(data.teams)
+                .forEach(teamName => {
+
+                    const team =
+                        data.teams[teamName] || {};
+
+                    const players =
+                        team.players
+                            ? Object.keys(team.players)
+                            : [];
+
+                    if (
+                        players.includes(
+                            currentUser
+                        )
+                    ) {
+                        isJoined = true;
+                        myTeamName = teamName;
+                    }
+
+
+                    if (
+                        tournamentSystem ===
+                        "Спидран"
+                    ) {
+
+                        speedrunParticipants.push({
+                            name: teamName,
+                            time:
+                                team.runTime ||
+                                "00:00:00",
+                            isTeam: true
+                        });
+
+                        return;
+                    }
+
+
+                    if (
+                        players.length >=
+                        requiredSize
+                    ) {
+                        validParticipants.push(
+                            teamName
+                        );
+                    }
+
+
+                    let html = `
+                        <div class="team-block">
+
+                            <div class="team-name">
+
+                                <span>
+                                    ${escapeHTML(teamName)}
+                                </span>
+
+                                ${
+                                    players.length < requiredSize
+                                    ? `
+                                        <span
+                                            style="
+                                                color:#ff3c64;
+                                                font-size:9px;
+                                            "
+                                        >
+                                            ${players.length}/${requiredSize}
+                                        </span>
+                                    `
+                                    : `
+                                        <span
+                                            style="
+                                                color:#00ffcc;
+                                                font-size:9px;
+                                            "
+                                        >
+                                            ${players.length}/${requiredSize}
+                                        </span>
+                                    `
+                                }
+
+                            </div>
+                    `;
+
+
+                    players.forEach(player => {
+
+                        const me =
+                            player === currentUser
+                                ? " me"
+                                : "";
+
+                        html += `
+                            <div
+                                class="player-item${me}"
+                            >
+                                🎮 ${escapeHTML(player)}
+                            </div>
+                        `;
+                    });
+
+
+                    html += `
+                        </div>
+                    `;
+
+                    container.innerHTML += html;
                 });
+        }
+
+    } else {
+
+        if (data.players) {
+
+            Object.keys(data.players)
+                .forEach(player => {
+
+                    if (
+                        player === currentUser
+                    ) {
+                        isJoined = true;
+                    }
+
+
+                    if (
+                        tournamentSystem ===
+                        "Спидран"
+                    ) {
+
+                        speedrunParticipants.push({
+                            name: player,
+                            time:
+                                data.players[player]
+                                    ?.runTime ||
+                                "00:00:00",
+                            isTeam: false
+                        });
+
+                        return;
+                    }
+
+
+                    validParticipants.push(
+                        player
+                    );
+
+                    const me =
+                        player === currentUser
+                            ? " me"
+                            : "";
+
+                    container.innerHTML += `
+                        <div
+                            class="player-item${me}"
+                            style="margin-bottom:5px;"
+                        >
+                            🎮 ${escapeHTML(player)}
+                        </div>
+                    `;
+                });
+        }
+    }
+
+
+    /* SPEEDRUN */
+
+    if (
+        tournamentSystem ===
+        "Спидран"
+    ) {
+
+        speedrunParticipants.sort(
+            (a, b) => {
+
+                const timeA =
+                    normalizeTime(
+                        a.time
+                    );
+
+                const timeB =
+                    normalizeTime(
+                        b.time
+                    );
+
+                return timeA - timeB;
             }
+        );
 
-            if (pContainer.innerHTML === "") pContainer.innerHTML = "<div style='color:#555; font-size:12px;'>Пусто.</div>";
 
-            let btn = document.getElementById("action-btn"); let txt = document.getElementById("join-status");
-            if (tStatus === "active" || tStatus === "finished") {
-                btn.innerText = tStatus === "active" ? "Турнир идет" : "Турнир завершен";
-                btn.className = "wg-btn locked"; btn.disabled = true;
-                txt.innerText = "Регистрация закрыта"; txt.style.color = "#ff3c64";
-            } else {
-                btn.disabled = false;
-                if (isJoined) { btn.innerText = "✖ ОТМЕНИТЬ"; btn.className = "wg-btn leave"; txt.innerText = "Вы в турнире"; txt.style.color = "#00ffcc"; } 
-                else { btn.innerText = "УЧАСТВОВАТЬ"; btn.className = "wg-btn"; txt.innerText = "Регистрация открыта"; txt.style.color = "#8c8c9b";}
-            }
+        speedrunParticipants.forEach(
+            (player, index) => {
 
-            if (tournamentSystem !== "Спидран") buildAndDrawBracket(validParticipants, maxLimit, matchResults);
+                const hasTime =
+                    player.time !==
+                    "00:00:00";
 
-        } catch (e) {}
-    }
+                const rank =
+                    hasTime
+                        ? index + 1
+                        : "—";
 
-    function generateMatchHTML(matchObj, id, resultsDB) {
-        let p1Display = matchObj.p1 === null ? "---" : matchObj.p1;
-        let p2Display = matchObj.p2 === null ? "---" : matchObj.p2;
-        let res = resultsDB[id];
-        
-        let s1HTML = ""; let s2HTML = "";
-        let p1Class = ""; let p2Class = "";
-        
-        if (res) {
-            s1HTML = `<span class="match-score">${res.s1}</span>`;
-            s2HTML = `<span class="match-score">${res.s2}</span>`;
-            if (res.winner === matchObj.p1) { p1Class = "winner"; p2Class = "loser"; }
-            if (res.winner === matchObj.p2) { p2Class = "winner"; p1Class = "loser"; }
-        } else if (matchObj.p1 && !matchObj.p2 && matchObj.winner === matchObj.p1) {
-            p1Class = "winner"; s1HTML = `<span class="score-auto">AUTO</span>`;
-        } else if (matchObj.p2 && !matchObj.p1 && matchObj.winner === matchObj.p2) {
-            p2Class = "winner"; s2HTML = `<span class="score-auto">AUTO</span>`;
-        }
-        
-        let clickAction = ""; let clickableClass = "";
-        let isP1 = matchObj.p1 && matchObj.p1 !== "---" && (currentUser === matchObj.p1 || myTeamName === matchObj.p1);
-        let isP2 = matchObj.p2 && matchObj.p2 !== "---" && (currentUser === matchObj.p2 || myTeamName === matchObj.p2);
-        let isAdmin = currentUser === "0m3gas";
-        
-        if (tStatus === "active" && matchObj.p1 && matchObj.p2 && matchObj.p1 !== "TBD" && matchObj.p2 !== "TBD" && (isP1 || isP2 || isAdmin)) {
-            clickableClass = "match-clickable";
-            let safeP1 = matchObj.p1.replace(/'/g, "\\'");
-            let safeP2 = matchObj.p2.replace(/'/g, "\\'");
-            clickAction = `onclick="openMatchModal('${id}', '${safeP1}', '${safeP2}')"`;
-        }
-        
-        return `<div class="match ${clickableClass}" ${clickAction}>
-                    <div class="match-team ${p1Class}"><span style="overflow:hidden; text-overflow:ellipsis;">${p1Display}</span> ${s1HTML}</div>
-                    <div class="match-team ${p2Class}"><span style="overflow:hidden; text-overflow:ellipsis;">${p2Display}</span> ${s2HTML}</div>
-                </div>`;
-    }
+                const rankClass =
+                    rank === 1
+                        ? "top1"
+                        : rank === 2
+                            ? "top2"
+                            : rank === 3
+                                ? "top3"
+                                : "";
 
-    function buildAndDrawBracket(participants, max, resultsDB) {
-        let bContainer = document.getElementById("bracket-container"); 
-        bContainer.innerHTML = "";
-        
-        if (tournamentSystem === "Двойное выбывание") {
-            renderDoubleElimination(participants, max, resultsDB, bContainer);
-        } else {
-            renderSingleElimination(participants, max, resultsDB, bContainer);
-        }
-    }
 
-    function renderSingleElimination(participants, max, resultsDB, bContainer) {
-        const seeds4 = [1, 4, 2, 3]; const seeds8 = [1, 8, 4, 5, 2, 7, 3, 6]; const seeds16 = [1, 16, 8, 9, 4, 13, 5, 12, 2, 15, 7, 10, 3, 14, 6, 11];
-        let seeds = max == 4 ? seeds4 : (max == 16 ? seeds16 : seeds8);
-        
-        let dynamicBracket = [];
-        let numRounds = Math.log2(max);
-        let bHTML = '<div style="display:flex; gap:40px;">';
-        
-        let round0 = [];
-        for (let i = 0; i < seeds.length; i += 2) {
-            let p1 = participants[seeds[i] - 1] || null;
-            let p2 = participants[seeds[i+1] - 1] || null;
-            round0.push({ p1: p1, p2: p2 });
-        }
-        dynamicBracket.push(round0);
+                let editButton = "";
 
-        for(let r = 0; r < numRounds; r++) {
-            bHTML += `<div class="round">`;
-            let nextRoundMatches = []; 
+                if (
+                    currentUser === ADMIN_USER &&
+                    tStatus === "active"
+                ) {
 
-            for(let m = 0; m < dynamicBracket[r].length; m++) {
-                let match = dynamicBracket[r][m];
-                let matchId = `r${r}_m${m}`; 
-                let result = resultsDB[matchId]; 
-                let winner = "TBD";
-                let matchObj = { p1: match.p1, p2: match.p2, winner: null };
-
-                if (result) {
-                    winner = result.winner; matchObj.winner = winner;
-                } else {
-                    if (match.p1 && match.p2 === null) { winner = match.p1; matchObj.winner = match.p1; } 
-                    else if (match.p2 && match.p1 === null) { winner = match.p2; matchObj.winner = match.p2; }
+                    editButton = `
+                        <button
+                            class="edit-time-btn"
+                            onclick='editSpeedrunTime(
+                                ${JSON.stringify(player.name)},
+                                ${player.isTeam}
+                            )'
+                        >
+                            ⏱
+                        </button>
+                    `;
                 }
 
-                bHTML += generateMatchHTML(matchObj, matchId, resultsDB);
 
-                if (m % 2 !== 0) { 
-                    let prevMatch = dynamicBracket[r][m-1]; let prevWinner = "TBD";
-                    let prevRes = resultsDB[`r${r}_m${m-1}`];
-                    if (prevRes) prevWinner = prevRes.winner;
-                    else if (prevMatch.p1 && prevMatch.p2 === null) prevWinner = prevMatch.p1;
-                    else if (prevMatch.p2 && prevMatch.p1 === null) prevWinner = prevMatch.p2;
-                    nextRoundMatches.push({ p1: prevWinner, p2: winner });
-                }
+                container.innerHTML += `
+                    <div class="speedrun-item">
+
+                        <div
+                            style="
+                                display:flex;
+                                align-items:center;
+                                gap:8px;
+                                min-width:0;
+                            "
+                        >
+
+                            <div
+                                class="
+                                    speedrun-rank
+                                    ${rankClass}
+                                "
+                            >
+                                #${rank}
+                            </div>
+
+                            <div
+                                style="
+                                    font-size:13px;
+                                    font-weight:800;
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                    white-space:nowrap;
+                                "
+                            >
+                                ${escapeHTML(player.name)}
+                            </div>
+
+                        </div>
+
+                        <div
+                            style="
+                                display:flex;
+                                align-items:center;
+                                flex-shrink:0;
+                            "
+                        >
+
+                            <div class="speedrun-time">
+                                ${escapeHTML(player.time)}
+                            </div>
+
+                            ${editButton}
+
+                        </div>
+
+                    </div>
+                `;
             }
-            bHTML += `</div>`;
-            if (nextRoundMatches.length > 0) dynamicBracket.push(nextRoundMatches); 
-        }
-        bHTML += '</div>';
-        bContainer.innerHTML = bHTML;
-        
-        generateLeaderboardSE(dynamicBracket, numRounds, resultsDB, participants);
+        );
     }
 
-    function generateLeaderboardSE(dynamicBracket, numRounds, resultsDB, participants) {
-        if (tStatus !== "finished") return;
-        let playerFarthestRound = {};
-        participants.forEach(p => playerFarthestRound[p] = 0);
 
-        for(let r=0; r<numRounds; r++) {
-            for(let m=0; m<dynamicBracket[r].length; m++) {
-                let match = dynamicBracket[r][m];
-                if(match.p1 && match.p1 !== "TBD") playerFarthestRound[match.p1] = r;
-                if(match.p2 && match.p2 !== "TBD") playerFarthestRound[match.p2] = r;
-            }
+    if (!container.innerHTML.trim()) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                Пока никто не зарегистрирован.
+            </div>
+        `;
+    }
+
+
+    return {
+        validParticipants
+    };
+}
+
+
+/* =========================================================
+   TIME
+   ========================================================= */
+
+function normalizeTime(time) {
+
+    if (!/^\d{2}:\d{2}:\d{2}$/.test(time)) {
+        return Infinity;
+    }
+
+    const parts =
+        time.split(":").map(Number);
+
+    return (
+        parts[0] * 3600 +
+        parts[1] * 60 +
+        parts[2]
+    );
+}
+
+
+/* =========================================================
+   JOIN BUTTON
+   ========================================================= */
+
+function updateJoinButton() {
+
+    const button =
+        document.getElementById(
+            "action-btn"
+        );
+
+    const status =
+        document.getElementById(
+            "join-status"
+        );
+
+
+    if (
+        tStatus === "active" ||
+        tStatus === "finished"
+    ) {
+
+        button.disabled = true;
+        button.className =
+            "wg-btn locked";
+
+        button.innerText =
+            tStatus === "active"
+                ? "Турнир идёт"
+                : "Турнир завершён";
+
+        status.innerText =
+            "Регистрация закрыта";
+
+        status.style.color =
+            "#ff3c64";
+
+        return;
+    }
+
+
+    button.disabled = false;
+
+
+    if (isJoined) {
+
+        button.innerText =
+            "✖ Отменить участие";
+
+        button.className =
+            "wg-btn leave";
+
+        status.innerText =
+            "Вы зарегистрированы";
+
+        status.style.color =
+            "#00ffcc";
+
+    } else {
+
+        button.innerText =
+            "Участвовать";
+
+        button.className =
+            "wg-btn";
+
+        status.innerText =
+            "Регистрация открыта";
+
+        status.style.color =
+            "#858592";
+    }
+}
+
+
+/* =========================================================
+   BRACKET
+   ========================================================= */
+
+function generateMatchHTML(
+    matchObj,
+    id,
+    resultsDB
+) {
+
+    const p1Display =
+        matchObj.p1 == null
+            ? "---"
+            : matchObj.p1;
+
+    const p2Display =
+        matchObj.p2 == null
+            ? "---"
+            : matchObj.p2;
+
+
+    const result =
+        resultsDB[id];
+
+
+    let s1HTML = "";
+    let s2HTML = "";
+
+    let p1Class = "";
+    let p2Class = "";
+
+
+    if (result) {
+
+        s1HTML = `
+            <span class="match-score">
+                ${escapeHTML(result.s1)}
+            </span>
+        `;
+
+        s2HTML = `
+            <span class="match-score">
+                ${escapeHTML(result.s2)}
+            </span>
+        `;
+
+
+        if (
+            result.winner ===
+            matchObj.p1
+        ) {
+
+            p1Class = "winner";
+            p2Class = "loser";
         }
-        let finalMatch = dynamicBracket[numRounds-1][0]; let ultimateWinner = "TBD";
-        if (resultsDB[`r${numRounds-1}_m0`]) ultimateWinner = resultsDB[`r${numRounds-1}_m0`].winner;
-        else if (finalMatch.p1 && finalMatch.p2 === null) ultimateWinner = finalMatch.p1;
-        else if (finalMatch.p2 && finalMatch.p1 === null) ultimateWinner = finalMatch.p2;
-        if (ultimateWinner !== "TBD") playerFarthestRound[ultimateWinner] = numRounds;
 
-        let sortedPlayers = participants.sort((a,b) => playerFarthestRound[b] - playerFarthestRound[a]);
-        let lbContainer = document.getElementById("final-leaderboard-container");
-        lbContainer.innerHTML = "";
-        let displayRank = 1; let lastScore = -1;
-        
-        sortedPlayers.forEach((p, index) => {
-            let score = playerFarthestRound[p];
-            if (score !== lastScore) { displayRank = index + 1; lastScore = score; }
-            let rankClass = displayRank == 1 ? "top1" : (displayRank == 2 ? "top2" : (displayRank == 3 ? "top3" : ""));
-            let phaseName = score === numRounds ? "🏆 Победитель" : (score === numRounds - 1 ? "🥈 Финалист" : (score === numRounds - 2 ? "🥉 Полуфинал" : `Раунд ${score + 1}`));
-            lbContainer.innerHTML += `<div class="speedrun-item"><div style="display:flex; align-items:center; gap:10px;"><div class="speedrun-rank ${rankClass}">#${displayRank}</div><div style="font-size: 14px; font-weight: bold;">${p}</div></div><div style="color: #8c8c9b; font-size: 12px; font-weight:bold;">${phaseName}</div></div>`;
+
+        if (
+            result.winner ===
+            matchObj.p2
+        ) {
+
+            p2Class = "winner";
+            p1Class = "loser";
+        }
+
+    } else if (
+        matchObj.p1 &&
+        !matchObj.p2 &&
+        matchObj.winner === matchObj.p1
+    ) {
+
+        p1Class = "winner";
+
+        s1HTML = `
+            <span class="score-auto">
+                AUTO
+            </span>
+        `;
+
+    } else if (
+        matchObj.p2 &&
+        !matchObj.p1 &&
+        matchObj.winner === matchObj.p2
+    ) {
+
+        p2Class = "winner";
+
+        s2HTML = `
+            <span class="score-auto">
+                AUTO
+            </span>
+        `;
+    }
+
+
+    const isP1 =
+        matchObj.p1 &&
+        matchObj.p1 !== "---" &&
+        (
+            currentUser === matchObj.p1 ||
+            myTeamName === matchObj.p1
+        );
+
+
+    const isP2 =
+        matchObj.p2 &&
+        matchObj.p2 !== "---" &&
+        (
+            currentUser === matchObj.p2 ||
+            myTeamName === matchObj.p2
+        );
+
+
+    const isAdmin =
+        currentUser === ADMIN_USER;
+
+
+    const canOpen =
+        tStatus === "active" &&
+        matchObj.p1 &&
+        matchObj.p2 &&
+        matchObj.p1 !== "TBD" &&
+        matchObj.p2 !== "TBD" &&
+        (isP1 || isP2 || isAdmin);
+
+
+    let clickableClass = "";
+    let clickAction = "";
+
+
+    if (canOpen) {
+
+        clickableClass =
+            "match-clickable";
+
+        clickAction =
+            `onclick='openMatchModal(
+                ${JSON.stringify(id)},
+                ${JSON.stringify(String(matchObj.p1))},
+                ${JSON.stringify(String(matchObj.p2))}
+            )'`;
+    }
+
+
+    return `
+        <div
+            class="match ${clickableClass}"
+            ${clickAction}
+        >
+
+            <div
+                class="match-team ${p1Class}"
+            >
+
+                <span
+                    style="
+                        overflow:hidden;
+                        text-overflow:ellipsis;
+                        white-space:nowrap;
+                    "
+                >
+                    ${escapeHTML(p1Display)}
+                </span>
+
+                ${s1HTML}
+
+            </div>
+
+
+            <div
+                class="match-team ${p2Class}"
+            >
+
+                <span
+                    style="
+                        overflow:hidden;
+                        text-overflow:ellipsis;
+                        white-space:nowrap;
+                    "
+                >
+                    ${escapeHTML(p2Display)}
+                </span>
+
+                ${s2HTML}
+
+            </div>
+
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   BUILD BRACKET
+   ========================================================= */
+
+function buildAndDrawBracket(
+    participants,
+    max,
+    resultsDB
+) {
+
+    const container =
+        document.getElementById(
+            "bracket-container"
+        );
+
+    container.innerHTML = "";
+
+
+    if (
+        tournamentSystem ===
+        "Двойное выбывание"
+    ) {
+
+        renderDoubleElimination(
+            participants,
+            max,
+            resultsDB,
+            container
+        );
+
+    } else {
+
+        renderSingleElimination(
+            participants,
+            max,
+            resultsDB,
+            container
+        );
+    }
+}
+
+
+/* =========================================================
+   SINGLE ELIMINATION
+   ========================================================= */
+
+function renderSingleElimination(
+    participants,
+    max,
+    resultsDB,
+    container
+) {
+
+    const seeds4 =
+        [1, 4, 2, 3];
+
+    const seeds8 =
+        [1, 8, 4, 5, 2, 7, 3, 6];
+
+    const seeds16 =
+        [
+            1,16,8,9,
+            4,13,5,12,
+            2,15,7,10,
+            3,14,6,11
+        ];
+
+
+    let seeds;
+
+    if (max === 4) {
+        seeds = seeds4;
+    } else if (max === 16) {
+        seeds = seeds16;
+    } else {
+        seeds = seeds8;
+    }
+
+
+    const numRounds =
+        Math.log2(max);
+
+
+    const dynamicBracket = [];
+
+
+    const firstRound = [];
+
+
+    for (
+        let i = 0;
+        i < seeds.length;
+        i += 2
+    ) {
+
+        firstRound.push({
+            p1:
+                participants[
+                    seeds[i] - 1
+                ] || null,
+
+            p2:
+                participants[
+                    seeds[i + 1] - 1
+                ] || null
         });
     }
 
-    function renderDoubleElimination(participants, max, resultsDB, bContainer) {
-        let matches = {}; 
-        let W_rounds = Math.log2(max);
-        let lRoundCount = W_rounds > 1 ? 2 * W_rounds - 2 : 0;
-        
-        for(let r=0; r<W_rounds; r++) {
-            let numMatches = max / Math.pow(2, r+1);
-            for(let m=0; m<numMatches; m++) matches[`W_${r}_${m}`] = { p1: null, p2: null, type: 'W', r, m };
+
+    dynamicBracket.push(
+        firstRound
+    );
+
+
+    let html = `
+        <div
+            style="
+                display:flex;
+                gap:45px;
+            "
+        >
+    `;
+
+
+    for (
+        let r = 0;
+        r < numRounds;
+        r++
+    ) {
+
+        html += `
+            <div class="round">
+        `;
+
+
+        const nextRound = [];
+
+
+        for (
+            let m = 0;
+            m < dynamicBracket[r].length;
+            m++
+        ) {
+
+            const match =
+                dynamicBracket[r][m];
+
+            const matchId =
+                `r${r}_m${m}`;
+
+
+            const result =
+                resultsDB[matchId];
+
+
+            let winner = null;
+
+
+            if (result) {
+
+                winner =
+                    result.winner;
+
+            } else if (
+                match.p1 &&
+                !match.p2
+            ) {
+
+                winner =
+                    match.p1;
+
+            } else if (
+                match.p2 &&
+                !match.p1
+            ) {
+
+                winner =
+                    match.p2;
+            }
+
+
+            const matchObj = {
+                p1: match.p1,
+                p2: match.p2,
+                winner
+            };
+
+
+            html +=
+                generateMatchHTML(
+                    matchObj,
+                    matchId,
+                    resultsDB
+                );
+
+
+            if (
+                m % 2 === 1
+            ) {
+
+                const previous =
+                    dynamicBracket[r][m - 1];
+
+
+                const previousId =
+                    `r${r}_m${m - 1}`;
+
+
+                const previousResult =
+                    resultsDB[
+                        previousId
+                    ];
+
+
+                let previousWinner =
+                    null;
+
+
+                if (previousResult) {
+
+                    previousWinner =
+                        previousResult.winner;
+
+                } else if (
+                    previous.p1 &&
+                    !previous.p2
+                ) {
+
+                    previousWinner =
+                        previous.p1;
+
+                } else if (
+                    previous.p2 &&
+                    !previous.p1
+                ) {
+
+                    previousWinner =
+                        previous.p2;
+                }
+
+
+                nextRound.push({
+                    p1: previousWinner,
+                    p2: winner
+                });
+            }
         }
-        let currentLSize = max / 4;
-        for(let lr=0; lr<lRoundCount; lr++) {
-            for(let m=0; m<currentLSize; m++) matches[`L_${lr}_${m}`] = { p1: null, p2: null, type: 'L', r: lr, m };
-            if (lr % 2 === 1) currentLSize /= 2;
+
+
+        html += `
+            </div>
+        `;
+
+
+        if (
+            nextRound.length
+        ) {
+
+            dynamicBracket.push(
+                nextRound
+            );
         }
-        matches[`GF`] = { p1: null, p2: null, type: 'GF' };
+    }
 
-        const seeds4 = [1, 4, 2, 3]; const seeds8 = [1, 8, 4, 5, 2, 7, 3, 6]; const seeds16 = [1, 16, 8, 9, 4, 13, 5, 12, 2, 15, 7, 10, 3, 14, 6, 11];
-        let seeds = max == 4 ? seeds4 : (max == 16 ? seeds16 : seeds8);
-        for (let i = 0; i < max; i += 2) {
-            let m = Math.floor(i/2);
-            if(participants[seeds[i] - 1]) matches[`W_0_${m}`].p1 = participants[seeds[i] - 1];
-            if(participants[seeds[i+1] - 1]) matches[`W_0_${m}`].p2 = participants[seeds[i+1] - 1];
+
+    html += `
+        </div>
+    `;
+
+
+    container.innerHTML =
+        html;
+
+
+    generateLeaderboardSE(
+        dynamicBracket,
+        numRounds,
+        resultsDB,
+        participants
+    );
+}
+
+
+/* =========================================================
+   SINGLE ELIMINATION LEADERBOARD
+   ========================================================= */
+
+function generateLeaderboardSE(
+    bracket,
+    numRounds,
+    resultsDB,
+    participants
+) {
+
+    if (
+        tStatus !== "finished"
+    ) {
+        return;
+    }
+
+
+    const farthest = {};
+
+
+    participants.forEach(
+        player => {
+            farthest[player] = 0;
+        }
+    );
+
+
+    for (
+        let r = 0;
+        r < numRounds;
+        r++
+    ) {
+
+        for (
+            let m = 0;
+            m < bracket[r].length;
+            m++
+        ) {
+
+            const match =
+                bracket[r][m];
+
+
+            if (
+                match.p1 &&
+                match.p1 !== "TBD"
+            ) {
+                farthest[match.p1] = Math.max(
+                    farthest[match.p1] || 0,
+                    r
+                );
+            }
+
+
+            if (
+                match.p2 &&
+                match.p2 !== "TBD"
+            ) {
+                farthest[match.p2] = Math.max(
+                    farthest[match.p2] || 0,
+                    r
+                );
+            }
+        }
+    }
+
+
+    const finalId =
+        `r${numRounds - 1}_m0`;
+
+
+    const finalResult =
+        resultsDB[finalId];
+
+
+    if (finalResult) {
+
+        farthest[
+            finalResult.winner
+        ] = numRounds;
+    }
+
+
+    const sorted =
+        [...participants].sort(
+            (a, b) =>
+                (farthest[b] || 0) -
+                (farthest[a] || 0)
+        );
+
+
+    const container =
+        document.getElementById(
+            "final-leaderboard-container"
+        );
+
+
+    container.innerHTML = "";
+
+
+    sorted.forEach(
+        (player, index) => {
+
+            const score =
+                farthest[player] || 0;
+
+
+            let phase;
+
+            if (
+                score === numRounds
+            ) {
+
+                phase =
+                    "🏆 Победитель";
+
+            } else if (
+                score === numRounds - 1
+            ) {
+
+                phase =
+                    "🥈 Финалист";
+
+            } else if (
+                score === numRounds - 2
+            ) {
+
+                phase =
+                    "🥉 Полуфинал";
+
+            } else {
+
+                phase =
+                    `Раунд ${score + 1}`;
+            }
+
+
+            const rank =
+                index + 1;
+
+
+            const rankClass =
+                rank === 1
+                    ? "top1"
+                    : rank === 2
+                        ? "top2"
+                        : rank === 3
+                            ? "top3"
+                            : "";
+
+
+            container.innerHTML += `
+                <div class="speedrun-item">
+
+                    <div
+                        style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                            min-width:0;
+                        "
+                    >
+
+                        <div
+                            class="
+                                speedrun-rank
+                                ${rankClass}
+                            "
+                        >
+                            #${rank}
+                        </div>
+
+                        <div
+                            style="
+                                font-size:13px;
+                                font-weight:800;
+                                overflow:hidden;
+                                text-overflow:ellipsis;
+                                white-space:nowrap;
+                            "
+                        >
+                            ${escapeHTML(player)}
+                        </div>
+
+                    </div>
+
+                    <div
+                        style="
+                            color:#858592;
+                            font-size:10px;
+                            font-weight:800;
+                            white-space:nowrap;
+                        "
+                    >
+                        ${phase}
+                    </div>
+
+                </div>
+            `;
+        }
+    );
+}
+
+
+/* =========================================================
+   DOUBLE ELIMINATION
+   ========================================================= */
+
+function renderDoubleElimination(
+    participants,
+    max,
+    resultsDB,
+    container
+) {
+
+    /*
+        Оставляем твою существующую схему
+        двойного выбывания, но делаем
+        вывод безопасным и аккуратным.
+    */
+
+    const matches = {};
+
+    const W_rounds =
+        Math.log2(max);
+
+    const lRoundCount =
+        W_rounds > 1
+            ? 2 * W_rounds - 2
+            : 0;
+
+
+    for (
+        let r = 0;
+        r < W_rounds;
+        r++
+    ) {
+
+        const count =
+            max /
+            Math.pow(2, r + 1);
+
+        for (
+            let m = 0;
+            m < count;
+            m++
+        ) {
+
+            matches[
+                `W_${r}_${m}`
+            ] = {
+                p1: null,
+                p2: null,
+                type: "W",
+                r,
+                m
+            };
+        }
+    }
+
+
+    let currentLSize =
+        max / 4;
+
+
+    for (
+        let lr = 0;
+        lr < lRoundCount;
+        lr++
+    ) {
+
+        for (
+            let m = 0;
+            m < currentLSize;
+            m++
+        ) {
+
+            matches[
+                `L_${lr}_${m}`
+            ] = {
+                p1: null,
+                p2: null,
+                type: "L",
+                r: lr,
+                m
+            };
         }
 
-        let changed = true;
-        while(changed) {
-            changed = false;
-            for(let id in matches) {
-                let match = matches[id];
-                if(match.processed) continue;
-                let res = resultsDB[id]; let winner = null; let loser = null;
 
-                if (res) { winner = res.winner; loser = res.winner === match.p1 ? match.p2 : match.p1; } 
-                else if (match.p1 && !match.p2) { winner = match.p1; loser = null; } 
-                else if (match.p2 && !match.p1) { winner = match.p2; loser = null; }
+        if (
+            lr % 2 === 1
+        ) {
+            currentLSize /= 2;
+        }
+    }
 
-                if (winner !== null) {
-                    match.winner = winner; match.loser = loser; match.processed = true; changed = true;
-                    if(match.type === 'W') {
-                        let nextW_id = match.r === W_rounds - 1 ? 'GF' : `W_${match.r+1}_${Math.floor(match.m/2)}`;
-                        let nextL_id = match.r === 0 ? `L_0_${Math.floor(match.m/2)}` : `L_${match.r*2 - 1}_${match.m}`;
-                        let nW = matches[nextW_id];
-                        if (nW) { if (!nW.p1) nW.p1 = winner; else if (!nW.p2 && nW.p1 !== winner) nW.p2 = winner; }
-                        let nL = matches[nextL_id];
-                        if (nL && loser) { if (!nL.p1) nL.p1 = loser; else if (!nL.p2 && nL.p1 !== loser) nL.p2 = loser; }
-                    } else if (match.type === 'L') {
-                        let nextL_id = match.r === lRoundCount - 1 ? 'GF' : (match.r % 2 === 0 ? `L_${match.r+1}_${match.m}` : `L_${match.r+1}_${Math.floor(match.m/2)}`);
-                        let nL = matches[nextL_id];
-                        if (nL) { if (!nL.p1) nL.p1 = winner; else if (!nL.p2 && nL.p1 !== winner) nL.p2 = winner; }
+
+    matches.GF = {
+        p1: null,
+        p2: null,
+        type: "GF"
+    };
+
+
+    const seeds4 =
+        [1,4,2,3];
+
+    const seeds8 =
+        [1,8,4,5,2,7,3,6];
+
+    const seeds16 =
+        [
+            1,16,8,9,
+            4,13,5,12,
+            2,15,7,10,
+            3,14,6,11
+        ];
+
+
+    const seeds =
+        max === 4
+            ? seeds4
+            : max === 16
+                ? seeds16
+                : seeds8;
+
+
+    for (
+        let i = 0;
+        i < max;
+        i += 2
+    ) {
+
+        const m =
+            Math.floor(i / 2);
+
+
+        matches[
+            `W_0_${m}`
+        ].p1 =
+            participants[
+                seeds[i] - 1
+            ] || null;
+
+
+        matches[
+            `W_0_${m}`
+        ].p2 =
+            participants[
+                seeds[i + 1] - 1
+            ] || null;
+    }
+
+
+    let changed = true;
+
+    let safety = 0;
+
+
+    while (
+        changed &&
+        safety < 100
+    ) {
+
+        safety++;
+
+        changed = false;
+
+
+        for (
+            const id in matches
+        ) {
+
+            const match =
+                matches[id];
+
+
+            if (
+                match.processed
+            ) {
+                continue;
+            }
+
+
+            const result =
+                resultsDB[id];
+
+
+            let winner = null;
+            let loser = null;
+
+
+            if (result) {
+
+                winner =
+                    result.winner;
+
+                loser =
+                    winner === match.p1
+                        ? match.p2
+                        : match.p1;
+
+            } else if (
+                match.p1 &&
+                !match.p2
+            ) {
+
+                winner =
+                    match.p1;
+
+            } else if (
+                match.p2 &&
+                !match.p1
+            ) {
+
+                winner =
+                    match.p2;
+            }
+
+
+            if (!winner) {
+                continue;
+            }
+
+
+            match.winner =
+                winner;
+
+            match.loser =
+                loser;
+
+            match.processed =
+                true;
+
+            changed = true;
+
+
+            if (
+                match.type === "W"
+            ) {
+
+                const nextW =
+                    match.r === W_rounds - 1
+                        ? "GF"
+                        : `W_${match.r + 1}_${Math.floor(match.m / 2)}`;
+
+
+                const nextL =
+                    match.r === 0
+                        ? `L_0_${Math.floor(match.m / 2)}`
+                        : `L_${match.r * 2 - 1}_${match.m}`;
+
+
+                const wMatch =
+                    matches[nextW];
+
+
+                if (wMatch) {
+
+                    if (
+                        !wMatch.p1
+                    ) {
+
+                        wMatch.p1 =
+                            winner;
+
+                    } else if (
+                        !wMatch.p2 &&
+                        wMatch.p1 !== winner
+                    ) {
+
+                        wMatch.p2 =
+                            winner;
+                    }
+                }
+
+
+                const lMatch =
+                    matches[nextL];
+
+
+                if (
+                    lMatch &&
+                    loser
+                ) {
+
+                    if (
+                        !lMatch.p1
+                    ) {
+
+                        lMatch.p1 =
+                            loser;
+
+                    } else if (
+                        !lMatch.p2 &&
+                        lMatch.p1 !== loser
+                    ) {
+
+                        lMatch.p2 =
+                            loser;
+                    }
+                }
+
+
+            } else if (
+                match.type === "L"
+            ) {
+
+                const nextL =
+                    match.r === lRoundCount - 1
+                        ? "GF"
+                        : (
+                            match.r % 2 === 0
+                                ? `L_${match.r + 1}_${match.m}`
+                                : `L_${match.r + 1}_${Math.floor(match.m / 2)}`
+                        );
+
+
+                const lMatch =
+                    matches[nextL];
+
+
+                if (lMatch) {
+
+                    if (
+                        !lMatch.p1
+                    ) {
+
+                        lMatch.p1 =
+                            winner;
+
+                    } else if (
+                        !lMatch.p2 &&
+                        lMatch.p1 !== winner
+                    ) {
+
+                        lMatch.p2 =
+                            winner;
                     }
                 }
             }
         }
-
-        let finalHTML = `<div style="width:100%; display:flex; flex-direction:column;">
-            <h3 style="color:#a67cff; margin-bottom:10px;">ВЕРХНЯЯ СЕТКА</h3>
-            <div class="bracket" style="margin-bottom:30px; display:flex; gap:40px;">`;
-        for(let r=0; r<W_rounds; r++) {
-            finalHTML += `<div class="round">`;
-            let numMatches = max / Math.pow(2, r+1);
-            for(let m=0; m<numMatches; m++) finalHTML += generateMatchHTML(matches[`W_${r}_${m}`], `W_${r}_${m}`, resultsDB);
-            finalHTML += `</div>`;
-        }
-        finalHTML += `</div>`;
-
-        if(lRoundCount > 0) {
-            finalHTML += `<h3 style="color:#ff3c64; margin-bottom:10px;">НИЖНЯЯ СЕТКА</h3>
-            <div class="bracket" style="margin-bottom:30px; display:flex; gap:40px;">`;
-            let currentLSize = max / 4;
-            for(let lr=0; lr<lRoundCount; lr++) {
-                finalHTML += `<div class="round">`;
-                for(let m=0; m<currentLSize; m++) finalHTML += generateMatchHTML(matches[`L_${lr}_${m}`], `L_${lr}_${m}`, resultsDB);
-                finalHTML += `</div>`;
-                if (lr % 2 === 1) currentLSize /= 2;
-            }
-            finalHTML += `</div>`;
-        }
-        finalHTML += `<h3 style="color:#ffcc00; margin-bottom:10px;">ГРАНД-ФИНАЛ</h3>
-        <div class="bracket"><div class="round">` + generateMatchHTML(matches[`GF`], `GF`, resultsDB) + `</div></div></div>`;
-        
-        bContainer.innerHTML = finalHTML;
-
-        if(tStatus === "finished") {
-            let lbContainer = document.getElementById("final-leaderboard-container");
-            if (matches['GF'].winner) {
-                lbContainer.innerHTML = `<div class="speedrun-item"><div style="display:flex; align-items:center; gap:10px;"><div class="speedrun-rank top1">#1</div><div style="font-size: 14px; font-weight: bold;">${matches['GF'].winner}</div></div><div style="color: #8c8c9b; font-size: 12px; font-weight:bold;">🏆 Победитель</div></div>`;
-            } else {
-                lbContainer.innerHTML = "<div style='color:#ccc; font-size:14px;'>Лидерборд формируется...</div>";
-            }
-        }
     }
 
-    // --- ЛОГИКА ОКНА МАТЧА (ЧАТ И ВВОД СЧЕТА АДМИНОМ) ---
-    function openMatchModal(matchId, p1, p2) {
-        document.getElementById("match-modal-title").innerText = `${p1} vs ${p2}`;
-        document.getElementById("active-match-id").value = matchId;
-        document.getElementById("active-p1-raw").value = p1;
-        document.getElementById("active-p2-raw").value = p2;
-        
-        document.getElementById("score-p1-name").innerText = p1;
-        document.getElementById("score-p2-name").innerText = p2;
-        document.getElementById("score-p1-val").value = "1";
-        document.getElementById("score-p2-val").value = "0";
 
-        if (currentUser === "0m3gas") {
-            document.getElementById("admin-score-section").style.display = "block";
+    let html = `
+        <div
+            style="
+                width:100%;
+                display:flex;
+                flex-direction:column;
+            "
+        >
+
+            <h3
+                style="
+                    color:#a67cff;
+                    margin:0 0 10px;
+                    font-size:13px;
+                "
+            >
+                ВЕРХНЯЯ СЕТКА
+            </h3>
+
+            <div
+                class="bracket"
+                style="margin-bottom:30px;"
+            >
+    `;
+
+
+    for (
+        let r = 0;
+        r < W_rounds;
+        r++
+    ) {
+
+        html += `
+            <div class="round">
+        `;
+
+
+        const count =
+            max /
+            Math.pow(2, r + 1);
+
+
+        for (
+            let m = 0;
+            m < count;
+            m++
+        ) {
+
+            const id =
+                `W_${r}_${m}`;
+
+
+            html +=
+                generateMatchHTML(
+                    matches[id],
+                    id,
+                    resultsDB
+                );
+        }
+
+
+        html += `
+            </div>
+        `;
+    }
+
+
+    html += `
+            </div>
+    `;
+
+
+    if (
+        lRoundCount > 0
+    ) {
+
+        html += `
+            <h3
+                style="
+                    color:#ff3c64;
+                    margin:0 0 10px;
+                    font-size:13px;
+                "
+            >
+                НИЖНЯЯ СЕТКА
+            </h3>
+
+            <div
+                class="bracket"
+                style="margin-bottom:30px;"
+            >
+        `;
+
+
+        currentLSize =
+            max / 4;
+
+
+        for (
+            let lr = 0;
+            lr < lRoundCount;
+            lr++
+        ) {
+
+            html += `
+                <div class="round">
+            `;
+
+
+            for (
+                let m = 0;
+                m < currentLSize;
+                m++
+            ) {
+
+                const id =
+                    `L_${lr}_${m}`;
+
+
+                html +=
+                    generateMatchHTML(
+                        matches[id],
+                        id,
+                        resultsDB
+                    );
+            }
+
+
+            html += `
+                </div>
+            `;
+
+
+            if (
+                lr % 2 === 1
+            ) {
+
+                currentLSize /= 2;
+            }
+        }
+
+
+        html += `
+            </div>
+        `;
+    }
+
+
+    html += `
+        <h3
+            style="
+                color:#ffcc00;
+                margin:0 0 10px;
+                font-size:13px;
+            "
+        >
+            ГРАНД-ФИНАЛ
+        </h3>
+
+        <div class="bracket">
+
+            <div class="round">
+                ${generateMatchHTML(
+                    matches.GF,
+                    "GF",
+                    resultsDB
+                )}
+            </div>
+
+        </div>
+
+        </div>
+    `;
+
+
+    container.innerHTML =
+        html;
+
+
+    if (
+        tStatus === "finished"
+    ) {
+
+        const lb =
+            document.getElementById(
+                "final-leaderboard-container"
+            );
+
+
+        if (
+            matches.GF.winner
+        ) {
+
+            lb.innerHTML = `
+                <div class="speedrun-item">
+
+                    <div
+                        style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                        "
+                    >
+
+                        <div
+                            class="speedrun-rank top1"
+                        >
+                            #1
+                        </div>
+
+                        <div
+                            style="
+                                font-size:13px;
+                                font-weight:800;
+                            "
+                        >
+                            ${escapeHTML(
+                                matches.GF.winner
+                            )}
+                        </div>
+
+                    </div>
+
+                    <div
+                        style="
+                            color:#858592;
+                            font-size:10px;
+                            font-weight:800;
+                        "
+                    >
+                        🏆 Победитель
+                    </div>
+
+                </div>
+            `;
+
         } else {
-            document.getElementById("admin-score-section").style.display = "none";
+
+            lb.innerHTML = `
+                <div class="empty-state">
+                    Лидерборд формируется...
+                </div>
+            `;
+        }
+    }
+}
+
+
+/* =========================================================
+   MATCH MODAL
+   ========================================================= */
+
+function openMatchModal(
+    matchId,
+    p1,
+    p2
+) {
+
+    document.getElementById(
+        "match-modal-title"
+    ).innerText =
+        `${p1} vs ${p2}`;
+
+
+    document.getElementById(
+        "active-match-id"
+    ).value =
+        matchId;
+
+
+    document.getElementById(
+        "active-p1-raw"
+    ).value =
+        p1;
+
+
+    document.getElementById(
+        "active-p2-raw"
+    ).value =
+        p2;
+
+
+    document.getElementById(
+        "score-p1-name"
+    ).innerText =
+        p1;
+
+
+    document.getElementById(
+        "score-p2-name"
+    ).innerText =
+        p2;
+
+
+    document.getElementById(
+        "score-p1-val"
+    ).value = "1";
+
+
+    document.getElementById(
+        "score-p2-val"
+    ).value = "0";
+
+
+    document.getElementById(
+        "admin-score-section"
+    ).style.display =
+        currentUser === ADMIN_USER
+            ? "block"
+            : "none";
+
+
+    document.getElementById(
+        "matchModal"
+    ).style.display =
+        "flex";
+
+
+    loadChat(matchId);
+
+
+    if (
+        activeMatchChatInterval
+    ) {
+
+        clearInterval(
+            activeMatchChatInterval
+        );
+    }
+
+
+    activeMatchChatInterval =
+        setInterval(
+            () => loadChat(matchId),
+            2500
+        );
+
+
+    setTimeout(() => {
+
+        document.getElementById(
+            "chat-input"
+        ).focus();
+
+    }, 100);
+}
+
+
+function closeMatchModal() {
+
+    document.getElementById(
+        "matchModal"
+    ).style.display =
+        "none";
+
+
+    if (
+        activeMatchChatInterval
+    ) {
+
+        clearInterval(
+            activeMatchChatInterval
+        );
+
+        activeMatchChatInterval =
+            null;
+    }
+}
+
+
+function handleModalBackground(event) {
+
+    if (
+        event.target.id ===
+        "matchModal"
+    ) {
+        closeMatchModal();
+    }
+}
+
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+async function loadChat(matchId) {
+
+    try {
+
+        const data =
+            await firebaseGet(
+                `tournaments/${safeFirebaseKey(tourneyId)}/chats/${safeFirebaseKey(matchId)}`
+            );
+
+
+        const chatBox =
+            document.getElementById(
+                "chat-history"
+            );
+
+
+        chatBox.innerHTML = "";
+
+
+        if (!data) {
+
+            chatBox.innerHTML = `
+                <div
+                    style="
+                        text-align:center;
+                        color:#555;
+                        font-size:11px;
+                        margin-top:95px;
+                    "
+                >
+                    Нет сообщений.
+                    Отправьте ID игры или скриншот.
+                </div>
+            `;
+
+            return;
         }
 
-        document.getElementById("matchModal").style.display = "flex";
-        
-        loadChat(matchId);
-        if (activeMatchChatInterval) clearInterval(activeMatchChatInterval);
-        activeMatchChatInterval = setInterval(() => loadChat(matchId), 2000);
+
+        Object.keys(data)
+            .sort()
+            .forEach(key => {
+
+                const msg =
+                    data[key] || {};
+
+
+                const isMe =
+                    msg.author === currentUser;
+
+
+                const align =
+                    isMe
+                        ? "right"
+                        : "left";
+
+
+                let color =
+                    isMe
+                        ? "#00ffcc"
+                        : "#a67cff";
+
+
+                if (
+                    msg.author ===
+                    ADMIN_USER
+                ) {
+                    color = "#ff3c64";
+                }
+
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "chat-row";
+
+
+                row.style.textAlign =
+                    align;
+
+
+                const author =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                author.style.color =
+                    color;
+
+                author.style.fontWeight =
+                    "900";
+
+                author.innerText =
+                    msg.author || "User";
+
+
+                const bubble =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                bubble.className =
+                    "chat-bubble";
+
+                bubble.innerText =
+                    msg.text || "";
+
+
+                const time =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                time.className =
+                    "chat-time";
+
+                time.innerText =
+                    msg.time || "";
+
+
+                row.appendChild(
+                    author
+                );
+
+                row.appendChild(
+                    bubble
+                );
+
+                row.appendChild(
+                    time
+                );
+
+
+                chatBox.appendChild(
+                    row
+                );
+            });
+
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+
+    } catch (error) {
+
+        console.error(
+            "Chat error:",
+            error
+        );
+    }
+}
+
+
+/* =========================================================
+   SEND CHAT
+   ========================================================= */
+
+async function sendChatMessage() {
+
+    const input =
+        document.getElementById(
+            "chat-input"
+        );
+
+
+    const text =
+        input.value.trim();
+
+
+    if (!text) {
+        return;
     }
 
-    function closeMatchModal() {
-        document.getElementById("matchModal").style.display = "none";
-        if (activeMatchChatInterval) clearInterval(activeMatchChatInterval);
+
+    if (text.length > 1000) {
+
+        showToast(
+            "Сообщение слишком длинное.",
+            "error"
+        );
+
+        return;
     }
 
-    async function loadChat(matchId) {
-        try {
-            let res = await fetch(`${dbBase}tournaments/${tourneyId}/chats/${matchId}.json`);
-            let data = await res.json();
-            let chatBox = document.getElementById("chat-history");
-            chatBox.innerHTML = "";
-            if (data) {
-                let keys = Object.keys(data);
-                keys.sort(); 
-                keys.forEach(k => {
-                    let msg = data[k];
-                    let isMe = msg.author === currentUser;
-                    let align = isMe ? "text-align:right;" : "text-align:left;";
-                    let color = isMe ? "color:#00ffcc;" : "color:#a67cff;";
-                    if(msg.author === "0m3gas") color = "color:#ff3c64;";
-                    
-                    chatBox.innerHTML += `<div style="${align} font-size:13px; margin-bottom:8px;">
-                        <span style="${color} font-weight:bold;">${msg.author}</span><br>
-                        <span style="color:white; word-break:break-word; background:#1a1a24; padding:5px 8px; border-radius:6px; display:inline-block; margin-top:3px; border:1px solid #333;">${msg.text}</span>
-                        <div style="color:#555; font-size:9px; margin-top:3px;">${msg.time}</div>
-                    </div>`;
-                });
-            } else {
-                chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top:80px;">Нет сообщений. Отправьте ID игры или скриншот.</div>`;
-            }
-            chatBox.scrollTop = chatBox.scrollHeight;
-        } catch(e) {}
+
+    const matchId =
+        document.getElementById(
+            "active-match-id"
+        ).value;
+
+
+    if (!matchId) {
+        return;
     }
 
-    async function sendChatMessage() {
-        let input = document.getElementById("chat-input");
-        let text = input.value.trim();
-        if(!text) return;
-        let matchId = document.getElementById("active-match-id").value;
-        
-        let msgData = {
+
+    try {
+
+        const msgData = {
             author: currentUser,
-            text: text,
-            time: new Date().toLocaleTimeString()
+            text,
+            time:
+                new Date()
+                    .toLocaleTimeString()
         };
-        
-        await fetch(`${dbBase}tournaments/${tourneyId}/chats/${matchId}.json`, { method: "POST", body: JSON.stringify(msgData) });
+
+
+        await firebaseRequest(
+            `tournaments/${safeFirebaseKey(tourneyId)}/chats/${safeFirebaseKey(matchId)}`,
+            {
+                method: "POST",
+                body: JSON.stringify(msgData)
+            }
+        );
+
+
         input.value = "";
-        loadChat(matchId);
+
+        await loadChat(matchId);
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Не удалось отправить сообщение.",
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   SAVE MATCH SCORE
+   ========================================================= */
+
+async function saveMatchScore() {
+
+    if (
+        currentUser !== ADMIN_USER
+    ) {
+
+        showToast(
+            "Недостаточно прав.",
+            "error"
+        );
+
+        return;
     }
 
-    async function saveMatchScore() {
-        let matchId = document.getElementById("active-match-id").value;
-        let p1 = document.getElementById("active-p1-raw").value; 
-        let p2 = document.getElementById("active-p2-raw").value;
-        let s1 = parseInt(document.getElementById("score-p1-val").value); 
-        let s2 = parseInt(document.getElementById("score-p2-val").value);
-        
-        if (s1 === s2) return alert("В киберспорте нет ничьей! Выбери победителя.");
-        
-        let winner = s1 > s2 ? p1 : p2;
-        let matchData = { p1: p1, p2: p2, s1: s1, s2: s2, winner: winner };
-        await fetch(`${dbBase}tournaments/${tourneyId}/matches/${matchId}.json`, { method: "PUT", body: JSON.stringify(matchData) });
-        
-        closeMatchModal(); 
-        cachedData = ""; loadTournamentData(); 
+
+    const matchId =
+        document.getElementById(
+            "active-match-id"
+        ).value;
+
+
+    const p1 =
+        document.getElementById(
+            "active-p1-raw"
+        ).value;
+
+
+    const p2 =
+        document.getElementById(
+            "active-p2-raw"
+        ).value;
+
+
+    const s1 =
+        parseInt(
+            document.getElementById(
+                "score-p1-val"
+            ).value
+        );
+
+
+    const s2 =
+        parseInt(
+            document.getElementById(
+                "score-p2-val"
+            ).value
+        );
+
+
+    if (
+        !Number.isInteger(s1) ||
+        !Number.isInteger(s2) ||
+        s1 < 0 ||
+        s2 < 0
+    ) {
+
+        showToast(
+            "Введите корректный счёт.",
+            "error"
+        );
+
+        return;
     }
 
-    async function editSpeedrunTime(name, isTeam) {
-        let newTime = prompt("Введите время прохождения (ЧЧ:ММ:СС):", "00:00:00");
-        if (newTime && newTime.trim() !== "") {
-            let path = isTeam ? `teams/${name}` : `players/${name}`;
-            await fetch(`${dbBase}tournaments/${tourneyId}/${path}.json`, { method: "PATCH", body: JSON.stringify({ runTime: newTime.trim() }) });
-            cachedData = ""; loadTournamentData(); 
-        }
+
+    if (
+        s1 === s2
+    ) {
+
+        showToast(
+            "Ничья в этом формате невозможна.",
+            "error"
+        );
+
+        return;
     }
 
-    async function changeStatus(newStatus) {
-        let txt = newStatus === "active" ? "ЗАПУСТИТЬ ТУРНИР?\nСетка зафиксируется." : "ЗАВЕРШИТЬ ТУРНИР?\nБудет сформирована таблица лидеров.";
-        if(confirm(txt)) {
-            await fetch(`${dbBase}tournaments/${tourneyId}.json`, { method: "PATCH", body: JSON.stringify({ status: newStatus }) });
-            cachedData = ""; loadTournamentData(); 
-        }
+
+    const winner =
+        s1 > s2
+            ? p1
+            : p2;
+
+
+    const matchData = {
+        p1,
+        p2,
+        s1,
+        s2,
+        winner
+    };
+
+
+    try {
+
+        await firebasePut(
+            `tournaments/${safeFirebaseKey(tourneyId)}/matches/${safeFirebaseKey(matchId)}`,
+            matchData
+        );
+
+
+        closeMatchModal();
+
+        cachedData = "";
+
+        await loadTournamentData(
+            true
+        );
+
+
+        showToast(
+            "Результат сохранён.",
+            "success"
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Не удалось сохранить результат.",
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   SPEEDRUN
+   ========================================================= */
+
+async function editSpeedrunTime(
+    name,
+    isTeam
+) {
+
+    if (
+        currentUser !== ADMIN_USER
+    ) {
+
+        return;
     }
 
-    async function handleJoinClick() {
-        if (tStatus !== "waiting") return; 
-        let btn = document.getElementById("action-btn"); btn.disabled = true;
+
+    const newTime =
+        prompt(
+            "Введите время в формате ЧЧ:ММ:СС",
+            "00:00:00"
+        );
+
+
+    if (
+        newTime === null
+    ) {
+        return;
+    }
+
+
+    const time =
+        newTime.trim();
+
+
+    if (
+        !/^\d{2}:\d{2}:\d{2}$/.test(time)
+    ) {
+
+        showToast(
+            "Формат должен быть ЧЧ:ММ:СС.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    const parts =
+        time.split(":")
+            .map(Number);
+
+
+    if (
+        parts[1] > 59 ||
+        parts[2] > 59
+    ) {
+
+        showToast(
+            "Некорректное время.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const path =
+            isTeam
+                ? `teams/${safeFirebaseKey(name)}`
+                : `players/${safeFirebaseKey(name)}`;
+
+
+        await firebasePatch(
+            `tournaments/${safeFirebaseKey(tourneyId)}/${path}`,
+            {
+                runTime: time
+            }
+        );
+
+
+        cachedData = "";
+
+        await loadTournamentData(
+            true
+        );
+
+
+        showToast(
+            "Время обновлено.",
+            "success"
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Не удалось обновить время.",
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   CHANGE STATUS
+   ========================================================= */
+
+async function changeStatus(
+    newStatus
+) {
+
+    if (
+        currentUser !== ADMIN_USER
+    ) {
+
+        return;
+    }
+
+
+    let message;
+
+
+    if (
+        newStatus === "active"
+    ) {
+
+        message =
+            "Запустить турнир?\n\nПосле запуска регистрация закроется.";
+
+    } else {
+
+        message =
+            "Завершить турнир?\n\nПосле завершения изменить результаты обычным игрокам будет нельзя.";
+    }
+
+
+    if (!confirm(message)) {
+        return;
+    }
+
+
+    try {
+
+        await firebasePatch(
+            `tournaments/${safeFirebaseKey(tourneyId)}`,
+            {
+                status: newStatus
+            }
+        );
+
+
+        cachedData = "";
+
+        await loadTournamentData(
+            true
+        );
+
+
+        showToast(
+            newStatus === "active"
+                ? "Турнир запущен!"
+                : "Турнир завершён.",
+            "success"
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Не удалось изменить статус.",
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   JOIN / LEAVE
+   ========================================================= */
+
+async function handleJoinClick() {
+
+    if (
+        tStatus !== "waiting"
+    ) {
+        return;
+    }
+
+
+    const button =
+        document.getElementById(
+            "action-btn"
+        );
+
+
+    button.disabled = true;
+
+
+    try {
+
         if (isJoined) {
-            if (tournamentFormat === "2v2" || tournamentFormat === "5v5") await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + myTeamName + "/players/" + currentUser + ".json", { method: "DELETE" });
-            else await fetch(dbBase + "tournaments/" + tourneyId + "/players/" + currentUser + ".json", { method: "DELETE" });
-        } else {
-            let initialData = { time: new Date().toLocaleTimeString() };
-            if (tournamentSystem === "Спидран") initialData.runTime = "00:00:00"; 
-            if (tournamentFormat === "2v2" || tournamentFormat === "5v5") {
-                let tName = prompt("Название команды:");
-                if (!tName || tName.trim() === "") { btn.disabled = false; return; }
-                if (tournamentSystem === "Спидран") await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + tName.trim() + ".json", { method: "PATCH", body: JSON.stringify({ runTime: "00:00:00" }) });
-                await fetch(dbBase + "tournaments/" + tourneyId + "/teams/" + tName.trim() + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify(initialData) });
+
+            /*
+                LEAVE
+            */
+
+            if (
+                tournamentFormat === "2v2" ||
+                tournamentFormat === "5v5"
+            ) {
+
+                await firebaseDelete(
+                    `tournaments/${safeFirebaseKey(tourneyId)}/teams/${safeFirebaseKey(myTeamName)}/players/${safeFirebaseKey(currentUser)}`
+                );
+
             } else {
-                await fetch(dbBase + "tournaments/" + tourneyId + "/players/" + currentUser + ".json", { method: "PUT", body: JSON.stringify(initialData) });
+
+                await firebaseDelete(
+                    `tournaments/${safeFirebaseKey(tourneyId)}/players/${safeFirebaseKey(currentUser)}`
+                );
+            }
+
+
+            showToast(
+                "Вы вышли из турнира.",
+                "success"
+            );
+
+
+        } else {
+
+            /*
+                JOIN
+            */
+
+            if (
+                tournamentFormat === "2v2" ||
+                tournamentFormat === "5v5"
+            ) {
+
+                const teamName =
+                    prompt(
+                        "Введите название команды:"
+                    );
+
+
+                if (
+                    !teamName ||
+                    !teamName.trim()
+                ) {
+
+                    return;
+                }
+
+
+                const cleanTeamName =
+                    teamName.trim();
+
+
+                if (
+                    cleanTeamName.length > 30
+                ) {
+
+                    showToast(
+                        "Название команды слишком длинное.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                const teamPath =
+                    `tournaments/${safeFirebaseKey(tourneyId)}/teams/${safeFirebaseKey(cleanTeamName)}`;
+
+
+                const existingTeam =
+                    await firebaseGet(
+                        teamPath
+                    );
+
+
+                if (
+                    existingTeam &&
+                    existingTeam.players &&
+                    Object.keys(
+                        existingTeam.players
+                    ).length >=
+                    (
+                        tournamentFormat === "2v2"
+                            ? 2
+                            : 5
+                    )
+                ) {
+
+                    showToast(
+                        "В этой команде уже нет свободных мест.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    existingTeam &&
+                    existingTeam.players &&
+                    existingTeam.players[currentUser]
+                ) {
+
+                    showToast(
+                        "Вы уже состоите в этой команде.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                const initialData = {
+                    time:
+                        new Date()
+                            .toLocaleTimeString()
+                };
+
+
+                if (
+                    tournamentSystem ===
+                    "Спидран"
+                ) {
+
+                    initialData.runTime =
+                        "00:00:00";
+                }
+
+
+                if (
+                    !existingTeam
+                ) {
+
+                    await firebasePatch(
+                        teamPath,
+                        {
+                            runTime:
+                                tournamentSystem === "Спидран"
+                                    ? "00:00:00"
+                                    : undefined
+                        }
+                    );
+                }
+
+
+                await firebasePut(
+                    `${teamPath}/players/${safeFirebaseKey(currentUser)}`,
+                    initialData
+                );
+
+
+                showToast(
+                    "Вы зарегистрированы!",
+                    "success"
+                );
+
+
+            } else {
+
+                /*
+                    SOLO
+                */
+
+                const players =
+                    await firebaseGet(
+                        `tournaments/${safeFirebaseKey(tourneyId)}/players`
+                    );
+
+
+                const playerCount =
+                    players
+                        ? Object.keys(players).length
+                        : 0;
+
+
+                if (
+                    playerCount >= maxLimit
+                ) {
+
+                    showToast(
+                        "Все места уже заняты.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                const initialData = {
+                    time:
+                        new Date()
+                            .toLocaleTimeString()
+                };
+
+
+                if (
+                    tournamentSystem ===
+                    "Спидран"
+                ) {
+
+                    initialData.runTime =
+                        "00:00:00";
+                }
+
+
+                await firebasePut(
+                    `tournaments/${safeFirebaseKey(tourneyId)}/players/${safeFirebaseKey(currentUser)}`,
+                    initialData
+                );
+
+
+                showToast(
+                    "Вы зарегистрированы!",
+                    "success"
+                );
             }
         }
-        btn.disabled = false; cachedData = ""; loadTournamentData(); 
-    }
 
-    loadTournamentData(); setInterval(loadTournamentData, 3000);
+
+        cachedData = "";
+
+        await loadTournamentData(
+            true
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            "Произошла ошибка. Попробуйте ещё раз.",
+            "error"
+        );
+
+    } finally {
+
+        button.disabled = false;
+    }
+}
+
+
+/* =========================================================
+   KEYBOARD
+   ========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeMatchModal();
+        }
+
+
+        if (
+            event.key === "Enter" &&
+            document.activeElement?.id ===
+            "chat-input"
+        ) {
+
+            event.preventDefault();
+
+            sendChatMessage();
+        }
+    }
+);
+
+
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
+
+document.getElementById(
+    "lang-toggle"
+).innerText =
+    currentLang;
+
+
+loadTournamentData(
+    true
+);
+
+
+/*
+    Обновляем страницу каждые 3 секунды,
+    но сами DOM-элементы не перерисовываем,
+    если данные Firebase не изменились.
+*/
+
+setInterval(
+    () => loadTournamentData(),
+    3000
+);
+
 </script>
 
 </body>
 </html>
-```
