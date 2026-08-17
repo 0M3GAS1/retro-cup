@@ -1,134 +1,559 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-    <meta charset="UTF-8">
-    <title>ТУРИКИ | Вход в систему</title>
-    <style>
-        body { background-color: #121212; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh;}
-        .auth-container { width: 100%; max-width: 400px; background: #1e1e1e; border: 2px solid #9d00ff; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px #9d00ff; }
-        h2 { color: #00ffcc; text-align: center; margin-top: 0; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; color: #aaa; margin-bottom: 5px; font-size: 14px; }
-        input { width: 100%; padding: 10px; background: #121212; color: white; border: 1px solid #555; box-sizing: border-box; font-family: monospace; }
-        .btn { background: #9d00ff; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .btn:hover { background: #b84dff; }
-        
-        .switch-text { text-align: center; margin-top: 20px; font-size: 14px; color: #aaa; }
-        .switch-text span { color: #00ffcc; cursor: pointer; text-decoration: underline; }
-        
-        #register-form { display: none; }
-    </style>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>RETRO CUP | Авторизация</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:20px;
+
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:#0b0b0e;
+
+    font-family:"Inter",sans-serif;
+
+    color:white;
+}
+
+.auth-container{
+
+    width:100%;
+    max-width:450px;
+
+    background:#141419;
+
+    border:1px solid #23232b;
+
+    border-radius:20px;
+
+    padding:35px;
+
+    box-shadow:
+    0 20px 50px rgba(0,0,0,.5),
+    0 0 40px rgba(166,124,255,.15);
+
+    animation:fade .4s ease;
+}
+
+@keyframes fade{
+
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.logo{
+
+    text-align:center;
+
+    margin-bottom:30px;
+}
+
+.logo h1{
+
+    margin:0;
+
+    font-size:32px;
+
+    font-weight:900;
+
+    color:#a67cff;
+}
+
+.logo p{
+
+    margin-top:10px;
+
+    color:#8c8c9b;
+
+    font-size:14px;
+}
+
+h2{
+
+    margin-top:0;
+
+    text-align:center;
+
+    font-size:24px;
+
+    margin-bottom:25px;
+}
+
+.input-group{
+
+    margin-bottom:18px;
+}
+
+label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    color:#8c8c9b;
+
+    font-size:14px;
+
+    font-weight:700;
+}
+
+input{
+
+    width:100%;
+
+    padding:14px;
+
+    border-radius:10px;
+
+    border:1px solid #33333d;
+
+    background:#0b0b0e;
+
+    color:white;
+
+    font-size:15px;
+
+    transition:.2s;
+}
+
+input:focus{
+
+    outline:none;
+
+    border-color:#a67cff;
+
+    box-shadow:
+    0 0 20px rgba(166,124,255,.2);
+}
+
+.btn{
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#a67cff;
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    margin-top:10px;
+}
+
+.btn:hover{
+
+    transform:translateY(-2px);
+
+    background:#915eff;
+}
+
+.register-btn{
+
+    background:#ff3c64;
+}
+
+.register-btn:hover{
+
+    background:#ff5f81;
+}
+
+.switch-text{
+
+    margin-top:25px;
+
+    text-align:center;
+
+    color:#8c8c9b;
+
+    font-size:14px;
+}
+
+.switch-text span{
+
+    color:#00ffe0;
+
+    cursor:pointer;
+
+    font-weight:700;
+}
+
+.switch-text span:hover{
+
+    text-decoration:underline;
+}
+
+.back-link{
+
+    display:block;
+
+    margin-top:25px;
+
+    text-align:center;
+
+    text-decoration:none;
+
+    color:#666;
+}
+
+.back-link:hover{
+
+    color:#a67cff;
+}
+
+#register-form{
+
+    display:none;
+}
+
+@media(max-width:600px){
+
+    body{
+
+        padding:15px;
+    }
+
+    .auth-container{
+
+        padding:25px;
+    }
+
+    .logo h1{
+
+        font-size:28px;
+    }
+
+    h2{
+
+        font-size:22px;
+    }
+}
+
+</style>
+
 </head>
+
 <body>
 
 <div class="auth-container">
-    
+
+    <div class="logo">
+
+        <h1>👑 RETRO CUP</h1>
+
+        <p>Турнирная платформа</p>
+
+    </div>
+
     <div id="login-form">
-        <h2>АВТОРИЗАЦИЯ</h2>
+
+        <h2>Авторизация</h2>
+
         <div class="input-group">
-            <label>Никнейм:</label>
-            <input type="text" id="log-nick" placeholder="Введи свой ник">
+
+            <label>Никнейм</label>
+
+            <input
+                type="text"
+                id="log-nick"
+                placeholder="Введи свой ник">
+
         </div>
+
         <div class="input-group">
-            <label>Пароль:</label>
-            <input type="password" id="log-pass" placeholder="Введи пароль">
+
+            <label>Пароль</label>
+
+            <input
+                type="password"
+                id="log-pass"
+                placeholder="Введи пароль">
+
         </div>
-        <button class="btn" onclick="login()">ВОЙТИ</button>
-        <div class="switch-text">Нет аккаунта? <span onclick="toggleForms()">Создать!</span></div>
-        <a href="index.html" style="display:block; text-align:center; color:#555; text-decoration:none; margin-top:20px; font-size: 14px;">⬅ На главную</a>
+
+        <button
+            class="btn"
+            onclick="login()">
+
+            Войти
+
+        </button>
+
+        <div class="switch-text">
+
+            Нет аккаунта?
+
+            <span onclick="toggleForms()">
+
+                Зарегистрироваться
+
+            </span>
+
+        </div>
+
     </div>
 
     <div id="register-form">
-        <h2 style="color: #ff0055;">РЕГИСТРАЦИЯ</h2>
+
+        <h2>Регистрация</h2>
+
         <div class="input-group">
-            <label>Придумай Никнейм:</label>
-            <input type="text" id="reg-nick" placeholder="Он будет виден всем">
+
+            <label>Никнейм</label>
+
+            <input
+                type="text"
+                id="reg-nick"
+                placeholder="Он будет виден всем">
+
         </div>
+
         <div class="input-group">
-            <label>Код дружбы Steam (ТОЛЬКО ЦИФРЫ):</label>
-            <!-- МАГИЯ ТУТ: oninput стирает все буквы прямо во время печатания -->
-            <input type="text" id="reg-steam" placeholder="Например: 123456789" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+
+            <label>Steam ID</label>
+
+            <input
+                type="text"
+                id="reg-steam"
+                placeholder="Только цифры"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
         </div>
+
         <div class="input-group">
-            <label>Придумай Пароль:</label>
-            <input type="password" id="reg-pass" placeholder="Секретный пароль">
+
+            <label>Пароль</label>
+
+            <input
+                type="password"
+                id="reg-pass"
+                placeholder="Придумай пароль">
+
         </div>
-        <button class="btn" style="background: #ff0055;" onclick="register()">СДЕЛАТЬ АККАУНТ</button>
-        <div class="switch-text">Уже есть аккаунт? <span onclick="toggleForms()">Войти</span></div>
-        <a href="index.html" style="display:block; text-align:center; color:#555; text-decoration:none; margin-top:20px; font-size: 14px;">⬅ На главную</a>
+
+        <div class="input-group">
+
+            <label>Повтори пароль</label>
+
+            <input
+                type="password"
+                id="reg-pass-repeat"
+                placeholder="Повтори пароль">
+
+        </div>
+
+        <button
+            class="btn register-btn"
+            onclick="register()">
+
+            Создать аккаунт
+
+        </button>
+
+        <div class="switch-text">
+
+            Уже есть аккаунт?
+
+            <span onclick="toggleForms()">
+
+                Войти
+
+            </span>
+
+        </div>
+
     </div>
+
+    <a
+        href="index.html"
+        class="back-link">
+
+        ← Вернуться на главную
+
+    </a>
 
 </div>
 
 <script>
-    const dbBaseUrl = "https://retro-cup-51db5-default-rtdb.firebaseio.com/users/";
 
-    function toggleForms() {
-        let loginF = document.getElementById("login-form");
-        let regF = document.getElementById("register-form");
-        if (loginF.style.display === "none") {
-            loginF.style.display = "block";
-            regF.style.display = "none";
-        } else {
-            loginF.style.display = "none";
-            regF.style.display = "block";
-        }
+const dbBaseUrl =
+"https://retro-cup-51db5-default-rtdb.firebaseio.com/users/";
+
+function toggleForms(){
+
+    const login =
+    document.getElementById("login-form");
+
+    const register =
+    document.getElementById("register-form");
+
+    if(login.style.display==="none"){
+
+        login.style.display="block";
+
+        register.style.display="none";
+
+    }else{
+
+        login.style.display="none";
+
+        register.style.display="block";
+    }
+}
+
+async function register(){
+
+    const nick=
+    document.getElementById("reg-nick").value.trim();
+
+    const steam=
+    document.getElementById("reg-steam").value.trim();
+
+    const pass=
+    document.getElementById("reg-pass").value;
+
+    const repeat=
+    document.getElementById("reg-pass-repeat").value;
+
+    if(!nick||!steam||!pass||!repeat){
+
+        alert("Заполни все поля!");
+
+        return;
     }
 
-    async function register() {
-        let nick = document.getElementById("reg-nick").value;
-        let steam = document.getElementById("reg-steam").value;
-        let pass = document.getElementById("reg-pass").value;
+    if(pass!==repeat){
 
-        if (nick === "" || pass === "" || steam === "") return alert("Заполни все поля!");
+        alert("Пароли не совпадают!");
 
-        let checkUrl = dbBaseUrl + nick + ".json";
-        let response = await fetch(checkUrl);
-        let data = await response.json();
-
-        if (data !== null) {
-            alert("❌ Братан, этот ник уже занят! Придумай другой.");
-            return;
-        }
-
-        let newUser = {
-            password: pass, 
-            steamCode: steam,
-            regDate: new Date().toLocaleString()
-        };
-
-        await fetch(checkUrl, {
-            method: "PUT",
-            body: JSON.stringify(newUser)
-        });
-
-        alert("✅ Аккаунт успешно создан! Теперь ты можешь войти.");
-        toggleForms(); 
+        return;
     }
 
-    async function login() {
-        let nick = document.getElementById("log-nick").value;
-        let pass = document.getElementById("log-pass").value;
+    const checkUrl=
+    dbBaseUrl+encodeURIComponent(nick)+".json";
 
-        if (nick === "" || pass === "") return alert("Введи ник и пароль!");
+    const response=
+    await fetch(checkUrl);
 
-        let checkUrl = dbBaseUrl + nick + ".json";
-        let response = await fetch(checkUrl);
-        let data = await response.json();
+    const data=
+    await response.json();
 
-        if (data === null) {
-            alert("❌ Такого пользователя не существует!");
-            return;
-        }
+    if(data!==null){
 
-        if (data.password === pass) {
-            localStorage.setItem("currentUser", nick);
-            window.location.href = "profile.html";
-        } else {
-            alert("❌ Неверный пароль!");
-        }
+        alert("Этот ник уже занят!");
+
+        return;
     }
+
+    const newUser={
+
+        password:pass,
+
+        steamCode:steam,
+
+        regDate:new Date().toLocaleString()
+    };
+
+    await fetch(checkUrl,{
+
+        method:"PUT",
+
+        body:JSON.stringify(newUser)
+    });
+
+    alert("Аккаунт успешно создан!");
+
+    toggleForms();
+}
+
+async function login(){
+
+    const nick=
+    document.getElementById("log-nick").value.trim();
+
+    const pass=
+    document.getElementById("log-pass").value;
+
+    if(!nick||!pass){
+
+        alert("Введи ник и пароль!");
+
+        return;
+    }
+
+    const response=
+    await fetch(
+
+        dbBaseUrl+
+        encodeURIComponent(nick)+
+        ".json"
+    );
+
+    const data=
+    await response.json();
+
+    if(data===null){
+
+        alert("Пользователь не найден!");
+
+        return;
+    }
+
+    if(data.password===pass){
+
+        localStorage.setItem(
+            "currentUser",
+            nick
+        );
+
+        window.location.href=
+        "profile.html";
+
+    }else{
+
+        alert("Неверный пароль!");
+    }
+}
+
 </script>
 
 </body>
+
 </html>
