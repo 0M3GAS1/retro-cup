@@ -2500,23 +2500,21 @@ function renderSingleElimination(
     container
 ) {
 
-    const seeds4 =
-        [1, 4, 2, 3];
+/* =========================================================
+   SINGLE ELIMINATION
+   ========================================================= */
 
-    const seeds8 =
-        [1, 8, 4, 5, 2, 7, 3, 6];
-
-    const seeds16 =
-        [
-            1,16,8,9,
-            4,13,5,12,
-            2,15,7,10,
-            3,14,6,11
-        ];
-
+function renderSingleElimination(
+    participants,
+    max,
+    resultsDB,
+    container
+) {
+    const seeds4 = [1, 4, 2, 3];
+    const seeds8 = [1, 8, 4, 5, 2, 7, 3, 6];
+    const seeds16 = [1,16,8,9, 4,13,5,12, 2,15,7,10, 3,14,6,11];
 
     let seeds;
-
     if (max === 4) {
         seeds = seeds4;
     } else if (max === 16) {
@@ -2525,168 +2523,60 @@ function renderSingleElimination(
         seeds = seeds8;
     }
 
-
-    const numRounds =
-        Math.log2(max);
-
-
+    const numRounds = Math.log2(max);
     const dynamicBracket = [];
-
-
     const firstRound = [];
 
-
-    for (
-        let i = 0;
-        i < seeds.length;
-        i += 2
-    ) {
-
+    for (let i = 0; i < seeds.length; i += 2) {
         firstRound.push({
-            p1:
-                participants[
-                    seeds[i] - 1
-                ] || null,
-
-            p2:
-                participants[
-                    seeds[i + 1] - 1
-                ] || null
+            p1: participants[seeds[i] - 1] || null,
+            p2: participants[seeds[i + 1] - 1] || null
         });
     }
 
+    dynamicBracket.push(firstRound);
 
-    dynamicBracket.push(
-        firstRound
-    );
+    let html = `<div style="display:flex; gap:45px;">`;
 
-
-    let html = `
-        <div
-            style="
-                display:flex;
-                gap:45px;
-            "
-        >
-    `;
-
-
-    for (
-        let r = 0;
-        r < numRounds;
-        r++
-    ) {
-
-        html += `
-            <div class="round">
-        `;
-
-
+    for (let r = 0; r < numRounds; r++) {
+        html += `<div class="round">`;
         const nextRound = [];
 
-
-        for (
-            let m = 0;
-            m < dynamicBracket[r].length;
-            m++
-        ) {
-
-            const match =
-                dynamicBracket[r][m];
-
-            const matchId =
-                `r${r}_m${m}`;
-
-
-            const result =
-                resultsDB[matchId];
-
+        for (let m = 0; m < dynamicBracket[r].length; m++) {
+            const match = dynamicBracket[r][m];
+            const matchId = `r${r}_m${m}`;
+            const result = resultsDB[matchId];
 
             let winner = null;
 
-
+            // ✅ ИСПРАВЛЕНИЕ: Авто-проход дается ТОЛЬКО в первом раунде (r === 0)
             if (result) {
-
-                winner =
-                    result.winner;
-
-            } else if (
-                match.p1 &&
-                !match.p2
-            ) {
-
-                winner =
-                    match.p1;
-
-            } else if (
-                match.p2 &&
-                !match.p1
-            ) {
-
-                winner =
-                    match.p2;
+                winner = result.winner;
+            } else if (match.p1 && !match.p2 && r === 0) {
+                winner = match.p1;
+            } else if (match.p2 && !match.p1 && r === 0) {
+                winner = match.p2;
             }
 
+            const matchObj = { p1: match.p1, p2: match.p2, winner };
 
-            const matchObj = {
-                p1: match.p1,
-                p2: match.p2,
-                winner
-            };
+            html += generateMatchHTML(matchObj, matchId, resultsDB);
 
+            if (m % 2 === 1) {
+                const previous = dynamicBracket[r][m - 1];
+                const previousId = `r${r}_m${m - 1}`;
+                const previousResult = resultsDB[previousId];
 
-            html +=
-                generateMatchHTML(
-                    matchObj,
-                    matchId,
-                    resultsDB
-                );
+                let previousWinner = null;
 
-
-            if (
-                m % 2 === 1
-            ) {
-
-                const previous =
-                    dynamicBracket[r][m - 1];
-
-
-                const previousId =
-                    `r${r}_m${m - 1}`;
-
-
-                const previousResult =
-                    resultsDB[
-                        previousId
-                    ];
-
-
-                let previousWinner =
-                    null;
-
-
+                // ✅ ИСПРАВЛЕНИЕ: Проверяем предыдущего победителя так же
                 if (previousResult) {
-
-                    previousWinner =
-                        previousResult.winner;
-
-                } else if (
-                    previous.p1 &&
-                    !previous.p2
-                ) {
-
-                    previousWinner =
-                        previous.p1;
-
-                } else if (
-                    previous.p2 &&
-                    !previous.p1
-                ) {
-
-                    previousWinner =
-                        previous.p2;
+                    previousWinner = previousResult.winner;
+                } else if (previous.p1 && !previous.p2 && r === 0) {
+                    previousWinner = previous.p1;
+                } else if (previous.p2 && !previous.p1 && r === 0) {
+                    previousWinner = previous.p2;
                 }
-
 
                 nextRound.push({
                     p1: previousWinner,
@@ -2695,38 +2585,16 @@ function renderSingleElimination(
             }
         }
 
-
-        html += `
-            </div>
-        `;
-
-
-        if (
-            nextRound.length
-        ) {
-
-            dynamicBracket.push(
-                nextRound
-            );
+        html += `</div>`;
+        if (nextRound.length) {
+            dynamicBracket.push(nextRound);
         }
     }
 
+    html += `</div>`;
+    container.innerHTML = html;
 
-    html += `
-        </div>
-    `;
-
-
-    container.innerHTML =
-        html;
-
-
-    generateLeaderboardSE(
-        dynamicBracket,
-        numRounds,
-        resultsDB,
-        participants
-    );
+    generateLeaderboardSE(dynamicBracket, numRounds, resultsDB, participants);
 }
 
 
@@ -2939,590 +2807,168 @@ function generateLeaderboardSE(
    DOUBLE ELIMINATION
    ========================================================= */
 
+/* =========================================================
+   DOUBLE ELIMINATION
+   ========================================================= */
+
 function renderDoubleElimination(
     participants,
     max,
     resultsDB,
     container
 ) {
-
-    /*
-        Оставляем твою существующую схему
-        двойного выбывания, но делаем
-        вывод безопасным и аккуратным.
-    */
-
     const matches = {};
+    const W_rounds = Math.log2(max);
+    const lRoundCount = W_rounds > 1 ? 2 * W_rounds - 2 : 0;
 
-    const W_rounds =
-        Math.log2(max);
-
-    const lRoundCount =
-        W_rounds > 1
-            ? 2 * W_rounds - 2
-            : 0;
-
-
-    for (
-        let r = 0;
-        r < W_rounds;
-        r++
-    ) {
-
-        const count =
-            max /
-            Math.pow(2, r + 1);
-
-        for (
-            let m = 0;
-            m < count;
-            m++
-        ) {
-
-            matches[
-                `W_${r}_${m}`
-            ] = {
-                p1: null,
-                p2: null,
-                type: "W",
-                r,
-                m
-            };
+    for (let r = 0; r < W_rounds; r++) {
+        const count = max / Math.pow(2, r + 1);
+        for (let m = 0; m < count; m++) {
+            matches[`W_${r}_${m}`] = { p1: null, p2: null, type: "W", r, m };
         }
     }
 
-
-    let currentLSize =
-        max / 4;
-
-
-    for (
-        let lr = 0;
-        lr < lRoundCount;
-        lr++
-    ) {
-
-        for (
-            let m = 0;
-            m < currentLSize;
-            m++
-        ) {
-
-            matches[
-                `L_${lr}_${m}`
-            ] = {
-                p1: null,
-                p2: null,
-                type: "L",
-                r: lr,
-                m
-            };
+    let currentLSize = max / 4;
+    for (let lr = 0; lr < lRoundCount; lr++) {
+        for (let m = 0; m < currentLSize; m++) {
+            matches[`L_${lr}_${m}`] = { p1: null, p2: null, type: "L", r: lr, m };
         }
-
-
-        if (
-            lr % 2 === 1
-        ) {
+        if (lr % 2 === 1) {
             currentLSize /= 2;
         }
     }
 
+    matches.GF = { p1: null, p2: null, type: "GF" };
 
-    matches.GF = {
-        p1: null,
-        p2: null,
-        type: "GF"
-    };
+    const seeds4 = [1,4,2,3];
+    const seeds8 = [1,8,4,5,2,7,3,6];
+    const seeds16 = [1,16,8,9, 4,13,5,12, 2,15,7,10, 3,14,6,11];
 
+    const seeds = max === 4 ? seeds4 : max === 16 ? seeds16 : seeds8;
 
-    const seeds4 =
-        [1,4,2,3];
-
-    const seeds8 =
-        [1,8,4,5,2,7,3,6];
-
-    const seeds16 =
-        [
-            1,16,8,9,
-            4,13,5,12,
-            2,15,7,10,
-            3,14,6,11
-        ];
-
-
-    const seeds =
-        max === 4
-            ? seeds4
-            : max === 16
-                ? seeds16
-                : seeds8;
-
-
-    for (
-        let i = 0;
-        i < max;
-        i += 2
-    ) {
-
-        const m =
-            Math.floor(i / 2);
-
-
-        matches[
-            `W_0_${m}`
-        ].p1 =
-            participants[
-                seeds[i] - 1
-            ] || null;
-
-
-        matches[
-            `W_0_${m}`
-        ].p2 =
-            participants[
-                seeds[i + 1] - 1
-            ] || null;
+    for (let i = 0; i < max; i += 2) {
+        const m = Math.floor(i / 2);
+        matches[`W_0_${m}`].p1 = participants[seeds[i] - 1] || null;
+        matches[`W_0_${m}`].p2 = participants[seeds[i + 1] - 1] || null;
     }
 
-
     let changed = true;
-
     let safety = 0;
 
-
-    while (
-        changed &&
-        safety < 100
-    ) {
-
+    while (changed && safety < 100) {
         safety++;
-
         changed = false;
 
+        for (const id in matches) {
+            const match = matches[id];
+            if (match.processed) continue;
 
-        for (
-            const id in matches
-        ) {
-
-            const match =
-                matches[id];
-
-
-            if (
-                match.processed
-            ) {
-                continue;
-            }
-
-
-            const result =
-                resultsDB[id];
-
-
+            const result = resultsDB[id];
             let winner = null;
             let loser = null;
 
-
+            // ✅ ИСПРАВЛЕНИЕ: Авто-проход ТОЛЬКО в 1-м раунде ВЕРХНЕЙ сетки
             if (result) {
-
-                winner =
-                    result.winner;
-
-                loser =
-                    winner === match.p1
-                        ? match.p2
-                        : match.p1;
-
-            } else if (
-                match.p1 &&
-                !match.p2
-            ) {
-
-                winner =
-                    match.p1;
-
-            } else if (
-                match.p2 &&
-                !match.p1
-            ) {
-
-                winner =
-                    match.p2;
+                winner = result.winner;
+                loser = winner === match.p1 ? match.p2 : match.p1;
+            } else if (match.p1 && !match.p2 && match.type === "W" && match.r === 0) {
+                winner = match.p1;
+            } else if (match.p2 && !match.p1 && match.type === "W" && match.r === 0) {
+                winner = match.p2;
             }
 
+            if (!winner) continue;
 
-            if (!winner) {
-                continue;
-            }
-
-
-            match.winner =
-                winner;
-
-            match.loser =
-                loser;
-
-            match.processed =
-                true;
-
+            match.winner = winner;
+            match.loser = loser;
+            match.processed = true;
             changed = true;
 
+            if (match.type === "W") {
+                const nextW = match.r === W_rounds - 1 ? "GF" : `W_${match.r + 1}_${Math.floor(match.m / 2)}`;
+                const nextL = match.r === 0 ? `L_0_${Math.floor(match.m / 2)}` : `L_${match.r * 2 - 1}_${match.m}`;
 
-            if (
-                match.type === "W"
-            ) {
-
-                const nextW =
-                    match.r === W_rounds - 1
-                        ? "GF"
-                        : `W_${match.r + 1}_${Math.floor(match.m / 2)}`;
-
-
-                const nextL =
-                    match.r === 0
-                        ? `L_0_${Math.floor(match.m / 2)}`
-                        : `L_${match.r * 2 - 1}_${match.m}`;
-
-
-                const wMatch =
-                    matches[nextW];
-
-
+                const wMatch = matches[nextW];
                 if (wMatch) {
-
-                    if (
-                        !wMatch.p1
-                    ) {
-
-                        wMatch.p1 =
-                            winner;
-
-                    } else if (
-                        !wMatch.p2 &&
-                        wMatch.p1 !== winner
-                    ) {
-
-                        wMatch.p2 =
-                            winner;
-                    }
+                    if (!wMatch.p1) wMatch.p1 = winner;
+                    else if (!wMatch.p2 && wMatch.p1 !== winner) wMatch.p2 = winner;
                 }
 
-
-                const lMatch =
-                    matches[nextL];
-
-
-                if (
-                    lMatch &&
-                    loser
-                ) {
-
-                    if (
-                        !lMatch.p1
-                    ) {
-
-                        lMatch.p1 =
-                            loser;
-
-                    } else if (
-                        !lMatch.p2 &&
-                        lMatch.p1 !== loser
-                    ) {
-
-                        lMatch.p2 =
-                            loser;
-                    }
+                const lMatch = matches[nextL];
+                if (lMatch && loser) {
+                    if (!lMatch.p1) lMatch.p1 = loser;
+                    else if (!lMatch.p2 && lMatch.p1 !== loser) lMatch.p2 = loser;
                 }
 
+            } else if (match.type === "L") {
+                const nextL = match.r === lRoundCount - 1 ? "GF" 
+                    : (match.r % 2 === 0 ? `L_${match.r + 1}_${match.m}` : `L_${match.r + 1}_${Math.floor(match.m / 2)}`);
 
-            } else if (
-                match.type === "L"
-            ) {
-
-                const nextL =
-                    match.r === lRoundCount - 1
-                        ? "GF"
-                        : (
-                            match.r % 2 === 0
-                                ? `L_${match.r + 1}_${match.m}`
-                                : `L_${match.r + 1}_${Math.floor(match.m / 2)}`
-                        );
-
-
-                const lMatch =
-                    matches[nextL];
-
-
+                const lMatch = matches[nextL];
                 if (lMatch) {
-
-                    if (
-                        !lMatch.p1
-                    ) {
-
-                        lMatch.p1 =
-                            winner;
-
-                    } else if (
-                        !lMatch.p2 &&
-                        lMatch.p1 !== winner
-                    ) {
-
-                        lMatch.p2 =
-                            winner;
-                    }
+                    if (!lMatch.p1) lMatch.p1 = winner;
+                    else if (!lMatch.p2 && lMatch.p1 !== winner) lMatch.p2 = winner;
                 }
             }
         }
     }
 
+    let html = `<div style="width:100%; display:flex; flex-direction:column;">
+        <h3 style="color:#a67cff; margin:0 0 10px; font-size:13px;">ВЕРХНЯЯ СЕТКА</h3>
+        <div class="bracket" style="margin-bottom:30px;">`;
 
-    let html = `
-        <div
-            style="
-                width:100%;
-                display:flex;
-                flex-direction:column;
-            "
-        >
-
-            <h3
-                style="
-                    color:#a67cff;
-                    margin:0 0 10px;
-                    font-size:13px;
-                "
-            >
-                ВЕРХНЯЯ СЕТКА
-            </h3>
-
-            <div
-                class="bracket"
-                style="margin-bottom:30px;"
-            >
-    `;
-
-
-    for (
-        let r = 0;
-        r < W_rounds;
-        r++
-    ) {
-
-        html += `
-            <div class="round">
-        `;
-
-
-        const count =
-            max /
-            Math.pow(2, r + 1);
-
-
-        for (
-            let m = 0;
-            m < count;
-            m++
-        ) {
-
-            const id =
-                `W_${r}_${m}`;
-
-
-            html +=
-                generateMatchHTML(
-                    matches[id],
-                    id,
-                    resultsDB
-                );
+    for (let r = 0; r < W_rounds; r++) {
+        html += `<div class="round">`;
+        const count = max / Math.pow(2, r + 1);
+        for (let m = 0; m < count; m++) {
+            const id = `W_${r}_${m}`;
+            html += generateMatchHTML(matches[id], id, resultsDB);
         }
+        html += `</div>`;
+    }
+    html += `</div>`;
 
-
-        html += `
-            </div>
-        `;
+    if (lRoundCount > 0) {
+        html += `<h3 style="color:#ff3c64; margin:0 0 10px; font-size:13px;">НИЖНЯЯ СЕТКА</h3>
+        <div class="bracket" style="margin-bottom:30px;">`;
+        currentLSize = max / 4;
+        for (let lr = 0; lr < lRoundCount; lr++) {
+            html += `<div class="round">`;
+            for (let m = 0; m < currentLSize; m++) {
+                const id = `L_${lr}_${m}`;
+                html += generateMatchHTML(matches[id], id, resultsDB);
+            }
+            html += `</div>`;
+            if (lr % 2 === 1) currentLSize /= 2;
+        }
+        html += `</div>`;
     }
 
-
-    html += `
-            </div>
-    `;
-
-
-    if (
-        lRoundCount > 0
-    ) {
-
-        html += `
-            <h3
-                style="
-                    color:#ff3c64;
-                    margin:0 0 10px;
-                    font-size:13px;
-                "
-            >
-                НИЖНЯЯ СЕТКА
-            </h3>
-
-            <div
-                class="bracket"
-                style="margin-bottom:30px;"
-            >
-        `;
-
-
-        currentLSize =
-            max / 4;
-
-
-        for (
-            let lr = 0;
-            lr < lRoundCount;
-            lr++
-        ) {
-
-            html += `
-                <div class="round">
-            `;
-
-
-            for (
-                let m = 0;
-                m < currentLSize;
-                m++
-            ) {
-
-                const id =
-                    `L_${lr}_${m}`;
-
-
-                html +=
-                    generateMatchHTML(
-                        matches[id],
-                        id,
-                        resultsDB
-                    );
-            }
-
-
-            html += `
-                </div>
-            `;
-
-
-            if (
-                lr % 2 === 1
-            ) {
-
-                currentLSize /= 2;
-            }
-        }
-
-
-        html += `
-            </div>
-        `;
-    }
-
-
-    html += `
-        <h3
-            style="
-                color:#ffcc00;
-                margin:0 0 10px;
-                font-size:13px;
-            "
-        >
-            ГРАНД-ФИНАЛ
-        </h3>
-
+    html += `<h3 style="color:#ffcc00; margin:0 0 10px; font-size:13px;">ГРАНД-ФИНАЛ</h3>
         <div class="bracket">
-
-            <div class="round">
-                ${generateMatchHTML(
-                    matches.GF,
-                    "GF",
-                    resultsDB
-                )}
-            </div>
-
+            <div class="round">${generateMatchHTML(matches.GF, "GF", resultsDB)}</div>
         </div>
+    </div>`;
 
-        </div>
-    `;
+    container.innerHTML = html;
 
-
-    container.innerHTML =
-        html;
-
-
-    if (
-        tStatus === "finished"
-    ) {
-
-        const lb =
-            document.getElementById(
-                "final-leaderboard-container"
-            );
-
-
-        if (
-            matches.GF.winner
-        ) {
-
+    if (tStatus === "finished") {
+        const lb = document.getElementById("final-leaderboard-container");
+        if (matches.GF.winner) {
             lb.innerHTML = `
                 <div class="speedrun-item">
-
-                    <div
-                        style="
-                            display:flex;
-                            align-items:center;
-                            gap:10px;
-                        "
-                    >
-
-                        <div
-                            class="speedrun-rank top1"
-                        >
-                            #1
-                        </div>
-
-                        <div
-                            style="
-                                font-size:13px;
-                                font-weight:800;
-                            "
-                        >
-                            ${escapeHTML(
-                                matches.GF.winner
-                            )}
-                        </div>
-
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="speedrun-rank top1">#1</div>
+                        <div style="font-size:13px; font-weight:800;">${escapeHTML(matches.GF.winner)}</div>
                     </div>
-
-                    <div
-                        style="
-                            color:#858592;
-                            font-size:10px;
-                            font-weight:800;
-                        "
-                    >
-                        🏆 Победитель
-                    </div>
-
+                    <div style="color:#858592; font-size:10px; font-weight:800;">🏆 Победитель</div>
                 </div>
             `;
-
         } else {
-
-            lb.innerHTML = `
-                <div class="empty-state">
-                    Лидерборд формируется...
-                </div>
-            `;
+            lb.innerHTML = `<div class="empty-state">Лидерборд формируется...</div>`;
         }
     }
 }
-
 
 /* =========================================================
    MATCH MODAL
