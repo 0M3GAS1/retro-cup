@@ -2,9 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    
     <link rel="icon" type="image/png" href="logo.png">
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Retro Cup | Турнир</title>
@@ -91,6 +89,17 @@
             to {
                 transform: rotate(360deg);
             }
+        }
+
+        /* МАЛЕНЬКАЯ АВАТАРКА */
+        .player-avatar-small {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #33333d;
+            background: #0b0b0e;
+            flex-shrink: 0;
         }
 
         /* NAV */
@@ -467,11 +476,12 @@
 
         .player-item {
             padding: 6px 7px;
-
             color: #aaa;
             border-left: 2px solid #333;
-
             font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .player-item.me {
@@ -1418,6 +1428,10 @@ let loadingTournament = false;
 let currentLang =
     localStorage.getItem("siteLang") || "RU";
 
+/* КЕШ АВАТАРОК */
+let avatarsCache = {};
+const defaultAvatar = "https://via.placeholder.com/40/141419/a67cff?text=TU";
+
 
 /* =========================================================
    BASIC CHECK
@@ -1492,6 +1506,42 @@ function setLoadingButton(button, loading) {
 
         button.disabled = false;
     }
+}
+
+/* =========================================================
+   AVATARS PRELOADER
+   ========================================================= */
+
+async function preloadAvatars(data) {
+    let namesToFetch = [];
+
+    // Собираем всех уникальных игроков, чтобы загрузить их аватары
+    if (data.format === "1v1" || data.system === "Спидран") {
+        if (data.players) namesToFetch = Object.keys(data.players);
+    } 
+    // Для командных турниров достаем игроков из команд
+    if (data.teams) {
+        Object.values(data.teams).forEach(team => {
+            if (team.players) {
+                namesToFetch.push(...Object.keys(team.players));
+            }
+        });
+    }
+
+    // Убираем дубликаты
+    namesToFetch = [...new Set(namesToFetch)];
+
+    // Загружаем все аватарки параллельно (быстро)
+    await Promise.all(namesToFetch.map(async (name) => {
+        if (avatarsCache[name]) return; // уже загружено
+        try {
+            const res = await fetch(`https://retro-cup-51db5-default-rtdb.firebaseio.com/users/${encodeURIComponent(name)}.json`);
+            const userData = await res.json();
+            avatarsCache[name] = (userData && userData.avatar) ? userData.avatar : defaultAvatar;
+        } catch(e) {
+            avatarsCache[name] = defaultAvatar;
+        }
+    }));
 }
 
 
@@ -1697,8 +1747,11 @@ async function loadTournamentData(force = false) {
         /* STATUS */
         updateTournamentStatus();
 
-        /* ADMIN - Вызываем ровно один раз! */
+        /* ADMIN */
         updateAdminControls();
+
+        /* ПРЕДЗАГРУЗКА АВАТАРОК ПЕРЕД ОТРИСОВКОЙ */
+        await preloadAvatars(data);
 
         /* PLAYERS */
         const result = renderParticipants(data);
@@ -1744,7 +1797,6 @@ function updateTournamentStatus() {
     const badge = document.getElementById("tourney-status-badge");
     badge.className = "status-badge";
 
-    // ✅ ДОБАВИЛИ ПРОВЕРКУ НА "registration"
     if (tStatus === "waiting" || tStatus === "registration") {
         badge.innerText = "Ожидание игроков";
     } else if (tStatus === "active") {
@@ -1776,7 +1828,6 @@ function updateAdminControls() {
         return;
     }
 
-    // ✅ ДОБАВИЛИ ПРОВЕРКУ НА "registration" ТУТ ТОЖЕ
     if (tStatus === "waiting" || tStatus === "registration") {
         box.innerHTML = `
             <button class="admin-start-btn" onclick="changeStatus('active')">
@@ -1908,75 +1959,32 @@ function renderParticipants(data) {
 
                     let html = `
                         <div class="team-block">
-
                             <div class="team-name">
-
-                                <div
-                                    style="
-                                        display:flex;
-                                        align-items:center;
-                                        gap:8px;
-                                    "
-                                >
-
-                                    <span
-                                        style="
-                                            word-break:break-all;
-                                        "
-                                    >
-                                        ${escapeHTML(teamName)}
-                                    </span>
-
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="word-break:break-all;">${escapeHTML(teamName)}</span>
                                     ${inviteBtnHTML}
-
                                 </div>
-
                                 ${
-                                    players.length <
-                                    requiredSize
-                                        ? `
-                                            <span
-                                                style="
-                                                    color:#ff3c64;
-                                                    font-size:10px;
-                                                    flex-shrink:0;
-                                                "
-                                            >
-                                                ${players.length}/${requiredSize}
-                                            </span>
-                                        `
-                                        : `
-                                            <span
-                                                style="
-                                                    color:#00ffcc;
-                                                    font-size:10px;
-                                                    flex-shrink:0;
-                                                "
-                                            >
-                                                ${players.length}/${requiredSize}
-                                            </span>
-                                        `
+                                    players.length < requiredSize
+                                        ? `<span style="color:#ff3c64; font-size:10px; flex-shrink:0;">${players.length}/${requiredSize}</span>`
+                                        : `<span style="color:#00ffcc; font-size:10px; flex-shrink:0;">${players.length}/${requiredSize}</span>`
                                 }
-
                             </div>
                     `;
 
                     players.forEach(player => {
-                        const me =
-                            player === currentUser
-                                ? " me"
-                                : "";
+                        const me = player === currentUser ? " me" : "";
+                        const avatarSrc = avatarsCache[player] || defaultAvatar;
 
                         html += `
                             <div class="player-item${me}">
-                                🎮 ${escapeHTML(player)}
+                                <img src="${avatarSrc}" class="player-avatar-small" alt="">
+                                <span>${escapeHTML(player)}</span>
                             </div>
                         `;
                     });
 
-                    html += `
-                        </div>
-                    `;
+                    html += `</div>`;
 
                     container.innerHTML += html;
                 });
@@ -1985,165 +1993,75 @@ function renderParticipants(data) {
         if (data.players) {
             Object.keys(data.players)
                 .forEach(player => {
-                    if (
-                        player ===
-                        currentUser
-                    ) {
+                    if (player === currentUser) {
                         isJoined = true;
                     }
 
-                    if (
-                        tournamentSystem ===
-                        "Спидран"
-                    ) {
+                    if (tournamentSystem === "Спидран") {
                         speedrunParticipants.push({
                             name: player,
-                            time:
-                                data.players[player]
-                                    ?.runTime ||
-                                "00:00:00",
+                            time: data.players[player]?.runTime || "00:00:00",
                             isTeam: false
                         });
-
                         return;
                     }
 
-                    validParticipants.push(
-                        player
-                    );
+                    validParticipants.push(player);
 
-                    const me =
-                        player === currentUser
-                            ? " me"
-                            : "";
+                    const me = player === currentUser ? " me" : "";
+                    const avatarSrc = avatarsCache[player] || defaultAvatar;
 
                     container.innerHTML += `
-                        <div
-                            class="player-item${me}"
-                            style="
-                                margin-bottom:5px;
-                            "
-                        >
-                            🎮 ${escapeHTML(player)}
+                        <div class="player-item${me}" style="margin-bottom:5px;">
+                            <img src="${avatarSrc}" class="player-avatar-small" alt="">
+                            <span>${escapeHTML(player)}</span>
                         </div>
                     `;
                 });
         }
     }
 
-    if (
-        tournamentSystem ===
-        "Спидран"
-    ) {
-        speedrunParticipants.sort(
-            (a, b) => {
-                return (
-                    normalizeTime(a.time) -
-                    normalizeTime(b.time)
-                );
-            }
-        );
+    if (tournamentSystem === "Спидран") {
+        speedrunParticipants.sort((a, b) => {
+            return normalizeTime(a.time) - normalizeTime(b.time);
+        });
 
-        speedrunParticipants.forEach(
-            (player, index) => {
-                const hasTime =
-                    player.time !==
-                    "00:00:00";
+        speedrunParticipants.forEach((player, index) => {
+            const hasTime = player.time !== "00:00:00";
+            const rank = hasTime ? index + 1 : "—";
+            const rankClass = rank === 1 ? "top1" : rank === 2 ? "top2" : rank === 3 ? "top3" : "";
 
-                const rank =
-                    hasTime
-                        ? index + 1
-                        : "—";
-
-                const rankClass =
-                    rank === 1
-                        ? "top1"
-                        : rank === 2
-                        ? "top2"
-                        : rank === 3
-                        ? "top3"
-                        : "";
-
-                let editButton = "";
-
-                if (
-                    currentUser ===
-                        ADMIN_USER &&
-                    tStatus === "active"
-                ) {
-                    editButton = `
-                        <button
-                            class="edit-time-btn"
-                            onclick='editSpeedrunTime(
-                                ${JSON.stringify(player.name)},
-                                ${player.isTeam}
-                            )'
-                        >
-                            ⏱
-                        </button>
-                    `;
-                }
-
-                container.innerHTML += `
-                    <div class="speedrun-item">
-
-                        <div
-                            style="
-                                display:flex;
-                                align-items:center;
-                                gap:8px;
-                                min-width:0;
-                            "
-                        >
-
-                            <div
-                                class="
-                                    speedrun-rank
-                                    ${rankClass}
-                                "
-                            >
-                                #${rank}
-                            </div>
-
-                            <div
-                                style="
-                                    font-size:13px;
-                                    font-weight:800;
-                                    overflow:hidden;
-                                    text-overflow:ellipsis;
-                                    white-space:nowrap;
-                                "
-                            >
-                                ${escapeHTML(player.name)}
-                            </div>
-
-                        </div>
-
-                        <div
-                            style="
-                                display:flex;
-                                align-items:center;
-                                flex-shrink:0;
-                            "
-                        >
-
-                            <div class="speedrun-time">
-                                ${escapeHTML(player.time)}
-                            </div>
-
-                            ${editButton}
-
-                        </div>
-
-                    </div>
+            let editButton = "";
+            if (currentUser === ADMIN_USER && tStatus === "active") {
+                editButton = `
+                    <button class="edit-time-btn" onclick='editSpeedrunTime(${JSON.stringify(player.name)}, ${player.isTeam})'>
+                        ⏱
+                    </button>
                 `;
             }
-        );
+
+            let avatarHtml = !player.isTeam && avatarsCache[player.name] 
+                ? `<img src="${avatarsCache[player.name]}" class="player-avatar-small" alt="">` : "";
+
+            container.innerHTML += `
+                <div class="speedrun-item">
+                    <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                        <div class="speedrun-rank ${rankClass}">#${rank}</div>
+                        ${avatarHtml}
+                        <div style="font-size:13px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            ${escapeHTML(player.name)}
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; flex-shrink:0;">
+                        <div class="speedrun-time">${escapeHTML(player.time)}</div>
+                        ${editButton}
+                    </div>
+                </div>
+            `;
+        });
     }
 
-    if (
-        !container.innerHTML.trim()
-    ) {
+    if (!container.innerHTML.trim()) {
         container.innerHTML = `
             <div class="empty-state">
                 Пока никто не зарегистрирован.
@@ -2151,10 +2069,9 @@ function renderParticipants(data) {
         `;
     }
 
-    return {
-        validParticipants
-    };
+    return { validParticipants };
 }
+
 /* =========================================================
    TIME
    ========================================================= */
@@ -2255,190 +2172,81 @@ function updateJoinButton() {
    BRACKET
    ========================================================= */
 
+function getAvatarImgHTML(name) {
+    if (!name || name === "---" || name === "TBD") return "";
+    if (avatarsCache[name]) {
+        return `<img src="${avatarsCache[name]}" class="player-avatar-small" style="margin-right:6px;" alt="">`;
+    }
+    return "";
+}
+
 function generateMatchHTML(
     matchObj,
     id,
     resultsDB
 ) {
 
-    const p1Display =
-        matchObj.p1 == null
-            ? "---"
-            : matchObj.p1;
+    const p1Display = matchObj.p1 == null ? "---" : matchObj.p1;
+    const p2Display = matchObj.p2 == null ? "---" : matchObj.p2;
 
-    const p2Display =
-        matchObj.p2 == null
-            ? "---"
-            : matchObj.p2;
-
-
-    const result =
-        resultsDB[id];
-
+    const result = resultsDB[id];
 
     let s1HTML = "";
     let s2HTML = "";
-
     let p1Class = "";
     let p2Class = "";
 
-
     if (result) {
+        s1HTML = `<span class="match-score">${escapeHTML(result.s1)}</span>`;
+        s2HTML = `<span class="match-score">${escapeHTML(result.s2)}</span>`;
 
-        s1HTML = `
-            <span class="match-score">
-                ${escapeHTML(result.s1)}
-            </span>
-        `;
-
-        s2HTML = `
-            <span class="match-score">
-                ${escapeHTML(result.s2)}
-            </span>
-        `;
-
-
-        if (
-            result.winner ===
-            matchObj.p1
-        ) {
-
-            p1Class = "winner";
-            p2Class = "loser";
-        }
-
-
-        if (
-            result.winner ===
-            matchObj.p2
-        ) {
-
-            p2Class = "winner";
-            p1Class = "loser";
-        }
-
-    } else if (
-        matchObj.p1 &&
-        !matchObj.p2 &&
-        matchObj.winner === matchObj.p1
-    ) {
-
+        if (result.winner === matchObj.p1) { p1Class = "winner"; p2Class = "loser"; }
+        if (result.winner === matchObj.p2) { p2Class = "winner"; p1Class = "loser"; }
+    } else if (matchObj.p1 && !matchObj.p2 && matchObj.winner === matchObj.p1) {
         p1Class = "winner";
-
-        s1HTML = `
-            <span class="score-auto">
-                AUTO
-            </span>
-        `;
-
-    } else if (
-        matchObj.p2 &&
-        !matchObj.p1 &&
-        matchObj.winner === matchObj.p2
-    ) {
-
+        s1HTML = `<span class="score-auto">AUTO</span>`;
+    } else if (matchObj.p2 && !matchObj.p1 && matchObj.winner === matchObj.p2) {
         p2Class = "winner";
-
-        s2HTML = `
-            <span class="score-auto">
-                AUTO
-            </span>
-        `;
+        s2HTML = `<span class="score-auto">AUTO</span>`;
     }
 
-
-    const isP1 =
-        matchObj.p1 &&
-        matchObj.p1 !== "---" &&
-        (
-            currentUser === matchObj.p1 ||
-            myTeamName === matchObj.p1
-        );
-
-
-    const isP2 =
-        matchObj.p2 &&
-        matchObj.p2 !== "---" &&
-        (
-            currentUser === matchObj.p2 ||
-            myTeamName === matchObj.p2
-        );
-
-
-    const isAdmin =
-        currentUser === ADMIN_USER;
-
-
-    const canOpen =
-        tStatus === "active" &&
-        matchObj.p1 &&
-        matchObj.p2 &&
-        matchObj.p1 !== "TBD" &&
-        matchObj.p2 !== "TBD" &&
-        (isP1 || isP2 || isAdmin);
-
+    const isP1 = matchObj.p1 && matchObj.p1 !== "---" && (currentUser === matchObj.p1 || myTeamName === matchObj.p1);
+    const isP2 = matchObj.p2 && matchObj.p2 !== "---" && (currentUser === matchObj.p2 || myTeamName === matchObj.p2);
+    const isAdmin = currentUser === ADMIN_USER;
+    const canOpen = tStatus === "active" && matchObj.p1 && matchObj.p2 && matchObj.p1 !== "TBD" && matchObj.p2 !== "TBD" && (isP1 || isP2 || isAdmin);
 
     let clickableClass = "";
     let clickAction = "";
 
-
     if (canOpen) {
-
-        clickableClass =
-            "match-clickable";
-
-        clickAction =
-            `onclick='openMatchModal(
-                ${JSON.stringify(id)},
-                ${JSON.stringify(String(matchObj.p1))},
-                ${JSON.stringify(String(matchObj.p2))}
-            )'`;
+        clickableClass = "match-clickable";
+        clickAction = `onclick='openMatchModal(${JSON.stringify(id)}, ${JSON.stringify(String(matchObj.p1))}, ${JSON.stringify(String(matchObj.p2))})'`;
     }
 
+    let p1Avatar = getAvatarImgHTML(p1Display);
+    let p2Avatar = getAvatarImgHTML(p2Display);
 
     return `
-        <div
-            class="match ${clickableClass}"
-            ${clickAction}
-        >
-
-            <div
-                class="match-team ${p1Class}"
-            >
-
-                <span
-                    style="
-                        overflow:hidden;
-                        text-overflow:ellipsis;
-                        white-space:nowrap;
-                    "
-                >
-                    ${escapeHTML(p1Display)}
-                </span>
-
+        <div class="match ${clickableClass}" ${clickAction}>
+            <div class="match-team ${p1Class}">
+                <div style="display:flex; align-items:center; min-width:0; overflow:hidden;">
+                    ${p1Avatar}
+                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        ${escapeHTML(p1Display)}
+                    </span>
+                </div>
                 ${s1HTML}
-
             </div>
 
-
-            <div
-                class="match-team ${p2Class}"
-            >
-
-                <span
-                    style="
-                        overflow:hidden;
-                        text-overflow:ellipsis;
-                        white-space:nowrap;
-                    "
-                >
-                    ${escapeHTML(p2Display)}
-                </span>
-
+            <div class="match-team ${p2Class}">
+                <div style="display:flex; align-items:center; min-width:0; overflow:hidden;">
+                    ${p2Avatar}
+                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        ${escapeHTML(p2Display)}
+                    </span>
+                </div>
                 ${s2HTML}
-
             </div>
-
         </div>
     `;
 }
@@ -2484,7 +2292,6 @@ function buildAndDrawBracket(
         );
     }
 }
-
 
 /* =========================================================
    SINGLE ELIMINATION
@@ -2535,7 +2342,6 @@ function renderSingleElimination(
 
             let winner = null;
 
-            // ✅ ИСПРАВЛЕНИЕ: Авто-проход дается ТОЛЬКО в первом раунде (r === 0)
             if (result) {
                 winner = result.winner;
             } else if (match.p1 && !match.p2 && r === 0) {
@@ -2555,7 +2361,6 @@ function renderSingleElimination(
 
                 let previousWinner = null;
 
-                // ✅ ИСПРАВЛЕНИЕ: Проверяем предыдущего победителя так же
                 if (previousResult) {
                     previousWinner = previousResult.winner;
                 } else if (previous.p1 && !previous.p2 && r === 0) {
@@ -2735,6 +2540,9 @@ function generateLeaderboardSE(
                             ? "top3"
                             : "";
 
+            let avatarHtml = avatarsCache[player] 
+                ? `<img src="${avatarsCache[player]}" class="player-avatar-small" alt="">` : "";
+
 
             container.innerHTML += `
                 <div class="speedrun-item">
@@ -2756,6 +2564,8 @@ function generateLeaderboardSE(
                         >
                             #${rank}
                         </div>
+
+                        ${avatarHtml}
 
                         <div
                             style="
@@ -2787,6 +2597,7 @@ function generateLeaderboardSE(
         }
     );
 }
+
 
 /* =========================================================
    DOUBLE ELIMINATION
@@ -2848,7 +2659,6 @@ function renderDoubleElimination(
             let winner = null;
             let loser = null;
 
-            // ✅ ИСПРАВЛЕНИЕ: Авто-проход ТОЛЬКО в 1-м раунде ВЕРХНЕЙ сетки
             if (result) {
                 winner = result.winner;
                 loser = winner === match.p1 ? match.p2 : match.p1;
@@ -2925,6 +2735,8 @@ function renderDoubleElimination(
         html += `</div>`;
     }
 
+    let gfAvatar = matches.GF.winner && avatarsCache[matches.GF.winner] ? `<img src="${avatarsCache[matches.GF.winner]}" class="player-avatar-small" alt="">` : "";
+
     html += `<h3 style="color:#ffcc00; margin:0 0 10px; font-size:13px;">ГРАНД-ФИНАЛ</h3>
         <div class="bracket">
             <div class="round">${generateMatchHTML(matches.GF, "GF", resultsDB)}</div>
@@ -2940,6 +2752,7 @@ function renderDoubleElimination(
                 <div class="speedrun-item">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <div class="speedrun-rank top1">#1</div>
+                        ${gfAvatar}
                         <div style="font-size:13px; font-weight:800;">${escapeHTML(matches.GF.winner)}</div>
                     </div>
                     <div style="color:#858592; font-size:10px; font-weight:800;">🏆 Победитель</div>
@@ -3642,14 +3455,6 @@ async function changeStatus(
    JOIN / LEAVE
    ========================================================= */
 
-/* =========================================================
-   JOIN / LEAVE
-   ========================================================= */
-
-/* =========================================================
-   JOIN / LEAVE
-   ========================================================= */
-
 async function handleJoinClick() {
     // 1. Пропускаем клик, если турнир уже идет или закончен
     if (tStatus === "active" || tStatus === "finished" || tStatus === "running") { 
@@ -3816,3 +3621,4 @@ setInterval(
 
 </body>
 </html>
+```
